@@ -1,0 +1,74 @@
+name: Update VOD data
+
+concurrency:
+  group: update-vod-data
+  cancel-in-progress: false
+
+on:
+  schedule:
+    - cron: "7 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-vods:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Tokyo
+      TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+      TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+      TWITCH_CHANNEL: ${{ vars.TWITCH_CHANNEL }}
+      TWITCH_CHANNEL_ID: ${{ vars.TWITCH_CHANNEL_ID }}
+      SITE_NAME: ${{ vars.SITE_NAME }}
+      SITE_DESCRIPTION: ${{ vars.SITE_DESCRIPTION }}
+      SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+      SITE_LANGUAGE: ${{ vars.SITE_LANGUAGE }}
+      GOATCOUNTER_CODE: ${{ vars.GOATCOUNTER_CODE }}
+      TWITCH_LIVE_CHECK_ENABLED: "1"
+      TWITCH_LIVE_CHECK_FAIL_OPEN: "1"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install TwitchDownloaderCLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp-tools/twitchdownloader
+          curl -L "https://github.com/lay295/TwitchDownloader/releases/download/1.56.4/TwitchDownloaderCLI-1.56.4-Linux-x64.zip" -o .tmp-tools/twitchdownloader/td.zip
+          unzip -o .tmp-tools/twitchdownloader/td.zip -d .tmp-tools/twitchdownloader
+          chmod +x .tmp-tools/twitchdownloader/TwitchDownloaderCLI
+          echo "TWITCHDOWNLOADER_BIN=$GITHUB_WORKSPACE/.tmp-tools/twitchdownloader/TwitchDownloaderCLI" >> "$GITHUB_ENV"
+
+      - name: Update VOD data
+        run: python scripts/update_vods.py
+
+      - name: Verify no raw chat retention
+        run: python -m unittest tests.test_privacy_retention -v
+
+      - name: Commit updated data
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          diff_targets=(data/processed_vods.json data/vods.json data/vod_index.json data/vods data/segment-thumbnails)
+
+          if git diff --quiet -- "${diff_targets[@]}"; then
+            echo "No data changes to commit."
+            exit 0
+          fi
+
+          git add -A -- "${diff_targets[@]}"
+          git commit -m "Update Twitch VOD data"
+          git push

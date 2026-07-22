@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Twitch Highlights</title>
+  <meta name="description" content="Twitch VODのコメント量から見どころを表示する非公式サイトです。" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css?v=20260519-assist-panel-layout" />
+</head>
+
+<body>
+  <div class="page-shell">
+    <header class="brand-header">
+      <div class="brand-header__inner">
+        <div class="brand-header__brand" aria-label="Twitch Highlights">
+          <svg class="brand-header__mark" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+            <rect x="4.5" y="4" width="1.5" height="16" rx="0.75" fill="currentColor"></rect>
+            <path d="M9 6.5L18 12L9 17.5V6.5Z" fill="currentColor"></path>
+          </svg>
+          <h1 class="brand-header__name" id="site-name">Twitch Highlights</h1>
+          <p class="brand-header-support__subtitle">
+            <span class="brand-header-support__lead" id="site-description">Twitch VODのコメント量から見どころを表示する非公式サイトです。</span>
+          </p>
+        </div>
+        <div class="brand-header-support__schedule">
+          <span class="updated-at" id="updated-at-desktop">読み込み中...</span>
+          <span class="updated-stack" aria-live="polite">
+            <span class="schedule-build-label" id="build-label-desktop">UI build</span>
+            <span class="updated-at" id="next-update-at-desktop">読み込み中...</span>
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="focus-stage">
+        <div class="stage-sticky">
+          <section class="player-surface" aria-label="Twitch player">
+            <div class="player-surface__inner">
+              <div class="mobile-selection-title" aria-hidden="true">
+                <h2 class="mobile-selection-title__value" id="segment-title-mobile">読み込み中...</h2>
+              </div>
+              <div
+                class="player-frame"
+                id="player-frame"
+                data-player-status="idle"
+                data-current-vod-id=""
+                data-current-start-sec=""
+                data-player-mode=""
+              >
+                <div id="twitch-player" class="player-embed" aria-label="Twitch player"></div>
+                <p class="sr-only" id="player-status-text" aria-live="polite">プレイヤー準備中</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="playback-assist-panel" id="playback-assist-panel" aria-label="再生補助情報">
+            <section class="activity-map" id="activity-map" aria-label="コメント量の盛り上がり" hidden>
+              <div class="activity-map__header">
+                <div class="activity-map__lead">
+                  <p class="section-label">盛り上がりマップ</p>
+                  <p class="activity-map__help" id="activity-map-help">クリックで移動</p>
+                </div>
+                <div class="player-controls">
+                  <button class="player-rewind-button" id="player-rewind-10" type="button">
+                    <span class="player-rewind-button__icon" aria-hidden="true">◀</span>
+                    <span class="player-rewind-button__label player-rewind-button__label--desktop">10秒戻る</span>
+                    <span class="player-rewind-button__label player-rewind-button__label--mobile">10秒バック</span>
+                  </button>
+                </div>
+                <div class="activity-map__meta">
+                  <span class="activity-map__time" id="activity-map-current">00:00:00</span>
+                  <span class="activity-map__time activity-map__time--muted" id="activity-map-duration">00:00:00</span>
+                </div>
+              </div>
+              <div class="activity-map__chart-wrap">
+                <button class="activity-map__chart" id="activity-map-button" type="button" aria-describedby="activity-map-help">
+                  <svg class="activity-map__svg" viewBox="0 0 1000 88" preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="activity-map-fill" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stop-color="#b68aff"></stop>
+                        <stop offset="100%" stop-color="rgba(182, 138, 255, 0.08)"></stop>
+                      </linearGradient>
+                    </defs>
+                    <path id="activity-map-progress" class="activity-map__progress"></path>
+                    <path id="activity-map-path" class="activity-map__path"></path>
+                    <rect id="activity-map-segment-range" class="activity-map__segment-range" x="0" y="0" width="0" height="88" hidden></rect>
+                    <rect id="activity-map-unavailable" class="activity-map__unavailable" x="1000" y="0" width="0" height="88"></rect>
+                    <line id="activity-map-marker" class="activity-map__marker" x1="0" x2="0" y1="0" y2="88"></line>
+                  </svg>
+                </button>
+              </div>
+            </section>
+
+          </section>
+        </div>
+      </section>
+
+      <aside class="vod-rail" aria-label="最新VOD一覧">
+        <div class="vod-tabs mobile-vod-tabs" id="vod-tabs" role="tablist" aria-label="配信日タブ"></div>
+        <div id="vod-list" class="vod-list"></div>
+
+        <p class="status-message" id="status-message" hidden></p>
+
+        <section class="stream-summary" id="stream-summary" aria-live="polite">
+          <h3 class="stream-summary__title">この配信について</h3>
+          <dl class="stream-summary__list">
+            <div class="stream-summary__row">
+              <dt>配信タイトル</dt>
+              <dd id="summary-title"></dd>
+            </div>
+            <div class="stream-summary__row">
+              <dt>配信日時</dt>
+              <dd id="summary-date"></dd>
+            </div>
+            <div class="stream-summary__row">
+              <dt>長さ</dt>
+              <dd id="summary-duration"></dd>
+            </div>
+            <div class="stream-summary__row">
+              <dt>チャット量</dt>
+              <dd id="summary-chat"></dd>
+            </div>
+            <div class="stream-summary__row">
+              <dt>再生状態</dt>
+              <dd id="summary-playing"></dd>
+            </div>
+            <div class="stream-summary__row">
+              <dt>再生位置</dt>
+              <dd id="summary-playback-position"></dd>
+            </div>
+          </dl>
+        </section>
+
+        <nav class="pager" id="pager" aria-label="ページ移動" hidden>
+          <a class="pager-link" id="pager-latest" href="?page=1" aria-disabled="true">最新へ</a>
+          <a class="pager-link" id="pager-prev" href="?page=1" aria-disabled="true">前へ</a>
+          <span class="pager-current" id="pager-current">1 / 1</span>
+          <a class="pager-link" id="pager-next" href="?page=1" aria-disabled="true">次へ</a>
+          <a class="pager-link" id="pager-oldest" href="?page=1" aria-disabled="true">最後へ</a>
+        </nav>
+      </aside>
+    </main>
+
+    <footer class="page-footer" aria-label="更新情報">
+      <div class="page-footer__schedule">
+        <span class="updated-at" id="updated-at-mobile">読み込み中...</span>
+        <span class="updated-stack" aria-live="polite">
+          <span class="schedule-build-label" id="build-label-mobile">UI build</span>
+          <span class="updated-at" id="next-update-at-mobile">読み込み中...</span>
+        </span>
+      </div>
+    </footer>
+  </div>
+
+  <template id="vod-card-template">
+    <article class="vod-card">
+      <div class="vod-head">
+        <p class="vod-order"></p>
+        <p class="vod-date"></p>
+      </div>
+      <ul class="segment-list"></ul>
+    </article>
+  </template>
+
+  <template id="segment-item-template">
+    <li class="segment-item">
+      <button class="segment-button" type="button">
+        <span class="segment-preview" aria-hidden="true">
+          <img class="segment-thumbnail" alt="" loading="lazy" decoding="async" hidden />
+          <span class="segment-start-time"></span>
+          <span class="segment-preview-fallback">
+            <span class="segment-preview-play">▶</span>
+          </span>
+        </span>
+        <span class="segment-content">
+          <span class="segment-mainline">
+            <span class="segment-rank" hidden></span>
+            <span class="segment-summary"></span>
+          </span>
+          <span class="segment-subline">
+            <span class="segment-tags" hidden></span>
+          </span>
+        </span>
+      </button>
+    </li>
+  </template>
+
+  <script src="./js/app.js?v=20260519-assist-panel-layout" defer></script>
+</body>
+
+</html>

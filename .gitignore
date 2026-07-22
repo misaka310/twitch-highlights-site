@@ -1,0 +1,34 @@
+# Dependencies and generated output
+=/
+node_modules/
+public/
+artifacts/
+test-results/
+out/
+.cache/
+__pycache__/
+*.py[cod]
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+cookies.txt
+*.cookies.txt
+*.json3
+.tmp-*/
+.tmp-tools/
+.browser-profile*/
+
+# Raw Twitch chat is intentionally never retained
+# The update job processes comments in memory and stores only aggregate metrics.
+data/chat-archive/
+*.chat.jsonl
+chat.json
+
+# Local runtime files
+logs_job/
+*.log
+*.dmp
+.DS_Store
+Thumbs.db

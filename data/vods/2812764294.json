@@ -1,0 +1,75 @@
+{
+  "vod_id": "2812764294",
+  "vod_url": "https://www.twitch.tv/videos/2812764294",
+  "title": "例のツイートについて【フロムキモオタ雑談】",
+  "published_at": "2026-07-05T23:32:09+09:00",
+  "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/e895da5820d74bb81bb7_dotitao_316192777715_1783261924//thumb/thumb0-320x180.jpg",
+  "duration_sec": null,
+  "count": 3,
+  "chat_total": 521,
+  "comments_per_hour": 509.674,
+  "items": [
+    {
+      "rank": 1,
+      "id": "2812764294_0_60",
+      "start_sec": 0,
+      "end_sec": 60,
+      "duration_sec": 60,
+      "start_time": "00:00:00",
+      "end_time": "00:01:00",
+      "reason": "Chat activity spike around 0h0m0s (z-score=6.074).",
+      "tags": [
+        "は",
+        "ww",
+        "ホラー"
+      ],
+      "watch_url": "https://www.twitch.tv/videos/2812764294?t=0h0m0s",
+      "screenshot_url": "/data/segment-thumbnails/2812764294/2812764294_0_60.webp"
+    },
+    {
+      "rank": 2,
+      "id": "2812764294_1020_1070",
+      "start_sec": 1020,
+      "end_sec": 1070,
+      "duration_sec": 50,
+      "start_time": "00:17:00",
+      "end_time": "00:17:50",
+      "reason": "Chat activity spike around 0h17m0s (z-score=4.174).",
+      "tags": [
+        "好プレー"
+      ],
+      "watch_url": "https://www.twitch.tv/videos/2812764294?t=0h17m0s",
+      "screenshot_url": "/data/segment-thumbnails/2812764294/2812764294_1020_1070.webp"
+    },
+    {
+      "rank": 3,
+      "id": "2812764294_3510_3560",
+      "start_sec": 3510,
+      "end_sec": 3560,
+      "duration_sec": 50,
+      "start_time": "00:58:30",
+      "end_time": "00:59:20",
+      "reason": "Chat activity spike around 0h58m30s (z-score=2.907).",
+      "tags": [],
+      "watch_url": "https://www.twitch.tv/videos/2812764294?t=0h58m30s",
+      "screenshot_url": "/data/segment-thumbnails/2812764294/2812764294_3510_3560.webp"
+    }
+  ],
+  "activity_map": {
+    "bucket_sec": 10,
+    "duration_sec": 3680,
+    "last_comment_sec": 3679,
+    "buckets": [
+      0, 3, 9, 11, 5, 3, 2, 1, 3, 2, 3, 0, 2, 0, 2, 1, 8, 3, 4, 2, 1, 2, 1, 2, 0, 0, 2, 1, 0, 2, 3, 2, 2, 0, 2, 1, 0, 1, 1, 3,
+      0, 0, 3, 3, 1, 3, 1, 1, 2, 3, 0, 0, 0, 4, 1, 3, 2, 2, 3, 2, 4, 0, 5, 2, 1, 1, 1, 4, 4, 7, 3, 2, 1, 1, 3, 2, 0, 0, 1, 3,
+      2, 1, 3, 0, 1, 0, 3, 0, 0, 2, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 2, 0, 0, 5, 8, 2, 0, 1, 4, 1, 3, 1, 0, 4, 2, 1, 1, 1, 1, 0,
+      2, 0, 1, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 4, 3, 0, 0, 0, 0, 0, 0, 0, 1, 2, 5, 3, 4, 1, 1, 0, 2, 0, 1, 2, 3, 3,
+      0, 1, 3, 3, 4, 4, 3, 3, 0, 2, 2, 1, 1, 0, 0, 1, 1, 3, 1, 0, 1, 2, 0, 1, 1, 1, 0, 0, 2, 3, 1, 0, 2, 0, 1, 1, 5, 4, 1, 0,
+      1, 1, 2, 1, 0, 1, 0, 1, 2, 2, 0, 3, 4, 1, 0, 1, 3, 0, 1, 0, 1, 1, 3, 0, 1, 0, 2, 0, 0, 0, 2, 1, 0, 0, 3, 2, 1, 5, 1, 2,
+      1, 2, 0, 4, 3, 2, 2, 0, 1, 1, 1, 1, 4, 0, 1, 1, 1, 0, 0, 1, 0, 3, 1, 2, 4, 1, 1, 2, 0, 0, 0, 0, 0, 1, 1, 0, 3, 0, 0, 0,
+      2, 0, 0, 0, 0, 0, 0, 0, 2, 3, 2, 1, 0, 0, 0, 0, 0, 0, 2, 3, 0, 6, 0, 0, 0, 0, 2, 1, 0, 0, 3, 2, 2, 2, 1, 0, 1, 1, 0, 0,
+      1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 2, 0, 1, 1, 1, 2, 3, 0, 5, 3, 1, 1, 1, 1, 4, 1, 0, 0, 0, 0, 1, 2, 0, 6, 2, 3, 0, 2, 1, 1,
+      1, 2, 0, 3, 2, 1, 1, 4, 0
+    ]
+  }
+}
