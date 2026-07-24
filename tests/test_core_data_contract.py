@@ -32,6 +32,7 @@ ITEM_FIELDS = {
     "start_time",
     "end_time",
     "reason",
+    "headline",
     "tags",
     "watch_url",
     "screenshot_url",
@@ -41,7 +42,6 @@ RETIRED_KEY_PARTS = (
     "".join(("trans", "cript")),
     "".join(("you", "tube")),
     "".join(("time", "stamp")),
-    "".join(("head", "line")),
 )
 
 
@@ -79,6 +79,7 @@ class CoreDataContractTests(unittest.TestCase):
         sanitized = uv.sanitize_video_for_storage(source)
         self.assertTrue(set(sanitized) <= VIDEO_FIELDS | {"analysis_version", "analyzed_at"})
         self.assertTrue(set(sanitized["items"][0]) <= ITEM_FIELDS)
+        self.assertEqual(sanitized["items"][0]["headline"], "legacy")
         self.assertEqual([key for key in iter_keys(sanitized) if any(part in key.lower() for part in RETIRED_KEY_PARTS)], [])
 
     def test_repository_json_uses_core_contract(self):

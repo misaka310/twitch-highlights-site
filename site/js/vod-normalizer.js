@@ -62,7 +62,7 @@ function normalizeSegment(item, vodId, vodUrl) {
     label:
       item.label ||
       `${item.start_time || formatClock(item.start_sec)} - ${item.end_time || formatClock(item.end_sec)}`,
-    summary: localizeReason(item.reason || item.summary || ""),
+    summary: String(item.headline || "").trim() || localizeReason(item.reason || item.summary || ""),
     tags: normalizeTags(item.tags),
     watch_url: item.watch_url || buildTwitchVodUrl(vodUrl, item.start_sec),
     screenshot_url: String(item.screenshot_url || "").trim(),

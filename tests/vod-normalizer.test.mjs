@@ -28,7 +28,7 @@ test("VOD without highlight segments is excluded", () => {
   assert.deepEqual(normalizeData({ videos: [makeVideo({ items: [] })] }), []);
 });
 
-test("legacy generated text does not override the highlight reason", () => {
+test("generated headline is shown instead of the generic highlight reason", () => {
   const [vod] = normalizeData({
     videos: [
       makeVideo({
@@ -38,13 +38,13 @@ test("legacy generated text does not override the highlight reason", () => {
             start_sec: 15,
             end_sec: 25,
             reason: "z-score",
-            headline: "legacy generated text",
+            headline: "見どころの見出し",
           },
         ],
       }),
     ],
   });
-  assert.notEqual(vod.segments[0].summary, "legacy generated text");
+  assert.equal(vod.segments[0].summary, "見どころの見出し");
 });
 
 test("initial selection uses the first highlight segment", () => {

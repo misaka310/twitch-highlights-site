@@ -18,37 +18,29 @@ def iter_keys(value):
 
 
 class RepositoryArchitectureTests(unittest.TestCase):
-    def test_retired_feature_modules_and_data_directories_are_absent(self):
-        time_module = "".join(("time", "stamp_generation"))
-        speech_module = "".join(("trans", "cription"))
-        text_data = "".join(("trans", "cripts"))
-        time_data = "".join(("time", "stamps"))
-        alignment_data = "".join(("trans", "cript-alignments"))
-        requirements_file = "".join(("requirements-trans", "cribe.txt"))
-        external_matcher = "".join(("match_you", "tube_videos.py"))
-        segment_converter = "".join(("trans", "cribe_segments.py"))
-        retired_paths = (
-            ROOT / "scripts" / time_module,
-            ROOT / "scripts" / speech_module,
-            ROOT / "data" / text_data,
-            ROOT / "data" / time_data,
-            ROOT / "data" / alignment_data,
-            ROOT / requirements_file,
-            ROOT / "scripts" / external_matcher,
-            ROOT / "scripts" / segment_converter,
+    def test_public_enrichment_modules_exist_without_private_artifacts(self):
+        required_paths = (
+            ROOT / "requirements-transcribe.txt",
+            ROOT / "scripts" / "transcribe_segments.py",
+            ROOT / "scripts" / "headline_generation.py",
+            ROOT / "scripts" / "transcription",
+            ROOT / "scripts" / "verify_public_enrichment.py",
         )
-        self.assertEqual([str(path.relative_to(ROOT)) for path in retired_paths if path.exists()], [])
+        self.assertEqual([str(path.relative_to(ROOT)) for path in required_paths if not path.exists()], [])
 
-    def test_retired_integrations_are_absent_from_engine_sources(self):
-        retired_markers = (
+        forbidden_paths = (
+            ROOT / "data" / "chat-archive",
+            ROOT / "data" / "transcripts",
+            ROOT / "data" / "timestamps",
+            ROOT / "data" / "transcript-alignments",
+            ROOT / "scripts" / "match_youtube_videos.py",
+        )
+        self.assertEqual([str(path.relative_to(ROOT)) for path in forbidden_paths if path.exists()], [])
+
+    def test_disallowed_integrations_are_absent_from_engine_sources(self):
+        disallowed_markers = (
             "".join(("ano", "sa")),
             "".join(("cloud", "flare")),
-            "".join(("trans", "cript")),
-            "".join(("you", "tube")),
-            "".join(("faster", "_whisper")),
-            "".join(("gro", "q")),
-            "".join(("gem", "ini")),
-            "".join(("nvi", "dia")),
         )
         roots = [ROOT / "scripts", ROOT / "site", ROOT / ".github", ROOT / "config"]
         matches = []
@@ -59,17 +51,16 @@ class RepositoryArchitectureTests(unittest.TestCase):
                 if any(part in {"node_modules", "public", "__pycache__"} for part in path.parts):
                     continue
                 text = path.read_text(encoding="utf-8-sig", errors="ignore").lower()
-                for marker in retired_markers:
+                for marker in disallowed_markers:
                     if marker in text:
                         matches.append(f"{path.relative_to(ROOT)}:{marker}")
         self.assertEqual(matches, [])
 
-    def test_retired_metadata_keys_are_absent_from_data(self):
-        retired_key_parts = (
+    def test_private_metadata_keys_are_absent_from_data(self):
+        private_key_parts = (
             "".join(("trans", "cript")),
             "".join(("you", "tube")),
             "".join(("time", "stamp")),
-            "".join(("head", "line")),
         )
         matches = []
         paths = [
@@ -81,7 +72,7 @@ class RepositoryArchitectureTests(unittest.TestCase):
         for path in paths:
             payload = json.loads(path.read_text(encoding="utf-8-sig"))
             for key in iter_keys(payload):
-                for part in retired_key_parts:
+                for part in private_key_parts:
                     if part in key.lower():
                         matches.append(f"{path.relative_to(ROOT)}:{key}")
         self.assertEqual(matches, [])

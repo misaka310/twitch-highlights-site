@@ -29,6 +29,10 @@ cookies.txt
 data/chat-archive/
 *.chat.jsonl
 chat.json
+data/transcripts/
+data/transcript-alignments/
+data/timestamps/
+data/anosa-timestamps/
 
 # Local runtime files
 logs_job/
