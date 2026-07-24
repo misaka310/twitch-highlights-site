@@ -39,6 +39,8 @@ class HeadlineFallbackTests(unittest.TestCase):
             "アドレスに注目が集まる",
             "はいに注目が集まる",
             "起点っていに注目が集まる",
+            "なんで?商人がある",
+            "はい?エンジェルナンバー",
         )
         for headline in rejected:
             with self.subTest(headline=headline):

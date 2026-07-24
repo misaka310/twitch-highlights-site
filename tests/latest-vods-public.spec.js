@@ -31,7 +31,6 @@ test.describe("public latest VOD checks", () => {
       ["trans", "cript"].join(""),
       ["you", "tube"].join(""),
       ["time", "stamp"].join(""),
-      ["head", "line"].join(""),
     ];
 
     results.rows.forEach((row) => {
@@ -43,7 +42,29 @@ test.describe("public latest VOD checks", () => {
       forbidden.forEach((marker) => expect(serialized.includes(`\"${marker}`)).toBeFalsy());
       expect(Array.isArray(detail.items)).toBeTruthy();
       expect(detail.activity_map).toBeTruthy();
+      detail.items.slice(0, 3).forEach((item) => {
+        expect(String(item.headline || "").trim()).not.toBe("");
+        expect(String(item.screenshot_url || "").trim()).toMatch(/^\/data\/segment-thumbnails\//);
+      });
     });
+  });
+
+  test("latest highlights show headlines and loaded screenshots", async ({ page }) => {
+    const segments = page.locator(".vod-card:not([hidden]) .segment-button");
+    await expect(segments.first()).toBeVisible();
+    const count = await segments.count();
+    expect(count).toBeGreaterThan(0);
+
+    for (let index = 0; index < Math.min(3, count); index += 1) {
+      const segment = segments.nth(index);
+      const summary = segment.locator(".segment-summary");
+      await expect(summary).toBeVisible();
+      await expect(summary).not.toHaveText("コメントが集中した場面");
+
+      const thumbnail = segment.locator(".segment-thumbnail");
+      await expect(thumbnail).toBeVisible();
+      await expect.poll(async () => thumbnail.evaluate((image) => image.complete && image.naturalWidth > 0)).toBeTruthy();
+    }
   });
 
   test("highlights remain playable", async ({ page }) => {

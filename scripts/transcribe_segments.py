@@ -2702,7 +2702,7 @@ PUBLISH_BLOCKING_HEADLINE_REASONS = {
     "missing_topic_hint",
 }
 PUBLISH_CONVERSATIONAL_EDGE_RE = re.compile(
-    r"^(?:あー|えー|いや|まあ|なんか|はい)(?:$|[、,\s])|(?:っていう|ってい|というか|して|まして|ませ)$"
+    r"^(?:あー|えー|いや|まあ|なんか|はい|なんで)|(?:っていう|ってい|というか|して|まして|ませ)$"
 )
 
 
@@ -2716,6 +2716,8 @@ def is_publishable_headline(headline: str, *, source_text: str | None = None) ->
     if any(reason in PUBLISH_BLOCKING_HEADLINE_REASONS for reason in validation.reasons):
         return False
     if PUBLISH_CONVERSATIONAL_EDGE_RE.search(value):
+        return False
+    if "?" in value or "？" in value:
         return False
     if value.endswith("に注目が集まる"):
         return False
