@@ -154,8 +154,8 @@ async function mountInteractivePlayer(playback) {
     setPlayerUiState("error", playback.vodId, playback.startSec, "Twitch player init failed", "interactive");
     return;
   }
-  if (playback.token !== state.playbackToken) {
-    clearInteractiveMountState(playback.token);
+  if (!isInteractiveMountStillRelevant(playback)) {
+    restartDesiredInteractiveMount(playback.token);
     return;
   }
 
@@ -167,8 +167,8 @@ async function mountInteractivePlayer(playback) {
   elements.player.replaceChildren(inner);
   ensureInteractiveEmbedLayout();
   await waitForInteractiveContainerRect(playback);
-  if (playback.token !== state.playbackToken) {
-    clearInteractiveMountState(playback.token);
+  if (!isInteractiveMountStillRelevant(playback)) {
+    restartDesiredInteractiveMount(playback.token);
     return;
   }
 
@@ -327,6 +327,37 @@ function isInteractiveMountInFlightForVod(vodId) {
     state.playerReady === false &&
     String(state.interactiveVodId || "") === targetVodId
   );
+}
+
+
+function isInteractiveMountStillRelevant(playback) {
+  if (!playback) {
+    return false;
+  }
+  if (Number(playback.token) === Number(state.playbackToken)) {
+    return true;
+  }
+
+  const desiredPlayback = state.desiredPlayback;
+  return (
+    state.interactiveMountInFlight === true &&
+    Number(state.interactiveMountToken) === Number(playback.token) &&
+    String(state.interactiveMountVodId || "") === String(playback.vodId || "") &&
+    String(desiredPlayback?.vodId || "") === String(playback.vodId || "")
+  );
+}
+
+
+function restartDesiredInteractiveMount(staleToken) {
+  clearInteractiveMountState(staleToken);
+  const desiredPlayback = state.desiredPlayback;
+  if (!desiredPlayback || Number(desiredPlayback.token) !== Number(state.playbackToken)) {
+    return;
+  }
+  if (isInteractiveSeekReadyForVod(desiredPlayback.vodId) || state.interactiveMountInFlight === true) {
+    return;
+  }
+  void mountInteractivePlayer(desiredPlayback);
 }
 
 
@@ -678,7 +709,7 @@ async function waitForInteractiveContainerRect(playback) {
   let previousInnerHeight = null;
 
   while (Date.now() - startedAt <= INTERACTIVE_CONTAINER_WAIT_TIMEOUT_MS) {
-    if (playback?.token !== state.playbackToken) {
+    if (!isInteractiveMountStillRelevant(playback)) {
       return false;
     }
 
