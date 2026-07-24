@@ -5,6 +5,11 @@ concurrency:
   cancel-in-progress: false
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/update-vods.yml"
   schedule:
     - cron: "7 21 * * *"
   workflow_dispatch:
