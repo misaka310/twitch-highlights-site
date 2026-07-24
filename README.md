@@ -2,7 +2,7 @@
 
 ## 公開サイト
 
-[dotitao moments](https://dotitao-moments.onrender.com/)
+https://dotitao-moments.onrender.com/
 
 Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。対象チャンネル、サイト名、公開URLは設定ファイルへ分離されているため、コードを書き換えずに別のTwitchチャンネルへ切り替えられます。
 
