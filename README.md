@@ -1,5 +1,9 @@
 # Twitch Highlights Site
 
+## 公開サイト
+
+[dotitao moments](https://dotitao-moments.onrender.com/)
+
 Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。対象チャンネル、サイト名、公開URLは設定ファイルへ分離されているため、コードを書き換えずに別のTwitchチャンネルへ切り替えられます。
 
 このリポジトリに含まれる`config/site.json`は、現在の公開サイト`dotitao moments`用のインスタンス設定です。汎用ロジック自体は特定の配信者名を前提にしません。
