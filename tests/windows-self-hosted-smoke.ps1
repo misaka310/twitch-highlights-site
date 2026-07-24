@@ -8,7 +8,7 @@ $logPath = Join-Path $artifactRoot 'self-hosted-smoke.log'
 $startedAt = (Get-Date).ToUniversalTime()
 
 function Write-Log {
-    param([Parameter(Mandatory = $true)][string]$Message)
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Message)
     $Message | Tee-Object -FilePath $logPath -Append
 }
 
@@ -21,9 +21,80 @@ function Invoke-LoggedCommand {
 
     Write-Log "=== $Name ==="
     Write-Log "command: $FilePath $($Arguments -join ' ')"
-    & $FilePath @Arguments 2>&1 | Tee-Object -FilePath $logPath -Append
-    if ($LASTEXITCODE -ne 0) {
-        throw "$Name failed with exit code $LASTEXITCODE"
+    $stdoutPath = [IO.Path]::GetTempFileName()
+    $stderrPath = [IO.Path]::GetTempFileName()
+    $commandPath = [IO.Path]::ChangeExtension([IO.Path]::GetTempFileName(), '.cmd')
+    $cmd = (Get-Command cmd.exe -ErrorAction Stop).Source
+    $quotedCommand = @((('"' + $FilePath + '"'))) + @($Arguments | ForEach-Object { '"' + $_.Replace('"', '""') + '"' })
+    $commandText = @(
+        '@echo off',
+        ('cd /d "' + $repoRoot + '"'),
+        (($quotedCommand -join ' ') + ' > "' + $stdoutPath + '" 2> "' + $stderrPath + '"'),
+        'exit /b %ERRORLEVEL%'
+    ) -join "`r`n"
+    [IO.File]::WriteAllText($commandPath, $commandText, [Text.Encoding]::ASCII)
+
+    try {
+        $process = Start-Process `
+            -FilePath $cmd `
+            -ArgumentList @('/d', '/s', '/c', ('"' + $commandPath + '"')) `
+            -WorkingDirectory $repoRoot `
+            -NoNewWindow `
+            -Wait `
+            -PassThru
+
+        foreach ($streamPath in @($stdoutPath, $stderrPath)) {
+            if (Test-Path -LiteralPath $streamPath) {
+                foreach ($line in (Get-Content -LiteralPath $streamPath)) {
+                    Write-Log $line
+                }
+            }
+        }
+
+        if ($process.ExitCode -ne 0) {
+            throw "$Name failed with exit code $($process.ExitCode)"
+        }
+    }
+    finally {
+        Remove-Item -LiteralPath $stdoutPath, $stderrPath, $commandPath -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Invoke-WindowsEdgeSmoke {
+    param(
+        [Parameter(Mandatory = $true)][string]$PlaywrightPath,
+        [Parameter(Mandatory = $true)][string]$NodeRoot
+    )
+
+    Write-Log '=== Windows Edge browser smoke ==='
+    Write-Log "command: $PlaywrightPath test tests/self-hosted-browser-smoke.spec.js --config=playwright.selfhosted.config.js"
+    $cmd = (Get-Command cmd.exe -ErrorAction Stop).Source
+    $commandPath = [IO.Path]::ChangeExtension([IO.Path]::GetTempFileName(), '.cmd')
+    $commandText = @(
+        '@echo off',
+        ('set "PATH=' + $NodeRoot + ';%PATH%"'),
+        'set "PATHEXT=.COM;.EXE;.BAT;.CMD"',
+        ('cd /d "' + $repoRoot + '"'),
+        ('call "' + $PlaywrightPath + '" test tests/self-hosted-browser-smoke.spec.js --config=playwright.selfhosted.config.js'),
+        'exit /b %ERRORLEVEL%'
+    ) -join "`r`n"
+    [IO.File]::WriteAllText($commandPath, $commandText, [Text.Encoding]::ASCII)
+
+    try {
+        $process = Start-Process `
+            -FilePath $cmd `
+            -ArgumentList @('/d', '/s', '/c', ('"' + $commandPath + '"')) `
+            -WorkingDirectory $repoRoot `
+            -NoNewWindow `
+            -Wait `
+            -PassThru
+        if ($process.ExitCode -ne 0) {
+            throw "Windows Edge browser smoke failed with exit code $($process.ExitCode)"
+        }
+        Write-Log 'PASS Windows Edge browser smoke'
+    }
+    finally {
+        Remove-Item -LiteralPath $commandPath -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -59,12 +130,19 @@ function Test-PrivacyRetention {
 
 Push-Location $repoRoot
 try {
-    $npm = (Get-Command npm.cmd -ErrorAction Stop).Source
     $node = (Get-Command node.exe -ErrorAction Stop).Source
-    $npx = (Get-Command npx.cmd -ErrorAction Stop).Source
+    $nodeRoot = Split-Path -Parent $node
+    $npmCli = Join-Path $nodeRoot 'node_modules\npm\bin\npm-cli.js'
+    if (-not (Test-Path -LiteralPath $npmCli -PathType Leaf)) {
+        throw "Required npm CLI is missing: $npmCli"
+    }
 
     Test-PrivacyRetention
-    Invoke-LoggedCommand -Name 'Install dependencies' -FilePath $npm -Arguments @('ci')
+    Invoke-LoggedCommand -Name 'Install dependencies' -FilePath $node -Arguments @($npmCli, 'ci')
+    $playwright = Join-Path $repoRoot 'node_modules\.bin\playwright.cmd'
+    if (-not (Test-Path -LiteralPath $playwright -PathType Leaf)) {
+        throw "Required Playwright launcher is missing after npm ci: $playwright"
+    }
     Invoke-LoggedCommand -Name 'Frontend unit tests' -FilePath $node -Arguments @(
         '--test',
         'tests/formatters.test.mjs',
@@ -72,12 +150,30 @@ try {
         'tests/vod-list-view.test.mjs',
         'tests/vod-normalizer.test.mjs'
     )
-    Invoke-LoggedCommand -Name 'Windows Edge browser smoke' -FilePath $npx -Arguments @(
-        'playwright',
-        'test',
-        'tests/self-hosted-browser-smoke.spec.js',
-        '--config=playwright.selfhosted.config.js'
-    )
+    Invoke-WindowsEdgeSmoke -PlaywrightPath $playwright -NodeRoot $nodeRoot
+
+    $versionOutputPath = [IO.Path]::GetTempFileName()
+    $versionErrorPath = [IO.Path]::GetTempFileName()
+    try {
+        $versionProcess = Start-Process `
+            -FilePath $node `
+            -ArgumentList @('--version') `
+            -NoNewWindow `
+            -Wait `
+            -PassThru `
+            -RedirectStandardOutput $versionOutputPath `
+            -RedirectStandardError $versionErrorPath
+        if ($versionProcess.ExitCode -ne 0) {
+            throw "Node.js version check failed with exit code $($versionProcess.ExitCode)"
+        }
+        $nodeVersion = (Get-Content -LiteralPath $versionOutputPath -Raw).Trim()
+        if ([string]::IsNullOrWhiteSpace($nodeVersion)) {
+            throw 'Node.js version check returned no output.'
+        }
+    }
+    finally {
+        Remove-Item -LiteralPath $versionOutputPath, $versionErrorPath -Force -ErrorAction SilentlyContinue
+    }
 
     [pscustomobject]@{
         status = 'passed'
@@ -85,7 +181,7 @@ try {
         completedAt = (Get-Date).ToUniversalTime().ToString('o')
         machine = $env:COMPUTERNAME
         sessionId = [System.Diagnostics.Process]::GetCurrentProcess().SessionId
-        node = (& $node --version).Trim()
+        node = $nodeVersion
     } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $artifactRoot 'result.json') -Encoding UTF8
 }
 catch {

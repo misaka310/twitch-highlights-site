@@ -10,6 +10,7 @@ module.exports = defineConfig({
   workers: 1,
   retries: 0,
   reporter: "line",
+  outputDir: "test-results/playwright-selfhosted",
   use: {
     baseURL: `http://127.0.0.1:${TEST_PORT}`,
     headless: true,
@@ -27,7 +28,7 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    command: "node scripts/dev-server.mjs",
+    command: `"${process.execPath}" scripts/dev-server.mjs`,
     env: {
       HOST: "127.0.0.1",
       PORT: String(TEST_PORT),
