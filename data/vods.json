@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-25T00:08:43+09:00",
+  "updated_at": "2026-07-25T00:25:22+09:00",
   "next_update_at": "2026-07-25T00:00:00+00:00",
   "videos": [
     {
@@ -22,7 +22,7 @@
           "start_time": "00:00:30",
           "end_time": "00:04:20",
           "reason": "Chat activity spike around 0h0m30s (z-score=5.272).",
-          "headline": "いやに注目が集まる",
+          "headline": "緊張の展開にざわつく",
           "tags": [
             "まずい",
             "ホラー",
@@ -40,7 +40,7 @@
           "start_time": "02:10:50",
           "end_time": "02:13:10",
           "reason": "Chat activity spike around 2h10m50s (z-score=4.664).",
-          "headline": "すすみませに注目が集まる",
+          "headline": "緊張の展開にざわつく",
           "tags": [
             "あ",
             "ホラー"
@@ -57,7 +57,7 @@
           "start_time": "00:28:10",
           "end_time": "00:30:00",
           "reason": "Chat activity spike around 0h28m10s (z-score=3.448).",
-          "headline": "なんでに注目が集まる",
+          "headline": "なんで?商人がある",
           "tags": [
             "ww",
             "あ",
@@ -125,7 +125,7 @@
           "start_time": "01:05:10",
           "end_time": "01:07:30",
           "reason": "Chat activity spike around 1h5m10s (z-score=5.118).",
-          "headline": "アドレスに注目が集まる",
+          "headline": "緊張の展開にざわつく",
           "tags": [
             "あ",
             "えっど",
@@ -143,7 +143,7 @@
           "start_time": "00:46:40",
           "end_time": "00:47:30",
           "reason": "Chat activity spike around 0h46m40s (z-score=6.266).",
-          "headline": "はいに注目が集まる",
+          "headline": "はい?エンジェルナンバー",
           "tags": [
             "は",
             "おめ",
@@ -234,7 +234,7 @@
           "start_time": "00:55:10",
           "end_time": "00:56:10",
           "reason": "Chat activity spike around 0h55m10s (z-score=6.995).",
-          "headline": "起点っていに注目が集まる",
+          "headline": "好プレーで盛り上がる",
           "tags": [
             "あ",
             "ww",
