@@ -2717,6 +2717,8 @@ def is_publishable_headline(headline: str, *, source_text: str | None = None) ->
         return False
     if PUBLISH_CONVERSATIONAL_EDGE_RE.search(value):
         return False
+    if value.endswith("に注目が集まる"):
+        return False
     return value != DEFAULT_HEADLINE_TEXT
 
 
@@ -3738,7 +3740,7 @@ def build_tag_based_fallback_headline(tags: Any) -> str:
         ("ww", "笑いが一気に広がる"),
         ("えっど", "意外な発言にざわつく"),
         ("えっ", "意外な展開に驚く"),
-        ("つべ", "話題の発言に注目が集まる"),
+        ("つべ", "話題の発言で盛り上がる"),
     )
     for tag, fallback in fallback_by_tag:
         if tag in normalized_tags:
@@ -3747,22 +3749,9 @@ def build_tag_based_fallback_headline(tags: Any) -> str:
 
 
 def build_safe_fallback_headline(*, transcript: str, video_title: str) -> str:
-    game_term_hits = collect_game_term_hits(transcript)
-    if game_term_hits:
-        return finalize_headline(f"{game_term_hits[0]}で展開が動く")
-
-    source_terms = [term for term in collect_source_terms_for_headline(transcript) if len(term) >= 2]
-    if source_terms:
-        return finalize_headline(f"{source_terms[0]}に注目が集まる")
-
     heuristic = build_pattern_fallback_headline(transcript=transcript, video_title=video_title)
-    if heuristic:
+    if heuristic and is_publishable_headline(heuristic):
         return heuristic
-
-    fallback_title = strip_stream_title(video_title)
-    if fallback_title:
-        return finalize_headline(smart_truncate(fallback_title, HEADLINE_MAX_CHARS))
-
     return DEFAULT_HEADLINE_TEXT
 
 

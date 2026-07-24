@@ -34,6 +34,11 @@ class HeadlineFallbackTests(unittest.TestCase):
             "100万回感謝をするっていう",
             "昨日はちょっと老犬の介護に行ってましたいやまぁ結構ね長生",
             "あーもうなんでフルリモート終わったのこの世界勘弁して",
+            "いやに注目が集まる",
+            "すすみませに注目が集まる",
+            "アドレスに注目が集まる",
+            "はいに注目が集まる",
+            "起点っていに注目が集まる",
         )
         for headline in rejected:
             with self.subTest(headline=headline):
