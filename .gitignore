@@ -20,6 +20,10 @@ cookies.txt
 .tmp-tools/
 .browser-profile*/
 
+# Local agent state
+.ai-bridge/
+.ai-review/
+
 # Raw Twitch chat is intentionally never retained
 # The update job processes comments in memory and stores only aggregate metrics.
 data/chat-archive/
