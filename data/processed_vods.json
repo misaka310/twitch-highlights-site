@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-24T23:43:02+09:00",
+  "updated_at": "2026-07-25T00:08:43+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -24,7 +24,7 @@
           "start_time": "00:00:30",
           "end_time": "00:04:20",
           "reason": "Chat activity spike around 0h0m30s (z-score=5.272).",
-          "headline": "いや",
+          "headline": "いやに注目が集まる",
           "tags": [
             "まずい",
             "ホラー",
@@ -42,7 +42,7 @@
           "start_time": "02:10:50",
           "end_time": "02:13:10",
           "reason": "Chat activity spike around 2h10m50s (z-score=4.664).",
-          "headline": "すすみませ",
+          "headline": "すすみませに注目が集まる",
           "tags": [
             "あ",
             "ホラー"
@@ -59,7 +59,7 @@
           "start_time": "00:28:10",
           "end_time": "00:30:00",
           "reason": "Chat activity spike around 0h28m10s (z-score=3.448).",
-          "headline": "なんで",
+          "headline": "なんでに注目が集まる",
           "tags": [
             "ww",
             "あ",
@@ -130,7 +130,7 @@
           "start_time": "01:05:10",
           "end_time": "01:07:30",
           "reason": "Chat activity spike around 1h5m10s (z-score=5.118).",
-          "headline": "アドレス",
+          "headline": "アドレスに注目が集まる",
           "tags": [
             "あ",
             "えっど",
@@ -148,7 +148,7 @@
           "start_time": "00:46:40",
           "end_time": "00:47:30",
           "reason": "Chat activity spike around 0h46m40s (z-score=6.266).",
-          "headline": "はい",
+          "headline": "はいに注目が集まる",
           "tags": [
             "は",
             "おめ",
@@ -166,7 +166,7 @@
           "start_time": "01:27:50",
           "end_time": "01:28:40",
           "reason": "Chat activity spike around 1h27m50s (z-score=4.831).",
-          "headline": "100万回感謝をするっていう",
+          "headline": "祝福コメントが集まる",
           "tags": [
             "おめ",
             "ww",
@@ -226,7 +226,7 @@
           "start_time": "00:36:10",
           "end_time": "00:38:50",
           "reason": "Chat activity spike around 0h36m10s (z-score=3.606).",
-          "headline": "昨日はちょっと老犬の介護に行ってましたいやまぁ結構ね長生",
+          "headline": "好プレーで盛り上がる",
           "tags": [
             "好プレー"
           ],
@@ -242,7 +242,7 @@
           "start_time": "00:55:10",
           "end_time": "00:56:10",
           "reason": "Chat activity spike around 0h55m10s (z-score=6.995).",
-          "headline": "起点ってい",
+          "headline": "起点っていに注目が集まる",
           "tags": [
             "あ",
             "ww",
@@ -260,7 +260,7 @@
           "start_time": "00:00:20",
           "end_time": "00:02:00",
           "reason": "Chat activity spike around 0h0m20s (z-score=3.606).",
-          "headline": "あーもうなんでフルリモート終わったのこの世界勘弁して",
+          "headline": "祝福コメントが集まる",
           "tags": [
             "おめ",
             "ホラー"
