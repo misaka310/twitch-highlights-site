@@ -1392,7 +1392,7 @@ def _apply_headline_post_filter_fallback(
         outcome.headline.text,
         source_text=prepared_source_text or transcript_text,
     )
-    if final_validation.accepted:
+    if is_publishable_headline(outcome.headline.text, source_text=prepared_source_text or transcript_text):
         return outcome
 
     print(
@@ -1406,15 +1406,38 @@ def _apply_headline_post_filter_fallback(
         reason=f"post_filter:{','.join(final_validation.reasons)}",
         source_config=headline_source_config,
     )
+    fallback_validation = validate_final_headline_japanese(
+        headline.text,
+        source_text=prepared_source_text or transcript_text,
+    )
+    if is_publishable_headline(headline.text, source_text=prepared_source_text or transcript_text) and headline.text != DEFAULT_HEADLINE_TEXT:
+        return HeadlineGenerationOutcome(
+            headline=headline,
+            generation_reason="fallback_after_post_filter",
+        )
+
+    safe_headline = build_tag_based_fallback_headline(target.item.get("tags"))
+    print(
+        "info: extractive fallback rejected; using tag fallback "
+        f"label={label} reasons={fallback_validation.reasons} headline={headline.text} "
+        f"fallback={safe_headline}"
+    )
     return HeadlineGenerationOutcome(
-        headline=headline,
-        generation_reason="fallback_after_post_filter",
+        headline=HeadlineResult(
+            text=safe_headline,
+            model=LOCAL_HEADLINE_MODEL,
+            source="tags",
+            generation_mode="fallback_tag",
+            confidence="low",
+            notes=f"extractive_post_filter:{','.join(fallback_validation.reasons)}",
+        ),
+        generation_reason="fallback_tag_after_post_filter",
     )
 
 
 def _resolve_headline_status(headline: HeadlineResult, source_validation: SourceValidationResult) -> str:
-    if headline.generation_mode == "fallback_extractive":
-        return "fallback_extractive"
+    if headline.generation_mode in {"fallback_extractive", "fallback_tag"}:
+        return headline.generation_mode
     if not source_validation.accepted or headline.generation_mode in {"weak_llm", "weak_generated"}:
         return "weak_generated"
     return "ok"
@@ -2672,6 +2695,31 @@ def validate_final_headline_japanese(
     )
 
 
+PUBLISH_BLOCKING_HEADLINE_REASONS = {
+    "missing_function_word",
+    "too_abstract",
+    "literal_or_awkward_predicate",
+    "missing_topic_hint",
+}
+PUBLISH_CONVERSATIONAL_EDGE_RE = re.compile(
+    r"^(?:あー|えー|いや|まあ|なんか|はい)(?:$|[、,\s])|(?:っていう|ってい|というか|して|まして|ませ)$"
+)
+
+
+def is_publishable_headline(headline: str, *, source_text: str | None = None) -> bool:
+    value = cleanup_headline_candidate(headline)
+    if len(value) < 8 or len(value) > 24:
+        return False
+    validation = validate_final_headline_japanese(value, source_text=source_text)
+    if not validation.accepted:
+        return False
+    if any(reason in PUBLISH_BLOCKING_HEADLINE_REASONS for reason in validation.reasons):
+        return False
+    if PUBLISH_CONVERSATIONAL_EDGE_RE.search(value):
+        return False
+    return value != DEFAULT_HEADLINE_TEXT
+
+
 def headline_confidence_label(*, score_total: float, candidate_confidence: float, penalty: float = 0.0) -> str:
     weighted = score_total + (candidate_confidence * 2.0) - (penalty * 0.8)
     if weighted >= 9.5:
@@ -3680,14 +3728,32 @@ def build_fallback_extractive_result(
     )
 
 
+def build_tag_based_fallback_headline(tags: Any) -> str:
+    normalized_tags = [str(tag).strip() for tag in tags if str(tag).strip()] if isinstance(tags, list) else []
+    fallback_by_tag = (
+        ("好プレー", "好プレーで盛り上がる"),
+        ("おめ", "祝福コメントが集まる"),
+        ("ホラー", "緊張の展開にざわつく"),
+        ("まずい", "予想外の展開に驚く"),
+        ("ww", "笑いが一気に広がる"),
+        ("えっど", "意外な発言にざわつく"),
+        ("えっ", "意外な展開に驚く"),
+        ("つべ", "話題の発言に注目が集まる"),
+    )
+    for tag, fallback in fallback_by_tag:
+        if tag in normalized_tags:
+            return fallback
+    return "コメントが一気に増える"
+
+
 def build_safe_fallback_headline(*, transcript: str, video_title: str) -> str:
     game_term_hits = collect_game_term_hits(transcript)
     if game_term_hits:
-        return finalize_headline(f"{game_term_hits[0]}??????")
+        return finalize_headline(f"{game_term_hits[0]}で展開が動く")
 
     source_terms = [term for term in collect_source_terms_for_headline(transcript) if len(term) >= 2]
     if source_terms:
-        return finalize_headline(f"{source_terms[0]}?????")
+        return finalize_headline(f"{source_terms[0]}に注目が集まる")
 
     heuristic = build_pattern_fallback_headline(transcript=transcript, video_title=video_title)
     if heuristic:

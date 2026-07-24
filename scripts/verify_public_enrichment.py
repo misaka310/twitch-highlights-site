@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from transcribe_segments import is_publishable_headline, validate_final_headline_japanese
+
+
 DATA_PATH = ROOT / "data" / "vods.json"
 
 
@@ -28,6 +34,11 @@ def main() -> None:
             screenshot_url = str(item.get("screenshot_url") or "").strip()
             if not headline:
                 failures.append(f"segment_id={segment_id}: headline missing")
+            else:
+                validation = validate_final_headline_japanese(headline)
+                if not is_publishable_headline(headline):
+                    reasons = ",".join(validation.reasons) or "publish_quality"
+                    failures.append(f"segment_id={segment_id}: invalid headline ({reasons})")
             if not screenshot_url:
                 failures.append(f"segment_id={segment_id}: screenshot_url missing")
                 continue

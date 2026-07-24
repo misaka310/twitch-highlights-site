@@ -10,6 +10,12 @@ on:
       - main
     paths:
       - ".github/workflows/update-vods.yml"
+      - "requirements-transcribe.txt"
+      - "scripts/headline_*.py"
+      - "scripts/transcribe_segments.py"
+      - "scripts/transcript_*.py"
+      - "scripts/transcription/**"
+      - "scripts/verify_public_enrichment.py"
   schedule:
     - cron: "7 21 * * *"
   workflow_dispatch:
@@ -92,8 +98,8 @@ jobs:
           TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS: 2000
           TRANSCRIPT_MAX_SEGMENTS: 9
           TRANSCRIPT_RETRY_ERRORS: 1
-          FORCE_TRANSCRIPT_REFRESH: ${{ github.event.inputs.force_refresh_transcripts || 'false' }}
-          FORCE_HEADLINE_REFRESH: ${{ github.event.inputs.force_refresh_transcripts || 'false' }}
+          FORCE_TRANSCRIPT_REFRESH: ${{ github.event_name == 'push' && 'true' || github.event.inputs.force_refresh_transcripts || 'false' }}
+          FORCE_HEADLINE_REFRESH: ${{ github.event_name == 'push' && 'true' || github.event.inputs.force_refresh_transcripts || 'false' }}
           TRANSCRIPT_MAX_DURATION_SEC: 150
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
