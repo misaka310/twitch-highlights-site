@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-24T23:04:56+09:00",
+  "updated_at": "2026-07-24T23:43:02+09:00",
   "next_update_at": "2026-07-25T00:00:00+00:00",
   "videos": [
     {
@@ -8,7 +8,7 @@
       "title": "珍しく参加型をやります！ただし、、、、【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-07-23T21:08:49+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/bf205b4916115b0d2581_dotitao_316272410995_1784808524//thumb/thumb0-320x180.jpg",
-      "duration_sec": 11602,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1547,
       "comments_per_hour": 480.021,
@@ -20,7 +20,7 @@
       "title": "【祈願】テストプレイを絶対に当てる配信【The Duskbloods（ダスクブラッド）ネットワークテスト】",
       "published_at": "2026-07-22T22:09:00+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/5741f6f29245f0674e24_dotitao_316204328433_1784725735//thumb/thumb0-320x180.jpg",
-      "duration_sec": 7301,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 3058,
       "comments_per_hour": 1507.848,
@@ -32,7 +32,7 @@
       "title": "ソロ学者とマルチの交互浴でととのう【ナイトレイン/ELDEN RING NIGHTREIGN】",
       "published_at": "2026-07-21T22:19:59+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/f668a9e8aa5a2d155659_dotitao_316208810610_1784639994//thumb/thumb0-320x180.jpg",
-      "duration_sec": 7398,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1199,
       "comments_per_hour": 583.455,

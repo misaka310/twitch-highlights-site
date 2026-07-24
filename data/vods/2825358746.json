@@ -4,7 +4,7 @@
   "title": "ソロ学者とマルチの交互浴でととのう【ナイトレイン/ELDEN RING NIGHTREIGN】",
   "published_at": "2026-07-21T22:19:59+09:00",
   "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/f668a9e8aa5a2d155659_dotitao_316208810610_1784639994//thumb/thumb0-320x180.jpg",
-  "duration_sec": 7398,
+  "duration_sec": null,
   "count": 3,
   "chat_total": 1199,
   "comments_per_hour": 583.455,
@@ -18,10 +18,12 @@
       "start_time": "00:36:10",
       "end_time": "00:38:50",
       "reason": "Chat activity spike around 0h36m10s (z-score=3.606).",
+      "headline": "昨日はちょっと老犬の介護に行ってましたいやまぁ結構ね長生",
       "tags": [
         "好プレー"
       ],
-      "watch_url": "https://www.twitch.tv/videos/2825358746?t=0h36m10s"
+      "watch_url": "https://www.twitch.tv/videos/2825358746?t=0h36m10s",
+      "screenshot_url": "/data/segment-thumbnails/2825358746/2825358746_2170_2330.webp"
     },
     {
       "rank": 2,
@@ -32,12 +34,14 @@
       "start_time": "00:55:10",
       "end_time": "00:56:10",
       "reason": "Chat activity spike around 0h55m10s (z-score=6.995).",
+      "headline": "起点ってい",
       "tags": [
         "あ",
         "ww",
         "好プレー"
       ],
-      "watch_url": "https://www.twitch.tv/videos/2825358746?t=0h55m10s"
+      "watch_url": "https://www.twitch.tv/videos/2825358746?t=0h55m10s",
+      "screenshot_url": "/data/segment-thumbnails/2825358746/2825358746_3310_3370.webp"
     },
     {
       "rank": 3,
@@ -48,11 +52,13 @@
       "start_time": "00:00:20",
       "end_time": "00:02:00",
       "reason": "Chat activity spike around 0h0m20s (z-score=3.606).",
+      "headline": "あーもうなんでフルリモート終わったのこの世界勘弁して",
       "tags": [
         "おめ",
         "ホラー"
       ],
-      "watch_url": "https://www.twitch.tv/videos/2825358746?t=0h0m20s"
+      "watch_url": "https://www.twitch.tv/videos/2825358746?t=0h0m20s",
+      "screenshot_url": "/data/segment-thumbnails/2825358746/2825358746_20_120.webp"
     }
   ],
   "activity_map": {

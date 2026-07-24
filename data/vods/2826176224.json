@@ -4,7 +4,7 @@
   "title": "【祈願】テストプレイを絶対に当てる配信【The Duskbloods（ダスクブラッド）ネットワークテスト】",
   "published_at": "2026-07-22T22:09:00+09:00",
   "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/5741f6f29245f0674e24_dotitao_316204328433_1784725735//thumb/thumb0-320x180.jpg",
-  "duration_sec": 7301,
+  "duration_sec": null,
   "count": 3,
   "chat_total": 3058,
   "comments_per_hour": 1507.848,
@@ -18,12 +18,14 @@
       "start_time": "01:05:10",
       "end_time": "01:07:30",
       "reason": "Chat activity spike around 1h5m10s (z-score=5.118).",
+      "headline": "アドレス",
       "tags": [
         "あ",
         "えっど",
         "ホラー"
       ],
-      "watch_url": "https://www.twitch.tv/videos/2826176224?t=1h5m10s"
+      "watch_url": "https://www.twitch.tv/videos/2826176224?t=1h5m10s",
+      "screenshot_url": "/data/segment-thumbnails/2826176224/2826176224_3910_4050.webp"
     },
     {
       "rank": 2,
@@ -34,12 +36,14 @@
       "start_time": "00:46:40",
       "end_time": "00:47:30",
       "reason": "Chat activity spike around 0h46m40s (z-score=6.266).",
+      "headline": "はい",
       "tags": [
         "は",
         "おめ",
         "ホラー"
       ],
-      "watch_url": "https://www.twitch.tv/videos/2826176224?t=0h46m40s"
+      "watch_url": "https://www.twitch.tv/videos/2826176224?t=0h46m40s",
+      "screenshot_url": "/data/segment-thumbnails/2826176224/2826176224_2800_2850.webp"
     },
     {
       "rank": 3,
@@ -50,12 +54,14 @@
       "start_time": "01:27:50",
       "end_time": "01:28:40",
       "reason": "Chat activity spike around 1h27m50s (z-score=4.831).",
+      "headline": "100万回感謝をするっていう",
       "tags": [
         "おめ",
         "ww",
         "ホラー"
       ],
-      "watch_url": "https://www.twitch.tv/videos/2826176224?t=1h27m50s"
+      "watch_url": "https://www.twitch.tv/videos/2826176224?t=1h27m50s",
+      "screenshot_url": "/data/segment-thumbnails/2826176224/2826176224_5270_5320.webp"
     }
   ],
   "activity_map": {

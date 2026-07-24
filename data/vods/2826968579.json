@@ -4,7 +4,7 @@
   "title": "珍しく参加型をやります！ただし、、、、【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
   "published_at": "2026-07-23T21:08:49+09:00",
   "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/bf205b4916115b0d2581_dotitao_316272410995_1784808524//thumb/thumb0-320x180.jpg",
-  "duration_sec": 11602,
+  "duration_sec": null,
   "count": 3,
   "chat_total": 1547,
   "comments_per_hour": 480.021,
@@ -18,12 +18,14 @@
       "start_time": "00:00:30",
       "end_time": "00:04:20",
       "reason": "Chat activity spike around 0h0m30s (z-score=5.272).",
+      "headline": "いや",
       "tags": [
         "まずい",
         "ホラー",
         "ww"
       ],
-      "watch_url": "https://www.twitch.tv/videos/2826968579?t=0h0m30s"
+      "watch_url": "https://www.twitch.tv/videos/2826968579?t=0h0m30s",
+      "screenshot_url": "/data/segment-thumbnails/2826968579/2826968579_30_260.webp"
     },
     {
       "rank": 2,
@@ -34,11 +36,13 @@
       "start_time": "02:10:50",
       "end_time": "02:13:10",
       "reason": "Chat activity spike around 2h10m50s (z-score=4.664).",
+      "headline": "すすみませ",
       "tags": [
         "あ",
         "ホラー"
       ],
-      "watch_url": "https://www.twitch.tv/videos/2826968579?t=2h10m50s"
+      "watch_url": "https://www.twitch.tv/videos/2826968579?t=2h10m50s",
+      "screenshot_url": "/data/segment-thumbnails/2826968579/2826968579_7850_7990.webp"
     },
     {
       "rank": 3,
@@ -49,12 +53,14 @@
       "start_time": "00:28:10",
       "end_time": "00:30:00",
       "reason": "Chat activity spike around 0h28m10s (z-score=3.448).",
+      "headline": "なんで",
       "tags": [
         "ww",
         "あ",
         "は"
       ],
-      "watch_url": "https://www.twitch.tv/videos/2826968579?t=0h28m10s"
+      "watch_url": "https://www.twitch.tv/videos/2826968579?t=0h28m10s",
+      "screenshot_url": "/data/segment-thumbnails/2826968579/2826968579_1690_1800.webp"
     }
   ],
   "activity_map": {
