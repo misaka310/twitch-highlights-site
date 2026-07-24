@@ -164,12 +164,30 @@ test("switching from the latest VOD to an older VOD keeps the older timestamp", 
     .toBe(olderVodStartSec);
 });
 test("activity map clicks prefer interactive playback", async ({ page }) => {
+  await page.addInitScript(() => {
+    const nativeRequestAnimationFrame = window.requestAnimationFrame.bind(window);
+    const heldCallbacks = [];
+    let holdAnimationFrames = true;
+
+    window.requestAnimationFrame = (callback) => {
+      if (!holdAnimationFrames) {
+        return nativeRequestAnimationFrame(callback);
+      }
+      heldCallbacks.push(callback);
+      return heldCallbacks.length;
+    };
+    window.__releaseHeldAnimationFrames = () => {
+      holdAnimationFrames = false;
+      heldCallbacks.splice(0).forEach((callback) => nativeRequestAnimationFrame(callback));
+    };
+  });
   await page.goto("/");
 
   const activityMapButton = page.locator("#activity-map-button");
   const playerFrame = page.locator("#player-frame");
 
   await expect(activityMapButton).toBeVisible();
+  await expect.poll(async () => page.evaluate(() => window.__mockTwitchPlayer == null)).toBe(true);
   const beforeStartSec = Number(await playerFrame.getAttribute("data-current-start-sec"));
 
   await activityMapButton.evaluate((button) => {
@@ -188,6 +206,7 @@ test("activity map clicks prefer interactive playback", async ({ page }) => {
     button.dispatchEvent(new MouseEvent("mouseup", init));
     button.dispatchEvent(new MouseEvent("click", init));
   });
+  await page.evaluate(() => window.__releaseHeldAnimationFrames?.());
 
   await expect(playerFrame).toHaveAttribute("data-player-mode", "interactive");
   await expect
