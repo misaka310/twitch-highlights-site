@@ -1,7 +1,43 @@
 {
-  "updated_at": "2026-07-23T11:08:39+09:00",
-  "next_update_at": "2026-07-24T00:00:00+00:00",
+  "updated_at": "2026-07-24T23:04:56+09:00",
+  "next_update_at": "2026-07-25T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2826968579",
+      "vod_url": "https://www.twitch.tv/videos/2826968579",
+      "title": "珍しく参加型をやります！ただし、、、、【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-07-23T21:08:49+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/bf205b4916115b0d2581_dotitao_316272410995_1784808524//thumb/thumb0-320x180.jpg",
+      "duration_sec": 11602,
+      "count": 3,
+      "chat_total": 1547,
+      "comments_per_hour": 480.021,
+      "detail_path": "/data/vods/2826968579.json"
+    },
+    {
+      "vod_id": "2826176224",
+      "vod_url": "https://www.twitch.tv/videos/2826176224",
+      "title": "【祈願】テストプレイを絶対に当てる配信【The Duskbloods（ダスクブラッド）ネットワークテスト】",
+      "published_at": "2026-07-22T22:09:00+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/5741f6f29245f0674e24_dotitao_316204328433_1784725735//thumb/thumb0-320x180.jpg",
+      "duration_sec": 7301,
+      "count": 3,
+      "chat_total": 3058,
+      "comments_per_hour": 1507.848,
+      "detail_path": "/data/vods/2826176224.json"
+    },
+    {
+      "vod_id": "2825358746",
+      "vod_url": "https://www.twitch.tv/videos/2825358746",
+      "title": "ソロ学者とマルチの交互浴でととのう【ナイトレイン/ELDEN RING NIGHTREIGN】",
+      "published_at": "2026-07-21T22:19:59+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/f668a9e8aa5a2d155659_dotitao_316208810610_1784639994//thumb/thumb0-320x180.jpg",
+      "duration_sec": 7398,
+      "count": 3,
+      "chat_total": 1199,
+      "comments_per_hour": 583.455,
+      "detail_path": "/data/vods/2825358746.json"
+    },
     {
       "vod_id": "2823752375",
       "vod_url": "https://www.twitch.tv/videos/2823752375",
@@ -505,30 +541,6 @@
       "chat_total": 3297,
       "comments_per_hour": 968.282,
       "detail_path": "/data/vods/2781309918.json"
-    },
-    {
-      "vod_id": "2780508597",
-      "vod_url": "https://www.twitch.tv/videos/2780508597",
-      "title": "最強夜渡りランキング第一位の発表です…(ドラムロール)…学者！！【ナイトレイン/ELDEN RING NIGHTREIGN】",
-      "published_at": "2026-05-25T21:29:23+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/64db52a44afdbaca39a7_dotitao_315947760626_1779712158//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 3817,
-      "comments_per_hour": 925.957,
-      "detail_path": "/data/vods/2780508597.json"
-    },
-    {
-      "vod_id": "2779605096",
-      "vod_url": "https://www.twitch.tv/videos/2779605096",
-      "title": "【フロム速報アリ！】学者は世界に祝福されている【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-05-24T16:27:05+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/3e8290dcd3fbb4ea5f7a_dotitao_315942032242_1779607620//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 10951,
-      "comments_per_hour": 984.163,
-      "detail_path": "/data/vods/2779605096.json"
     }
   ]
 }
