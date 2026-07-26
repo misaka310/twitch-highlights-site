@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-07-26T07:14:49+09:00",
-  "next_update_at": "2026-07-26T00:00:00+00:00",
+  "updated_at": "2026-07-27T07:15:06+09:00",
+  "next_update_at": "2026-07-27T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "2826968579",
@@ -517,18 +517,6 @@
       "chat_total": 2337,
       "comments_per_hour": 964.485,
       "detail_path": "/data/vods/2782901453.json"
-    },
-    {
-      "vod_id": "2782082244",
-      "vod_url": "https://www.twitch.tv/videos/2782082244",
-      "title": "全キャラの最強ビルドプリセットを作るまで追われないナイトレイン【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-05-27T21:35:50+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/bfb3f7ee852191614a71_dotitao_315948524785_1779885345//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 4875,
-      "comments_per_hour": 1220.87,
-      "detail_path": "/data/vods/2782082244.json"
     }
   ]
 }
