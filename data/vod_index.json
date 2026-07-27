@@ -1,7 +1,43 @@
 {
-  "updated_at": "2026-07-27T07:15:06+09:00",
-  "next_update_at": "2026-07-27T00:00:00+00:00",
+  "updated_at": "2026-07-28T07:27:32+09:00",
+  "next_update_at": "2026-07-28T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2829510956",
+      "vod_url": "https://www.twitch.tv/videos/2829510956",
+      "title": "深夜のマターリ夜渡り【ナイトレイン/ELDEN RING NIGHTREIGN】",
+      "published_at": "2026-07-26T22:51:48+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/1fe8d40e48c8f164906c_dotitao_316231343218_1785073903//thumb/thumb0-320x180.jpg",
+      "duration_sec": 13464,
+      "count": 3,
+      "chat_total": 2537,
+      "comments_per_hour": 678.342,
+      "detail_path": "/data/vods/2829510956.json"
+    },
+    {
+      "vod_id": "2828613829",
+      "vod_url": "https://www.twitch.tv/videos/2828613829",
+      "title": "日本の夏 パルの悲鳴 今静かにして 木の下に宿れるなり 我が心 その宿れるなりと同じき 安き心にあ【PALWORLD / パルワールド】",
+      "published_at": "2026-07-25T20:24:54+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/6e1eb33ef2c0f482ff6f_dotitao_316225811698_1784978689//thumb/thumb0-320x180.jpg",
+      "duration_sec": 13366,
+      "count": 3,
+      "chat_total": 1593,
+      "comments_per_hour": 429.059,
+      "detail_path": "/data/vods/2828613829.json"
+    },
+    {
+      "vod_id": "2827772917",
+      "vod_url": "https://www.twitch.tv/videos/2827772917",
+      "title": "世界中で爆流行り！実はロリするアクションゲーなのだ【PALWORLD / パルワールド】",
+      "published_at": "2026-07-24T20:24:47+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b7a925c11103ad01ac0e_dotitao_316276568307_1784892281//thumb/thumb0-320x180.jpg",
+      "duration_sec": 46087,
+      "count": 3,
+      "chat_total": 4648,
+      "comments_per_hour": 363.07,
+      "detail_path": "/data/vods/2827772917.json"
+    },
     {
       "vod_id": "2826968579",
       "vod_url": "https://www.twitch.tv/videos/2826968579",
@@ -505,18 +541,6 @@
       "chat_total": 3893,
       "comments_per_hour": 866.288,
       "detail_path": "/data/vods/2783643459.json"
-    },
-    {
-      "vod_id": "2782901453",
-      "vod_url": "https://www.twitch.tv/videos/2782901453",
-      "title": "全キャラの最強ビルドプリセットを作るまで終われないナイトレイン【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-05-28T22:57:14+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/7335ba067f5a68664fc4_dotitao_315961706610_1779976629//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2337,
-      "comments_per_hour": 964.485,
-      "detail_path": "/data/vods/2782901453.json"
     }
   ]
 }
