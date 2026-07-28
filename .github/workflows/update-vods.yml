@@ -115,7 +115,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python scripts/transcribe_segments.py | tee headline-generation.log
+          python scripts/transcribe_segments.py --print-headline-results | tee headline-generation.log
 
       - name: Build headline diagnostics
         if: ${{ always() && github.event.inputs.skip_segment_transcription != 'true' }}
