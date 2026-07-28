@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-29T04:02:57+09:00",
+  "updated_at": "2026-07-29T04:41:02+09:00",
   "next_update_at": "2026-07-29T00:00:00+00:00",
   "videos": [
     {
@@ -40,7 +40,7 @@
           "start_time": "02:19:40",
           "end_time": "02:21:20",
           "reason": "Chat activity spike around 2h19m40s (z-score=4.385).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "大変な思いすると食べれなくなっちゃいます",
           "tags": [
             "あ",
             "好プレー"
@@ -57,7 +57,7 @@
           "start_time": "00:36:00",
           "end_time": "00:37:20",
           "reason": "Chat activity spike around 0h36m0s (z-score=5.049).",
-          "headline": "今日ずっとさ昼間こと考ながらニコニコしてた",
+          "headline": "昼間を想いながら笑顔",
           "tags": [
             "ww",
             "ホラー",
@@ -138,7 +138,7 @@
           "start_time": "02:50:10",
           "end_time": "02:51:50",
           "reason": "Chat activity spike around 2h50m10s (z-score=5.388).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "ラダゴンが初音ミクだったら",
           "tags": [
             "は",
             "好プレー"
@@ -155,7 +155,7 @@
           "start_time": "02:37:40",
           "end_time": "02:39:50",
           "reason": "Chat activity spike around 2h37m40s (z-score=3.663).",
-          "headline": "緊張の展開にざわつく",
+          "headline": "最初に戻る、セーブデータ更新",
           "tags": [
             "あ",
             "まずい",
@@ -173,7 +173,7 @@
           "start_time": "03:17:50",
           "end_time": "03:18:40",
           "reason": "Chat activity spike around 3h17m50s (z-score=3.663).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "ラスト一発当てて1秒で負けた",
           "tags": [
             "好プレー"
           ],
@@ -240,7 +240,7 @@
           "start_time": "01:03:30",
           "end_time": "01:07:10",
           "reason": "Chat activity spike around 1h3m30s (z-score=3.633).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "桃・マンゴー・メロンで1個落ちる",
           "tags": [
             "まずい",
             "好プレー",
@@ -275,7 +275,7 @@
           "start_time": "01:49:00",
           "end_time": "01:49:50",
           "reason": "Chat activity spike around 1h49m0s (z-score=5.163).",
-          "headline": "意外な展開に驚く",
+          "headline": "風呂後のウチターさんが語った下着",
           "tags": [
             "えっ"
           ],
