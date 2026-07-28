@@ -1,0 +1,294 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+
+SOURCE_PATH = Path("scripts/headline_generation.py")
+TEST_PATH = Path("tests/test_groq_retry_delay.py")
+
+
+def replace_once(text: str, old: str, new: str) -> str:
+    if old not in text:
+        raise SystemExit(f"expected source block not found: {old[:100]!r}")
+    return text.replace(old, new, 1)
+
+
+def main() -> None:
+    text = SOURCE_PATH.read_text(encoding="utf-8")
+    text = replace_once(
+        text,
+        "import json\nfrom dataclasses import dataclass\n",
+        "import json\nimport re\nimport time\nfrom dataclasses import dataclass\n",
+    )
+    text = replace_once(
+        text,
+        '''class HeadlineProviderError(RuntimeError):
+    def __init__(self, provider: str, reason: str, *, retryable: bool = False) -> None:
+        self.provider = provider
+        self.reason = reason
+        self.retryable = retryable
+        super().__init__(f"{provider} {reason}")
+''',
+        '''HEADLINE_PROVIDER_ERROR_MAX_RETRIES = 3
+HEADLINE_RETRY_FALLBACK_BASE_SEC = 2.0
+HEADLINE_RETRY_BUFFER_SEC = 0.5
+HEADLINE_RETRY_MAX_WAIT_SEC = 60.0
+_GROQ_RETRY_AFTER_RE = re.compile(
+    r"please try again in\\s+([0-9]+(?:\\.[0-9]+)?)s",
+    re.IGNORECASE,
+)
+
+
+def _parse_retry_after_value(value: Any) -> float | None:
+    raw = str(value or "").strip().lower()
+    match = re.fullmatch(r"([0-9]+(?:\\.[0-9]+)?)\\s*s?", raw)
+    if not match:
+        return None
+    return min(max(0.0, float(match.group(1))), HEADLINE_RETRY_MAX_WAIT_SEC)
+
+
+def resolve_http_retry_after_seconds(exc: Any, detail: str) -> float | None:
+    headers = getattr(exc, "headers", None)
+    if headers is not None:
+        for name in ("Retry-After", "X-RateLimit-Reset-Tokens"):
+            parsed = _parse_retry_after_value(headers.get(name))
+            if parsed is not None:
+                return parsed
+    match = _GROQ_RETRY_AFTER_RE.search(str(detail or ""))
+    if match:
+        return min(max(0.0, float(match.group(1))), HEADLINE_RETRY_MAX_WAIT_SEC)
+    return None
+
+
+class HeadlineProviderError(RuntimeError):
+    def __init__(
+        self,
+        provider: str,
+        reason: str,
+        *,
+        retryable: bool = False,
+        retry_after_sec: float | None = None,
+    ) -> None:
+        self.provider = provider
+        self.reason = reason
+        self.retryable = retryable
+        self.retry_after_sec = retry_after_sec
+        super().__init__(f"{provider} {reason}")
+''',
+    )
+    text = replace_once(
+        text,
+        '''        except error.HTTPError as exc:
+            detail = self.callbacks.read_http_error_detail(exc)
+            raise HeadlineProviderError("Groq", f"HTTP {exc.code}: {detail[:300] or 'request failed'}") from exc
+''',
+        '''        except error.HTTPError as exc:
+            detail = self.callbacks.read_http_error_detail(exc)
+            retryable = exc.code == 429 or 500 <= exc.code < 600
+            retry_after_sec = resolve_http_retry_after_seconds(exc, detail) if retryable else None
+            raise HeadlineProviderError(
+                "Groq",
+                f"HTTP {exc.code}: {detail[:300] or 'request failed'}",
+                retryable=retryable,
+                retry_after_sec=retry_after_sec,
+            ) from exc
+''',
+    )
+    text = replace_once(
+        text,
+        '''        collected: list[Any] = []
+        for attempt in range(1, self.settings.headline_max_attempts + 1):
+            context = hlp.HeadlineLogContext(
+                provider=provider_name,
+                attempt=attempt,
+                max_attempts=self.settings.headline_max_attempts,
+            )
+            try:
+                result = provider.generate(
+                    video_title=video_title,
+                    start_time=start_time,
+                    end_time=end_time,
+                    transcript=transcript,
+                    prepared_transcript=prepared_transcript,
+                    source_validation=source_validation,
+                )
+            except Exception as exc:
+                reason = exc.reason if isinstance(exc, HeadlineProviderError) else str(exc)
+                hlp.log_provider_error(context=context, reason=reason, logger=print)
+                continue
+
+            validation = self.callbacks.validate_headline_result(result.text, transcript=transcript)
+            metadata = dict(result.metadata or {})
+            metadata["provider"] = provider_name
+            metadata["attempt"] = attempt
+            metadata["attempt_validation"] = {
+                "hard_issues": list(validation.hard_issues),
+                "soft_issues": list(validation.soft_issues),
+                "flags": list(validation.info_flags),
+            }
+            result.metadata = metadata
+            hlp.log_provider_attempt(
+                context=context,
+                headline=result.text,
+                validation_result=validation,
+                logger=print,
+            )
+            collected.append(result)
+            if not hlp.should_retry_attempt(validation):
+                break
+        return collected
+''',
+        '''        collected: list[Any] = []
+        attempt = 1
+        provider_error_retries = 0
+        while attempt <= self.settings.headline_max_attempts:
+            context = hlp.HeadlineLogContext(
+                provider=provider_name,
+                attempt=attempt,
+                max_attempts=self.settings.headline_max_attempts,
+            )
+            try:
+                result = provider.generate(
+                    video_title=video_title,
+                    start_time=start_time,
+                    end_time=end_time,
+                    transcript=transcript,
+                    prepared_transcript=prepared_transcript,
+                    source_validation=source_validation,
+                )
+            except Exception as exc:
+                reason = exc.reason if isinstance(exc, HeadlineProviderError) else str(exc)
+                hlp.log_provider_error(context=context, reason=reason, logger=print)
+                retryable = isinstance(exc, HeadlineProviderError) and exc.retryable
+                if retryable and provider_error_retries < HEADLINE_PROVIDER_ERROR_MAX_RETRIES:
+                    base_wait = (
+                        exc.retry_after_sec
+                        if exc.retry_after_sec is not None
+                        else HEADLINE_RETRY_FALLBACK_BASE_SEC * (2 ** provider_error_retries)
+                    )
+                    wait_sec = min(
+                        HEADLINE_RETRY_MAX_WAIT_SEC,
+                        max(0.0, base_wait) + HEADLINE_RETRY_BUFFER_SEC,
+                    )
+                    provider_error_retries += 1
+                    print(
+                        "info: headline provider retry delay "
+                        f"provider={provider_name} attempt={attempt}/{self.settings.headline_max_attempts} "
+                        f"retry={provider_error_retries}/{HEADLINE_PROVIDER_ERROR_MAX_RETRIES} "
+                        f"wait_sec={wait_sec:.2f}"
+                    )
+                    time.sleep(wait_sec)
+                    continue
+                if retryable:
+                    print(
+                        "warn: headline provider retry budget exhausted "
+                        f"provider={provider_name} retries={provider_error_retries}"
+                    )
+                    break
+                attempt += 1
+                continue
+
+            provider_error_retries = 0
+            validation = self.callbacks.validate_headline_result(result.text, transcript=transcript)
+            metadata = dict(result.metadata or {})
+            metadata["provider"] = provider_name
+            metadata["attempt"] = attempt
+            metadata["attempt_validation"] = {
+                "hard_issues": list(validation.hard_issues),
+                "soft_issues": list(validation.soft_issues),
+                "flags": list(validation.info_flags),
+            }
+            result.metadata = metadata
+            hlp.log_provider_attempt(
+                context=context,
+                headline=result.text,
+                validation_result=validation,
+                logger=print,
+            )
+            collected.append(result)
+            if not hlp.should_retry_attempt(validation):
+                break
+            attempt += 1
+        return collected
+''',
+    )
+    SOURCE_PATH.write_text(text, encoding="utf-8")
+
+    TEST_PATH.write_text(
+        '''from __future__ import annotations
+
+import sys
+import unittest
+from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+import headline_generation as hg
+
+
+class GroqRetryDelayTests(unittest.TestCase):
+    def build_generator(self) -> hg.ResilientHeadlineGenerator:
+        return hg.ResilientHeadlineGenerator(
+            gemini=None,
+            groq=None,
+            nvidia=None,
+            fallback=mock.Mock(),
+            settings=SimpleNamespace(headline_max_attempts=1),
+            callbacks=SimpleNamespace(),
+        )
+
+    def call_collect(self, generator: hg.ResilientHeadlineGenerator, provider: mock.Mock) -> None:
+        generator._collect_provider_candidates(
+            provider_name="Groq",
+            provider=provider,
+            video_title="title",
+            start_time="00:00",
+            end_time="00:30",
+            transcript="transcript",
+        )
+
+    def test_retryable_error_waits_without_consuming_headline_attempt(self) -> None:
+        provider = mock.Mock()
+        provider.generate.side_effect = [
+            hg.HeadlineProviderError(
+                "Groq",
+                "HTTP 429",
+                retryable=True,
+                retry_after_sec=1.25,
+            ),
+            hg.HeadlineProviderError("Groq", "stop"),
+        ]
+        with mock.patch.object(hg.time, "sleep") as sleep:
+            self.call_collect(self.build_generator(), provider)
+        self.assertEqual(provider.generate.call_count, 2)
+        sleep.assert_called_once_with(1.75)
+
+    def test_non_retryable_error_does_not_sleep(self) -> None:
+        provider = mock.Mock()
+        provider.generate.side_effect = hg.HeadlineProviderError("Groq", "HTTP 400")
+        with mock.patch.object(hg.time, "sleep") as sleep:
+            self.call_collect(self.build_generator(), provider)
+        sleep.assert_not_called()
+
+    def test_retry_after_header_is_used(self) -> None:
+        exc = SimpleNamespace(headers={"Retry-After": "2.5"})
+        self.assertEqual(hg.resolve_http_retry_after_seconds(exc, ""), 2.5)
+
+    def test_groq_error_body_wait_is_used(self) -> None:
+        exc = SimpleNamespace(headers={})
+        detail = "Rate limit reached. Please try again in 13.3125s."
+        self.assertEqual(hg.resolve_http_retry_after_seconds(exc, detail), 13.3125)
+
+
+if __name__ == "__main__":
+    unittest.main()
+''',
+        encoding="utf-8",
+    )
+
+
+if __name__ == "__main__":
+    main()
