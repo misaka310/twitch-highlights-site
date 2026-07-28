@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-29T03:24:45+09:00",
+  "updated_at": "2026-07-29T03:45:00+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -59,7 +59,7 @@
           "start_time": "00:36:00",
           "end_time": "00:37:20",
           "reason": "Chat activity spike around 0h36m0s (z-score=5.049).",
-          "headline": "このこと考ながらずっとニコニコしてた",
+          "headline": "今日ずっとさ昼間こと考ながらニコニコしてた",
           "tags": [
             "ww",
             "ホラー",
