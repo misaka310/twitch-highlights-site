@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-07-28T07:27:32+09:00",
-  "next_update_at": "2026-07-28T00:00:00+00:00",
+  "updated_at": "2026-07-28T15:18:50+09:00",
+  "next_update_at": "2026-07-29T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2830263968",
+      "vod_url": "https://www.twitch.tv/videos/2830263968",
+      "title": "本日のフロムニュースのコーナー【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-07-27T21:35:34+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/7047ab56ee4f9ebd1a18_dotitao_316235208946_1785155729//thumb/thumb0-320x180.jpg",
+      "duration_sec": 12360,
+      "count": 3,
+      "chat_total": 2024,
+      "comments_per_hour": 589.515,
+      "detail_path": "/data/vods/2830263968.json"
+    },
     {
       "vod_id": "2829510956",
       "vod_url": "https://www.twitch.tv/videos/2829510956",
@@ -32,7 +44,7 @@
       "title": "世界中で爆流行り！実はロリするアクションゲーなのだ【PALWORLD / パルワールド】",
       "published_at": "2026-07-24T20:24:47+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b7a925c11103ad01ac0e_dotitao_316276568307_1784892281//thumb/thumb0-320x180.jpg",
-      "duration_sec": 46087,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 4648,
       "comments_per_hour": 363.07,
