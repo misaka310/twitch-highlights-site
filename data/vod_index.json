@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-28T15:18:50+09:00",
+  "updated_at": "2026-07-28T21:50:33+09:00",
   "next_update_at": "2026-07-29T00:00:00+00:00",
   "videos": [
     {
@@ -541,18 +541,6 @@
       "chat_total": 5143,
       "comments_per_hour": 898.777,
       "detail_path": "/data/vods/2784395262.json"
-    },
-    {
-      "vod_id": "2783643459",
-      "vod_url": "https://www.twitch.tv/videos/2783643459",
-      "title": "【ナイトレイン1周年前夜祭】下手くそ限定参加型リバイバル！書類面接有！【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-05-29T21:48:02+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/82c01538508d701362a3_dotitao_315957466865_1780058876//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 3893,
-      "comments_per_hour": 866.288,
-      "detail_path": "/data/vods/2783643459.json"
     }
   ]
 }
