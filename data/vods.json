@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-29T01:21:55+09:00",
+  "updated_at": "2026-07-29T03:24:45+09:00",
   "next_update_at": "2026-07-29T00:00:00+00:00",
   "videos": [
     {
@@ -22,7 +22,7 @@
           "start_time": "02:38:30",
           "end_time": "02:40:30",
           "reason": "Chat activity spike around 2h38m30s (z-score=3.721).",
-          "headline": "見分けられるようにしたら書いてほしい",
+          "headline": "好プレーで盛り上がる",
           "tags": [
             "あ",
             "は",
@@ -40,7 +40,7 @@
           "start_time": "02:19:40",
           "end_time": "02:21:20",
           "reason": "Chat activity spike around 2h19m40s (z-score=4.385).",
-          "headline": "まだ地獄を見たことがないか",
+          "headline": "好プレーで盛り上がる",
           "tags": [
             "あ",
             "好プレー"
@@ -57,7 +57,7 @@
           "start_time": "00:36:00",
           "end_time": "00:37:20",
           "reason": "Chat activity spike around 0h36m0s (z-score=5.049).",
-          "headline": "考えながらニコリコしてた",
+          "headline": "このこと考ながらずっとニコニコしてた",
           "tags": [
             "ww",
             "ホラー",
@@ -155,7 +155,7 @@
           "start_time": "02:37:40",
           "end_time": "02:39:50",
           "reason": "Chat activity spike around 2h37m40s (z-score=3.663).",
-          "headline": "最初に消えたキャラが復活、セーブ更新",
+          "headline": "緊張の展開にざわつく",
           "tags": [
             "あ",
             "まずい",
@@ -173,7 +173,7 @@
           "start_time": "03:17:50",
           "end_time": "03:18:40",
           "reason": "Chat activity spike around 3h17m50s (z-score=3.663).",
-          "headline": "最後の一発成功、でも1秒で負けた",
+          "headline": "好プレーで盛り上がる",
           "tags": [
             "好プレー"
           ],
@@ -240,7 +240,7 @@
           "start_time": "01:03:30",
           "end_time": "01:07:10",
           "reason": "Chat activity spike around 1h3m30s (z-score=3.633).",
-          "headline": "カバないわ追加好き、種取るのだるい",
+          "headline": "好プレーで盛り上がる",
           "tags": [
             "まずい",
             "好プレー",
@@ -275,7 +275,7 @@
           "start_time": "01:49:00",
           "end_time": "01:49:50",
           "reason": "Chat activity spike around 1h49m0s (z-score=5.163).",
-          "headline": "風呂上がりはブラジャーだけ派",
+          "headline": "意外な展開に驚く",
           "tags": [
             "えっ"
           ],
