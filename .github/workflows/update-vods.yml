@@ -112,7 +112,51 @@ jobs:
           HEADLINE_MAX_CHARS: 28
           TRANSCRIPT_SECOND_PASS_TOP_N: 3
           SEGMENT_SCREENSHOT_GENERATION_ENABLED: true
-        run: python scripts/transcribe_segments.py
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/transcribe_segments.py | tee headline-generation.log
+
+      - name: Build headline diagnostics
+        if: ${{ always() && github.event.inputs.skip_segment_transcription != 'true' }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          source = Path("headline-generation.log")
+          output = Path("headline-diagnostics.txt")
+          lines = source.read_text(encoding="utf-8", errors="replace").splitlines() if source.exists() else []
+          blocks = []
+          current = []
+          collecting = False
+          for line in lines:
+              if line.startswith("headline-result "):
+                  if current:
+                      blocks.append("\n".join(current))
+                  current = [line]
+                  collecting = True
+                  continue
+              if collecting:
+                  current.append(line)
+                  if line.startswith("--------------------------------------------------------"):
+                      blocks.append("\n".join(current))
+                      current = []
+                      collecting = False
+          if current:
+              blocks.append("\n".join(current))
+          output.write_text("\n\n".join(blocks) + ("\n" if blocks else ""), encoding="utf-8")
+          print(f"headline diagnostic blocks={len(blocks)} path={output}")
+          PY
+
+      - name: Upload headline diagnostics
+        if: ${{ always() && github.event.inputs.skip_segment_transcription != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: headline-diagnostics-${{ github.run_id }}
+          path: headline-diagnostics.txt
+          if-no-files-found: error
+          retention-days: 3
 
       - name: Verify public enrichment
         if: ${{ github.event.inputs.skip_segment_transcription != 'true' }}
