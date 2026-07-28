@@ -53,6 +53,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Set up Python
@@ -123,6 +124,7 @@ jobs:
       - name: Commit updated data
         shell: bash
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -135,4 +137,5 @@ jobs:
 
           git add -A -- "${diff_targets[@]}"
           git commit -m "Update Twitch VOD data"
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main
