@@ -64,6 +64,9 @@ def _parse_retry_after_value(value: Any) -> float | None:
 
 def resolve_http_retry_after_seconds(exc: Any, detail: str) -> float | None:
     headers = getattr(exc, "headers", None)
+    if headers is None:
+        response = getattr(exc, "response", None)
+        headers = getattr(response, "headers", None)
     if headers is not None:
         for name in ("Retry-After", "X-RateLimit-Reset-Tokens"):
             parsed = _parse_retry_after_value(headers.get(name))
@@ -313,38 +316,58 @@ class GroqHeadlineGenerator:
         )
 
     def _request_headline(self, *, instructions: str, prompt: str) -> str:
-        body = {
-            "model": self.model,
-            "instructions": instructions,
-            "input": prompt,
-        }
-        req = request.Request(
-            self.settings.groq_responses_url,
-            data=json.dumps(body).encode("utf-8"),
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            },
-            method="POST",
-        )
         try:
-            with request.urlopen(req, timeout=self.settings.groq_timeout_sec) as resp:
-                payload = json.loads(resp.read().decode("utf-8"))
-        except error.HTTPError as exc:
-            detail = self.callbacks.read_http_error_detail(exc)
-            retryable = exc.code == 429 or 500 <= exc.code < 600
+            import groq as groq_sdk
+        except ImportError as exc:
+            raise HeadlineProviderError("Groq", "official Groq SDK is not installed") from exc
+
+        client = groq_sdk.Groq(
+            api_key=self.api_key,
+            timeout=float(self.settings.groq_timeout_sec),
+        )
+        request_options: dict[str, Any] = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": instructions},
+                {"role": "user", "content": prompt},
+            ],
+            "response_format": {"type": "json_object"},
+        }
+        if self.model.startswith("qwen/"):
+            request_options["reasoning_effort"] = "none"
+
+        try:
+            completion = client.chat.completions.create(**request_options)
+        except Exception as exc:
+            status_code = int(getattr(exc, "status_code", 0) or 0)
+            body = getattr(exc, "body", None)
+            if isinstance(body, (dict, list)):
+                detail = json.dumps(body, ensure_ascii=False)
+            else:
+                detail = str(body or exc)
+            retryable = status_code == 429 or 500 <= status_code < 600
             retry_after_sec = resolve_http_retry_after_seconds(exc, detail) if retryable else None
+            if status_code:
+                reason = f"HTTP {status_code}: {detail[:300] or 'request failed'}"
+            else:
+                error_name = type(exc).__name__.lower()
+                retryable = "timeout" in error_name or "connection" in error_name
+                reason = "request timed out" if "timeout" in error_name else f"request failed: {detail[:300]}"
             raise HeadlineProviderError(
                 "Groq",
-                f"HTTP {exc.code}: {detail[:300] or 'request failed'}",
+                reason,
                 retryable=retryable,
                 retry_after_sec=retry_after_sec,
             ) from exc
-        except error.URLError as exc:
-            raise HeadlineProviderError("Groq", f"request failed: {exc.reason}") from exc
-        return self.callbacks.extract_response_output_text(payload)
+
+        choices = list(getattr(completion, "choices", None) or [])
+        if not choices:
+            raise HeadlineProviderError("Groq", "response did not include a choice")
+        message = getattr(choices[0], "message", None)
+        content = str(getattr(message, "content", "") or "").strip()
+        if not content:
+            raise HeadlineProviderError("Groq", "response did not include message content")
+        return content
 
 
 class NvidiaHeadlineGenerator:
