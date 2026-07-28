@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-28T22:25:10+09:00",
+  "updated_at": "2026-07-28T23:03:58+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -41,7 +41,7 @@
           "start_time": "02:37:40",
           "end_time": "02:39:50",
           "reason": "Chat activity spike around 2h37m40s (z-score=3.663).",
-          "headline": "最初に消えた人が戻りセーブ更新",
+          "headline": "消えた人が戻る！セーブ更新",
           "tags": [
             "あ",
             "まずい",
@@ -59,7 +59,7 @@
           "start_time": "03:17:50",
           "end_time": "03:18:40",
           "reason": "Chat activity spike around 3h17m50s (z-score=3.663).",
-          "headline": "ラスト一発で1秒負け",
+          "headline": "好プレーで盛り上がる",
           "tags": [
             "好プレー"
           ],
@@ -129,7 +129,7 @@
           "start_time": "01:03:30",
           "end_time": "01:07:10",
           "reason": "Chat activity spike around 1h3m30s (z-score=3.633).",
-          "headline": "種取るのだるいので1個落ちる",
+          "headline": "種取るのだるくて1個落ちる",
           "tags": [
             "まずい",
             "好プレー",
@@ -147,7 +147,7 @@
           "start_time": "02:16:40",
           "end_time": "02:18:30",
           "reason": "Chat activity spike around 2h16m40s (z-score=6.184).",
-          "headline": "スターウォーズとディアゴスティーニ",
+          "headline": "好プレーで盛り上がる",
           "tags": [
             "ww",
             "好プレー"
@@ -164,7 +164,7 @@
           "start_time": "01:49:00",
           "end_time": "01:49:50",
           "reason": "Chat activity spike around 1h49m0s (z-score=5.163).",
-          "headline": "意外な展開に驚く",
+          "headline": "風呂出た後ブラジャーと下着だけ派ですか",
           "tags": [
             "えっ"
           ],
@@ -237,7 +237,7 @@
           "start_time": "00:00:10",
           "end_time": "00:03:40",
           "reason": "Chat activity spike around 0h0m10s (z-score=5.117).",
-          "headline": "笑いが一気に広がる",
+          "headline": "面白いゲームを評価する",
           "tags": [
             "あ",
             "えっ",
@@ -255,7 +255,7 @@
           "start_time": "00:36:40",
           "end_time": "00:38:30",
           "reason": "Chat activity spike around 0h36m40s (z-score=7.737).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "トレント疑い、偽と判定",
           "tags": [
             "好プレー",
             "は",
