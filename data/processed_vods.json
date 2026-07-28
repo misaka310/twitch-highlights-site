@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-28T21:50:33+09:00",
+  "updated_at": "2026-07-28T22:25:10+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -24,7 +24,7 @@
           "start_time": "02:50:10",
           "end_time": "02:51:50",
           "reason": "Chat activity spike around 2h50m10s (z-score=5.388).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "ラガゴンが初音ミクだったら",
           "tags": [
             "は",
             "好プレー"
@@ -41,7 +41,7 @@
           "start_time": "02:37:40",
           "end_time": "02:39:50",
           "reason": "Chat activity spike around 2h37m40s (z-score=3.663).",
-          "headline": "緊張の展開にざわつく",
+          "headline": "最初に消えた人が戻りセーブ更新",
           "tags": [
             "あ",
             "まずい",
@@ -59,7 +59,7 @@
           "start_time": "03:17:50",
           "end_time": "03:18:40",
           "reason": "Chat activity spike around 3h17m50s (z-score=3.663).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "ラスト一発で1秒負け",
           "tags": [
             "好プレー"
           ],
@@ -129,7 +129,7 @@
           "start_time": "01:03:30",
           "end_time": "01:07:10",
           "reason": "Chat activity spike around 1h3m30s (z-score=3.633).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "種取るのだるいので1個落ちる",
           "tags": [
             "まずい",
             "好プレー",
@@ -147,7 +147,7 @@
           "start_time": "02:16:40",
           "end_time": "02:18:30",
           "reason": "Chat activity spike around 2h16m40s (z-score=6.184).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "スターウォーズとディアゴスティーニ",
           "tags": [
             "ww",
             "好プレー"
