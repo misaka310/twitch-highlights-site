@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-07-28T23:17:18+09:00",
+  "updated_at": "2026-07-29T01:21:55+09:00",
   "next_update_at": "2026-07-29T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2831029415",
+      "vod_url": "https://www.twitch.tv/videos/2831029415",
+      "title": "異常ナイトレイン愛者のつどい【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-07-28T20:15:32+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/826f300b9cd917e61dbe_dotitao_316239047282_1785237327//thumb/thumb0-320x180.jpg",
+      "duration_sec": 17054,
+      "count": 3,
+      "chat_total": 2388,
+      "comments_per_hour": 504.093,
+      "detail_path": "/data/vods/2831029415.json"
+    },
     {
       "vod_id": "2830263968",
       "vod_url": "https://www.twitch.tv/videos/2830263968",
@@ -32,7 +44,7 @@
       "title": "日本の夏 パルの悲鳴 今静かにして 木の下に宿れるなり 我が心 その宿れるなりと同じき 安き心にあ【PALWORLD / パルワールド】",
       "published_at": "2026-07-25T20:24:54+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/6e1eb33ef2c0f482ff6f_dotitao_316225811698_1784978689//thumb/thumb0-320x180.jpg",
-      "duration_sec": 13366,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1593,
       "comments_per_hour": 429.059,
