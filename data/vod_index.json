@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-07-29T07:24:13+09:00",
-  "next_update_at": "2026-07-29T00:00:00+00:00",
+  "updated_at": "2026-07-30T07:17:06+09:00",
+  "next_update_at": "2026-07-30T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2831856289",
+      "vod_url": "https://www.twitch.tv/videos/2831856289",
+      "title": "ナイトレインの夜を超えて 火の粉みたいな星を見て たぶんどこかの戦場で【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-07-29T20:15:48+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/2ce329ae65d2eb53e886_dotitao_316234745841_1785323743//thumb/thumb0-320x180.jpg",
+      "duration_sec": 19164,
+      "count": 3,
+      "chat_total": 2595,
+      "comments_per_hour": 487.477,
+      "detail_path": "/data/vods/2831856289.json"
+    },
     {
       "vod_id": "2831029415",
       "vod_url": "https://www.twitch.tv/videos/2831029415",
@@ -32,7 +44,7 @@
       "title": "深夜のマターリ夜渡り【ナイトレイン/ELDEN RING NIGHTREIGN】",
       "published_at": "2026-07-26T22:51:48+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/1fe8d40e48c8f164906c_dotitao_316231343218_1785073903//thumb/thumb0-320x180.jpg",
-      "duration_sec": 13464,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2537,
       "comments_per_hour": 678.342,
@@ -541,18 +553,6 @@
       "chat_total": 11081,
       "comments_per_hour": 2162.264,
       "detail_path": "/data/vods/2785204228.json"
-    },
-    {
-      "vod_id": "2784395262",
-      "vod_url": "https://www.twitch.tv/videos/2784395262",
-      "title": "発売1周年なので発売前に上げた反応動画を見返す懐古夜渡りたち【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-05-30T19:03:43+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d1c0f9319b8c68828d7d_dotitao_316024434931_1780135418//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 5143,
-      "comments_per_hour": 898.777,
-      "detail_path": "/data/vods/2784395262.json"
     }
   ]
 }
