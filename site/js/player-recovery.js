@@ -126,10 +126,18 @@
         ".segment-button, #activity-map-button, #player-rewind-10"
       );
       controls.forEach((control) => {
-        control.disabled = false;
-        control.setAttribute("aria-disabled", "false");
-        control.dataset.playerReady = "true";
-        control.title = "";
+        if (control.disabled) {
+          control.disabled = false;
+        }
+        if (control.getAttribute("aria-disabled") !== "false") {
+          control.setAttribute("aria-disabled", "false");
+        }
+        if (control.dataset.playerReady !== "true") {
+          control.dataset.playerReady = "true";
+        }
+        if (control.title) {
+          control.title = "";
+        }
       });
       if (!readyEventDispatched && document.querySelector(".segment-button")) {
         readyEventDispatched = true;
@@ -209,19 +217,18 @@
       true
     );
 
-    const mobileObserver = new MutationObserver(() => {
-      unlockMobilePlaybackControls();
-      const iframe = playerHost.querySelector(".player-embed-frame");
-      if (iframe && frame.dataset.playerStatus === "error") {
+    new MutationObserver(unlockMobilePlaybackControls).observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+    new MutationObserver(() => {
+      if (frame.dataset.playerStatus === "error") {
         frame.dataset.playerMode = "iframe";
         frame.dataset.playerStatus = "ready";
       }
-    });
-    mobileObserver.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
+    }).observe(frame, {
       attributes: true,
-      attributeFilter: ["data-player-status", "disabled"],
+      attributeFilter: ["data-player-status"],
     });
     unlockMobilePlaybackControls();
   }
