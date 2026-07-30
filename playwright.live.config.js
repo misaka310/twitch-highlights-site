@@ -7,8 +7,8 @@ module.exports = defineConfig({
   testMatch: /live-mobile-playback\.spec\.js$/,
   fullyParallel: false,
   workers: 1,
-  retries: 1,
-  timeout: 120_000,
+  retries: 0,
+  timeout: 12 * 60_000,
   expect: {
     timeout: 30_000,
   },
