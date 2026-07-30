@@ -42,5 +42,6 @@ jobs:
           tests/rewind.spec.js
           tests/latest-vods-public.spec.js
           tests/mobile-playback-recovery.spec.js
+          tests/mobile-iframe-autoplay.spec.js
           --project=desktop
           --project=mobile
