@@ -53,9 +53,11 @@ test("production mobile tap starts real Twitch playback and advances time", asyn
 async function waitForDeployedBuild(page) {
   const deadline = Date.now() + 10 * 60_000;
   let lastLabel = "";
+  let attempt = 0;
 
   while (Date.now() < deadline) {
-    await page.goto(`/?deploy_check=${Date.now()}`, {
+    attempt += 1;
+    const response = await page.goto(`/?deploy_check=${Date.now()}`, {
       waitUntil: "domcontentloaded",
       timeout: 60_000,
     });
@@ -67,7 +69,12 @@ async function waitForDeployedBuild(page) {
       lastLabel = "";
     }
 
+    console.log(
+      `[deploy-wait] attempt=${attempt} status=${response?.status() ?? "none"} label=${JSON.stringify(lastLabel)} url=${page.url()}`
+    );
+
     if (lastLabel === EXPECTED_BUILD_LABEL) {
+      console.log(`[deploy-wait] expected build is live after ${attempt} attempt(s)`);
       return;
     }
     await page.waitForTimeout(10_000);
