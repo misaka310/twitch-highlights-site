@@ -63,6 +63,7 @@ test("mobile Twitch player keeps the required 400x300 layout without page overfl
   );
   expect(pageHasHorizontalOverflow).toBe(false);
 
+  await segment.scrollIntoViewIfNeeded();
   const segmentBox = await segment.boundingBox();
   expect(segmentBox).not.toBeNull();
   await page.touchscreen.tap(
