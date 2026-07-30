@@ -1,11 +1,11 @@
-const DESKTOP_PORTAL_QUERY = "(min-width: 641px)";
+const PLAYER_PORTAL_QUERY = "(min-width: 400px)";
 
 export function createPlayerPortal({ player, frame }) {
   if (!player || !frame) {
     return { sync: () => {}, destroy: () => {} };
   }
 
-  const mediaQuery = window.matchMedia(DESKTOP_PORTAL_QUERY);
+  const mediaQuery = window.matchMedia(PLAYER_PORTAL_QUERY);
   let frameObserver = null;
   let animationFrameId = null;
 
