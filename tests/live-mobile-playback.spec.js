@@ -21,7 +21,9 @@ for (const projectName of ["mobile-383", "mobile-430"]) {
 
     await expect(page.locator('script[src*="player-recovery.js"]')).toHaveCount(0);
     await expect(page.locator("#player-unmute")).toHaveCount(0);
-    await expect(player).toHaveJSProperty("parentElement", await frame.elementHandle());
+    await expect
+      .poll(async () => player.evaluate((element) => element.parentElement?.id || ""))
+      .toBe("player-frame");
     await expect(frame).toHaveAttribute("data-player-mode", "interactive", { timeout: 60_000 });
     await expect(sdkIframe).toBeVisible({ timeout: 60_000 });
     await expect(segment).toBeVisible();
