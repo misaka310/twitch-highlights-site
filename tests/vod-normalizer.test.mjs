@@ -1,70 +1,143 @@
-import assert from "node:assert/strict";
 import test from "node:test";
+import assert from "node:assert/strict";
 
 globalThis.location = new URL("http://localhost/");
 globalThis.window = {};
 
-const { applyInitialSelectionToState, getInitialSelection, normalizeData } = await import("../site/js/vod-normalizer.js");
+const { createInitialState } = await import("../site/js/config.js");
+const { normalizeData, getInitialSelection, applyInitialSelectionToState } = await import("../site/js/vod-normalizer.js");
 
-function makeVideo(overrides = {}) {
-  return {
-    vod_id: "vod-1",
-    published_at: "2026-07-01T00:00:00Z",
-    items: [
-      {
-        id: "segment-1",
-        start_sec: 15,
-        end_sec: 25,
-        reason: "z-score",
-        tags: ["ww"],
-      },
-    ],
-    activity_map: { bucket_sec: 10, duration_sec: 100, buckets: [0, 2, 0] },
-    ...overrides,
-  };
-}
-
-test("VOD without highlight segments is excluded", () => {
-  assert.deepEqual(normalizeData({ videos: [makeVideo({ items: [] })] }), []);
-});
-
-test("generated headline is shown instead of the generic highlight reason", () => {
+test("normalizeData keeps anosa status isolated from legacy timestamps status", () => {
   const [vod] = normalizeData({
     videos: [
-      makeVideo({
-        items: [
-          {
-            id: "segment-1",
-            start_sec: 15,
-            end_sec: 25,
-            reason: "z-score",
-            headline: "見どころの見出し",
-          },
-        ],
-      }),
+      {
+        vod_id: "vod-1",
+        title: "VOD 1",
+        published_at: "2026-06-05T00:00:00Z",
+        anosa_timestamps_status: "",
+        anosa_timestamps_path: "",
+        anosa_timestamps: [],
+        timestamps_status: "ok",
+        timestamps_path: "data/timestamps/vod-1.json",
+        timestamps: [{ id: "legacy-1", start_sec: 10, label: "legacy" }],
+        items: [{ id: "seg-1", start_sec: 1, end_sec: 5 }],
+      },
     ],
   });
-  assert.equal(vod.segments[0].summary, "見どころの見出し");
+
+  assert.equal(vod.anosa_timestamps_status, "");
+  assert.equal(vod.anosa_timestamps_path, "");
+  assert.equal(vod.timestamps_status, "ok");
+  assert.equal(vod.timestamps.length, 0);
+  assert.equal(vod.timestamps_path, "/data/timestamps/vod-1.json");
 });
 
-test("initial selection uses the first highlight segment", () => {
-  const vods = normalizeData({ videos: [makeVideo()] });
-  const selection = getInitialSelection(vods);
-  assert.equal(selection.segment.id, "segment-1");
-  assert.equal(selection.start_sec, 15);
+test("normalizeData keeps vod when segments are empty but anosa timestamps exist", () => {
+  const vods = normalizeData({
+    videos: [
+      {
+        vod_id: "vod-2",
+        title: "VOD 2",
+        published_at: "2026-06-05T00:00:00Z",
+        anosa_timestamps_status: "ok",
+        anosa_timestamps_path: "data/anosa-timestamps/vod-2.json",
+        anosa_timestamps: [{ id: "anosa-1", start_sec: 20, label: "あのさぁ、テスト" }],
+        items: [],
+      },
+    ],
+  });
+
+  assert.equal(vods.length, 1);
+  assert.equal(vods[0].segments.length, 0);
+  assert.equal(vods[0].timestamps.length, 1);
 });
 
-test("initial selection seeds playback state", () => {
-  const state = {};
-  applyInitialSelectionToState(state, {
-    vod: { id: "vod-5" },
-    segment: { id: "segment-5" },
-    start_sec: 90,
+test("normalizeData still keeps highlight segments when both highlights and anosa exist", () => {
+  const [vod] = normalizeData({
+    videos: [
+      {
+        vod_id: "vod-3",
+        title: "VOD 3",
+        published_at: "2026-06-05T00:00:00Z",
+        anosa_timestamps_status: "ok",
+        anosa_timestamps_path: "data/anosa-timestamps/vod-3.json",
+        anosa_timestamps: [{ id: "anosa-1", start_sec: 20, label: "あのさぁ、テスト" }],
+        items: [{ id: "seg-1", start_sec: 1, end_sec: 5, headline: "highlight" }],
+      },
+    ],
   });
-  assert.deepEqual(state, {
-    selectedVodId: "vod-5",
-    selectedSegmentId: "segment-5",
-    requestedVodId: "vod-5",
-    requestedStartSec: 90,
+
+  assert.equal(vod.segments.length, 1);
+  assert.equal(vod.timestamps.length, 1);
+});
+
+test("getInitialSelection falls back to the first anosa timestamp when segments are empty", () => {
+  const [vod] = normalizeData({
+    videos: [
+      {
+        vod_id: "vod-4",
+        title: "VOD 4",
+        published_at: "2026-06-05T00:00:00Z",
+        anosa_timestamps_status: "ok",
+        anosa_timestamps_path: "data/anosa-timestamps/vod-4.json",
+        anosa_timestamps: [{ id: "anosa-1", start_sec: 42, label: "anosa only" }],
+        items: [],
+      },
+    ],
   });
+
+  const selection = getInitialSelection([vod]);
+
+  assert.equal(selection.vod.id, "vod-4");
+  assert.equal(selection.segment, null);
+  assert.equal(selection.start_sec, 42);
+});
+
+test("applyInitialSelectionToState seeds playback state for anosa-only selections", () => {
+  const [vod] = normalizeData({
+    videos: [
+      {
+        vod_id: "vod-5",
+        title: "VOD 5",
+        published_at: "2026-06-05T00:00:00Z",
+        anosa_timestamps_status: "ok",
+        anosa_timestamps_path: "data/anosa-timestamps/vod-5.json",
+        anosa_timestamps: [{ id: "anosa-1", start_sec: 75, label: "anosa only" }],
+        items: [],
+      },
+    ],
+  });
+  const state = createInitialState();
+
+  applyInitialSelectionToState(state, getInitialSelection([vod]));
+
+  assert.equal(state.selectedVodId, "vod-5");
+  assert.equal(state.selectedSegmentId, "");
+  assert.equal(state.requestedVodId, "vod-5");
+  assert.equal(state.requestedStartSec, 75);
+});
+
+test("getInitialSelection still prefers the first highlight segment when segments exist", () => {
+  const [vod] = normalizeData({
+    videos: [
+      {
+        vod_id: "vod-6",
+        title: "VOD 6",
+        published_at: "2026-06-05T00:00:00Z",
+        anosa_timestamps_status: "ok",
+        anosa_timestamps_path: "data/anosa-timestamps/vod-6.json",
+        anosa_timestamps: [{ id: "anosa-1", start_sec: 90, label: "fallback" }],
+        items: [
+          { id: "seg-1", start_sec: 11, end_sec: 20, headline: "first" },
+          { id: "seg-2", start_sec: 25, end_sec: 35, headline: "second" },
+        ],
+      },
+    ],
+  });
+
+  const selection = getInitialSelection([vod]);
+
+  assert.equal(selection.vod.id, "vod-6");
+  assert.equal(selection.segment.id, "seg-1");
+  assert.equal(selection.start_sec, 11);
 });

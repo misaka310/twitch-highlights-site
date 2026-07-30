@@ -1,11 +1,12 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ja">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Twitch Highlights</title>
-  <meta name="description" content="Twitch VODのコメント量から見どころを表示する非公式サイトです。" />
+  <title>dotitao moments</title>
+  <meta name="description" content="dotitao Twitch highlights" />
+  <script data-goatcounter="https://dotitao-moments.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css?v=20260519-assist-panel-layout" />
 </head>
@@ -14,14 +15,14 @@
   <div class="page-shell">
     <header class="brand-header">
       <div class="brand-header__inner">
-        <div class="brand-header__brand" aria-label="Twitch Highlights">
+        <div class="brand-header__brand" aria-label="dotitao">
           <svg class="brand-header__mark" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
             <rect x="4.5" y="4" width="1.5" height="16" rx="0.75" fill="currentColor"></rect>
             <path d="M9 6.5L18 12L9 17.5V6.5Z" fill="currentColor"></path>
           </svg>
-          <h1 class="brand-header__name" id="site-name">Twitch Highlights</h1>
+          <h1 class="brand-header__name">dotitao moments</h1>
           <p class="brand-header-support__subtitle">
-            <span class="brand-header-support__lead" id="site-description">Twitch VODのコメント量から見どころを表示する非公式サイトです。</span>
+            <span class="brand-header-support__lead">直近2ヶ月の配信の見どころをすぐ再生［非公式ファンサイト］</span>
           </p>
         </div>
         <div class="brand-header-support__schedule">
@@ -94,6 +95,21 @@
               </div>
             </section>
 
+            <section class="stage-selection transcript-panel" id="transcript-panel" aria-live="polite" hidden>
+              <div class="transcript-line transcript-line--prev">
+                <span class="transcript-prefix">前:</span>
+                <p class="selection-value transcript-text" id="transcript-prev">―</p>
+              </div>
+              <div class="transcript-line transcript-line--current">
+                <span class="transcript-current-icon" aria-hidden="true">▶</span>
+                <span class="transcript-prefix">今:</span>
+                <p class="selection-value transcript-text" id="transcript-current">―</p>
+              </div>
+              <div class="transcript-line transcript-line--next">
+                <span class="transcript-prefix">次:</span>
+                <p class="selection-value transcript-text" id="transcript-next">―</p>
+              </div>
+            </section>
           </section>
         </div>
       </section>

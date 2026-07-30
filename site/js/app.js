@@ -1,7 +1,6 @@
 (async () => {
   const [
     configModule,
-    siteConfigModule,
     domModule,
     dataLoaderModule,
     vodNormalizerModule,
@@ -9,10 +8,8 @@
     activityMapModule,
     playerPortalModule,
     playerControllerModule,
-    directPlaybackModule,
   ] = await Promise.all([
     import("./config.js"),
-    import("./site-config.js"),
     import("./dom.js"),
     import("./data-loader.js"),
     import("./vod-normalizer.js"),
@@ -20,11 +17,9 @@
     import("./activity-map.js"),
     import("./player-portal.js"),
     import("./player-controller.js"),
-    import("./direct-iframe-playback.js"),
   ]);
 
   const { applyDebugFlags, createInitialState, SCHEDULE_TEXT } = configModule;
-  const { applySiteConfig, loadSiteConfig } = siteConfigModule;
   const { elements } = domModule;
   const { loadData } = dataLoaderModule;
   const { normalizeData, getInitialSelection, applyInitialSelectionToState } = vodNormalizerModule;
@@ -32,7 +27,6 @@
   const { createActivityMapController } = activityMapModule;
   const { createPlayerPortal } = playerPortalModule;
   const { createPlayerController } = playerControllerModule;
-  const { createPlaybackRequestRouter } = directPlaybackModule;
 
   createPlayerPortal({
     player: elements.player,
@@ -52,17 +46,11 @@
     elements,
     updateActivityMapProgress: activityMapController.updateActivityMapProgress,
   });
-  const requestPlayback = createPlaybackRequestRouter({
-    state,
-    elements,
-    playerController,
-    updateActivityMapProgress: activityMapController.updateActivityMapProgress,
-  });
   const vodListView = createVodListView({
     state,
     elements,
     renderActivityMap: activityMapController.renderActivityMap,
-    requestPlayback,
+    requestPlayback: playerController.requestPlayback,
     renderEmptyState,
   });
   selectedSegmentResolver = () => vodListView.getSelectedSegment();
@@ -73,6 +61,7 @@
   const formatUpdatedScheduleText = vodListView.formatUpdatedScheduleText;
   const formatNextScheduleText = vodListView.formatNextScheduleText;
   const getSelectedSegment = vodListView.getSelectedSegment;
+  const requestPlayback = playerController.requestPlayback;
   const hideUnmuteOverlay = playerController.hideUnmuteOverlay;
   const stopPlayerPolling = playerController.stopPlayerPolling;
   const setPlayerUiState = playerController.setPlayerUiState;
@@ -82,7 +71,6 @@
 
 async function bootstrap() {
   applyDebugFlags();
-  applySiteConfig(await loadSiteConfig());
   const data = await loadData();
 
   if (!data) {
@@ -169,6 +157,21 @@ function renderEmptyState(message) {
   if (elements.vodTabs) {
     elements.vodTabs.replaceChildren();
     elements.vodTabs.hidden = true;
+  }
+  if (elements.transcriptCurrent) {
+    elements.transcriptCurrent.textContent = "表示データを確認してください";
+  }
+  if (elements.transcriptPrev) {
+    elements.transcriptPrev.textContent = "―";
+  }
+  if (elements.transcriptNext) {
+    elements.transcriptNext.textContent = "―";
+  }
+  if (elements.transcriptPanel) {
+    elements.transcriptPanel.hidden = true;
+  }
+  if (elements.playbackAssistPanel) {
+    elements.playbackAssistPanel.classList.add("is-transcript-hidden");
   }
   [
     elements.summaryTitle,

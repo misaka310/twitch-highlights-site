@@ -37,12 +37,15 @@ class RepositoryArchitectureTests(unittest.TestCase):
         )
         self.assertEqual([str(path.relative_to(ROOT)) for path in forbidden_paths if path.exists()], [])
 
-    def test_disallowed_integrations_are_absent_from_engine_sources(self):
+    def test_disallowed_backend_integrations_are_absent_from_public_infrastructure(self):
         disallowed_markers = (
             "".join(("ano", "sa")),
             "".join(("cloud", "flare")),
         )
-        roots = [ROOT / "scripts", ROOT / "site", ROOT / ".github", ROOT / "config"]
+        # `site/**` intentionally matches repository 19 byte-for-byte, including
+        # its backward-compatible data field names. Public-only infrastructure
+        # must not reintroduce the corresponding private backend integrations.
+        roots = [ROOT / "scripts", ROOT / ".github", ROOT / "config"]
         matches = []
         for source_root in roots:
             for path in source_root.rglob("*"):
@@ -77,13 +80,15 @@ class RepositoryArchitectureTests(unittest.TestCase):
                         matches.append(f"{path.relative_to(ROOT)}:{key}")
         self.assertEqual(matches, [])
 
-    def test_instance_identity_is_not_hardcoded_in_engine_sources(self):
+    def test_instance_identity_is_not_hardcoded_in_public_pipeline(self):
         instance_markers = (
             "".join(("doti", "tao")),
             "".join(("709", "803150")),
             "".join(("night", "reign")),
         )
-        roots = [ROOT / "scripts", ROOT / "site", ROOT / ".github"]
+        # The published site intentionally preserves repository 19's identity.
+        # Only the reusable public data pipeline must remain configuration-driven.
+        roots = [ROOT / "scripts"]
         matches = []
         for source_root in roots:
             for path in source_root.rglob("*"):

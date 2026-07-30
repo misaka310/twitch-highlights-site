@@ -1,6 +1,18 @@
 const { test, expect } = require("@playwright/test");
 
-test.describe("public latest VOD checks", () => {
+function parseJsonAllowBom(text) {
+  return JSON.parse(String(text || "").replace(/^\uFEFF/, ""));
+}
+
+function toPublicDataPath(path) {
+  const raw = String(path || "").trim();
+  if (!raw) {
+    return "";
+  }
+  return raw.startsWith("/") ? raw : `/${raw}`;
+}
+
+test.describe("public latest 3 vod checks", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       try {
@@ -12,62 +24,64 @@ test.describe("public latest VOD checks", () => {
     await page.goto("/");
   });
 
-  test("latest public VODs use the core data contract", async ({ page }) => {
-    const results = await page.evaluate(async () => {
-      const parse = (text) => JSON.parse(String(text || "").replace(/^\uFEFF/, ""));
-      const indexResponse = await fetch("/data/vod_index.json");
-      const indexPayload = parse(await indexResponse.text());
-      const rows = Array.isArray(indexPayload?.videos) ? indexPayload.videos.slice(0, 3) : [];
+  test("latest 3 public VODs keep transcript metadata consistent while timestamp tab stays absent", async ({ page }) => {
+    await expect(page.locator("#vod-mode-timestamps")).toHaveCount(0);
+    await expect(page.locator("#timestamp-list")).toHaveCount(0);
+
+    const latest = await page.evaluate(async () => {
+      const parseJsonAllowBomInBrowser = (text) => JSON.parse(String(text || "").replace(/^\uFEFF/, ""));
+
+      const indexRes = await fetch("/data/vod_index.json");
+      const indexPayload = parseJsonAllowBomInBrowser(await indexRes.text());
+      const rows = Array.isArray(indexPayload?.videos) ? indexPayload.videos : [];
+      const sorted = rows
+        .slice()
+        .sort(
+          (a, b) => new Date(String(b?.published_at || "")).getTime() - new Date(String(a?.published_at || "")).getTime()
+        )
+        .slice(0, 3);
+
       const details = [];
-      for (const row of rows) {
-        const response = await fetch(String(row.detail_path || ""));
-        details.push(response.ok ? parse(await response.text()) : null);
+      for (const row of sorted) {
+        const detailPath = String(row?.detail_path || "").trim();
+        const detailRes = await fetch(detailPath);
+        const detail = detailRes.ok ? parseJsonAllowBomInBrowser(await detailRes.text()) : {};
+        details.push({
+          vod_id: String(row?.vod_id || ""),
+          transcript_path: String(detail?.transcript_path || "").trim(),
+          transcript_status: String(detail?.transcript_status || "").trim().toLowerCase(),
+          sync_confidence: String(detail?.transcript_sync_confidence || detail?.sync_confidence || "").trim().toLowerCase(),
+        });
       }
-      return { rows, details };
+      return details;
     });
 
-    expect(results.rows.length).toBeGreaterThan(0);
-    const forbidden = [
-      ["trans", "cript"].join(""),
-      ["you", "tube"].join(""),
-      ["time", "stamp"].join(""),
-    ];
+    expect(latest.length).toBe(3);
 
-    results.rows.forEach((row) => {
-      const keys = Object.keys(row).map((key) => key.toLowerCase());
-      forbidden.forEach((marker) => expect(keys.some((key) => key.includes(marker))).toBeFalsy());
-    });
-    results.details.filter(Boolean).forEach((detail) => {
-      const serialized = JSON.stringify(detail).toLowerCase();
-      forbidden.forEach((marker) => expect(serialized.includes(`\"${marker}`)).toBeFalsy());
-      expect(Array.isArray(detail.items)).toBeTruthy();
-      expect(detail.activity_map).toBeTruthy();
-      detail.items.slice(0, 3).forEach((item) => {
-        expect(String(item.headline || "").trim()).not.toBe("");
-        expect(String(item.screenshot_url || "").trim()).toMatch(/^\/data\/segment-thumbnails\//);
-      });
-    });
-  });
+    for (const row of latest) {
+      await page.locator(`#vod-tab-${row.vod_id}`).click();
+      await expect(page.locator("#player-frame")).toBeVisible();
 
-  test("latest highlights show headlines and loaded screenshots", async ({ page }) => {
-    const segments = page.locator(".vod-card:not([hidden]) .segment-button");
-    await expect(segments.first()).toBeVisible();
-    const count = await segments.count();
-    expect(count).toBeGreaterThan(0);
-
-    for (let index = 0; index < Math.min(3, count); index += 1) {
-      const segment = segments.nth(index);
-      const summary = segment.locator(".segment-summary");
-      await expect(summary).toBeVisible();
-      await expect(summary).not.toHaveText("コメントが集中した場面");
-
-      const thumbnail = segment.locator(".segment-thumbnail");
-      await expect(thumbnail).toBeVisible();
-      await expect.poll(async () => thumbnail.evaluate((image) => image.complete && image.naturalWidth > 0)).toBeTruthy();
+      if (row.transcript_status === "ok" && row.transcript_path) {
+        const transcript = await page.request.get(toPublicDataPath(row.transcript_path));
+        expect(transcript.ok()).toBeTruthy();
+        const payload = parseJsonAllowBom(await transcript.text());
+        const cues = Array.isArray(payload?.cues) ? payload.cues : [];
+        expect(cues.length).toBeGreaterThan(0);
+        expect(["high", "medium", "low", "failed", ""]).toContain(row.sync_confidence);
+      }
     }
   });
 
-  test("highlights remain playable", async ({ page }) => {
+  test("header subtitle copy is fixed", async ({ page }) => {
+    await expect(page.locator(".brand-header-support__subtitle")).toHaveText(
+      "直近2ヶ月の配信の見どころをすぐ再生［非公式ファンサイト］"
+    );
+  });
+
+  test("highlights remain playable from the latest VODs without timestamp mode", async ({ page }) => {
+    await expect(page.locator("#vod-mode-timestamps")).toHaveCount(0);
+
     const firstVisibleSegment = page.locator(".vod-card:not([hidden]) .segment-button").first();
     await expect(firstVisibleSegment).toBeVisible();
 

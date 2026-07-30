@@ -54,10 +54,12 @@ test.beforeEach(async ({ page }) => {
 
       setVideo(video, seconds) {
         this.setVideoCalls += 1;
+        if (String(video) === String(this.video)) {
+          return;
+        }
         this.video = video;
-        this.currentTime = Number(seconds);
-        this.pendingTime = null;
-        this.emit("playing");
+        this.pendingTime = Number(seconds);
+        this.emit("ready");
       }
 
       loadVideo(video, seconds) {
@@ -111,7 +113,7 @@ test("segment buttons prefer interactive playback", async ({ page }) => {
   await expect(playerFrame).toHaveAttribute("data-current-start-sec", String(startSec));
 });
 
-test("changing positions within the same VOD seeks the existing player", async ({ page }) => {
+test("changing timestamps within the same VOD seeks the existing player", async ({ page }) => {
   await page.goto("/");
 
   const buttons = page.locator(".segment-button");
@@ -133,10 +135,7 @@ test("changing positions within the same VOD seeks the existing player", async (
 });
 
 
-test("switching from the latest VOD to an older VOD keeps the trusted iframe timestamp", async ({ page }) => {
-  await page.route("https://player.twitch.tv/**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>Twitch</title>" });
-  });
+test("switching from the latest VOD to an older VOD keeps the older timestamp", async ({ page }) => {
   await page.goto("/");
 
   const playerFrame = page.locator("#player-frame");
@@ -153,48 +152,24 @@ test("switching from the latest VOD to an older VOD keeps the trusted iframe tim
   const olderVodStartSec = Number(await olderVodButton.getAttribute("data-start-sec"));
   const olderVodId = String(await olderVodButton.getAttribute("data-vod-id"));
   await olderVodButton.click();
-
-  const iframe = page.locator(".player-embed-frame");
-  await expect(playerFrame).toHaveAttribute("data-player-mode", "iframe");
   await expect(playerFrame).toHaveAttribute("data-current-vod-id", olderVodId);
   await expect(playerFrame).toHaveAttribute("data-current-start-sec", String(olderVodStartSec));
-  await expect(iframe).toHaveAttribute("src", new RegExp(`video=${olderVodId}`));
-  await expect(iframe).toHaveAttribute("src", /autoplay=true/);
-  await expect(iframe).toHaveAttribute("src", /muted=false/);
-  await expect(iframe).toHaveAttribute(
-    "src",
-    new RegExp(`time=${encodeURIComponent(formatTwitchTime(olderVodStartSec))}`)
-  );
+  await expect
+    .poll(async () =>
+      page.evaluate(() => String(window.__mockTwitchPlayer.video || "").replace(/^v/i, ""))
+    )
+    .toBe(String(olderVodId).replace(/^v/i, ""));
+  await expect
+    .poll(async () => page.evaluate(() => window.__mockTwitchPlayer.currentTime))
+    .toBe(olderVodStartSec);
 });
-
-test("activity map clicks keep the direct iframe when the SDK is not ready", async ({ page }) => {
-  await page.route("https://player.twitch.tv/**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>Twitch</title>" });
-  });
-  await page.addInitScript(() => {
-    const nativeRequestAnimationFrame = window.requestAnimationFrame.bind(window);
-    const heldCallbacks = [];
-    let holdAnimationFrames = true;
-
-    window.requestAnimationFrame = (callback) => {
-      if (!holdAnimationFrames) {
-        return nativeRequestAnimationFrame(callback);
-      }
-      heldCallbacks.push(callback);
-      return heldCallbacks.length;
-    };
-    window.__releaseHeldAnimationFrames = () => {
-      holdAnimationFrames = false;
-      heldCallbacks.splice(0).forEach((callback) => nativeRequestAnimationFrame(callback));
-    };
-  });
+test("activity map clicks prefer interactive playback", async ({ page }) => {
   await page.goto("/");
 
   const activityMapButton = page.locator("#activity-map-button");
   const playerFrame = page.locator("#player-frame");
 
   await expect(activityMapButton).toBeVisible();
-  await expect.poll(async () => page.evaluate(() => window.__mockTwitchPlayer == null)).toBe(true);
   const beforeStartSec = Number(await playerFrame.getAttribute("data-current-start-sec"));
 
   await activityMapButton.evaluate((button) => {
@@ -213,21 +188,14 @@ test("activity map clicks keep the direct iframe when the SDK is not ready", asy
     button.dispatchEvent(new MouseEvent("mouseup", init));
     button.dispatchEvent(new MouseEvent("click", init));
   });
-  await page.evaluate(() => window.__releaseHeldAnimationFrames?.());
 
-  await expect(playerFrame).toHaveAttribute("data-player-mode", "iframe");
+  await expect(playerFrame).toHaveAttribute("data-player-mode", "interactive");
   await expect
     .poll(async () => Number(await playerFrame.getAttribute("data-current-start-sec")))
     .not.toBe(beforeStartSec);
-
-  const selectedStartSec = Number(await playerFrame.getAttribute("data-current-start-sec"));
-  const iframe = page.locator(".player-embed-frame");
-  await expect(iframe).toHaveAttribute(
-    "src",
-    new RegExp(`time=${encodeURIComponent(formatTwitchTime(selectedStartSec))}`)
-  );
-  await expect(iframe).toHaveAttribute("src", /autoplay=true/);
-  await expect(iframe).toHaveAttribute("src", /muted=false/);
+  await expect
+    .poll(async () => page.evaluate(() => window.__mockTwitchPlayer.seekCalls))
+    .toBeGreaterThan(0);
 });
 
 async function getSegmentButton(page, vodIndex, segmentIndex) {
@@ -247,10 +215,7 @@ async function activateVodTab(page, vodIndex) {
   await tab.click();
 }
 
-function formatTwitchTime(totalSeconds) {
-  const seconds = Math.max(0, Math.floor(Number(totalSeconds) || 0));
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-  return `${hours}h${minutes}m${remainingSeconds}s`;
-}
+
+
+
+

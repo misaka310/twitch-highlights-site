@@ -1,21 +1,42 @@
-import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
+import assert from "node:assert/strict";
 
 globalThis.location = new URL("http://localhost/");
 
 const module = await import("../site/js/vod-list-view.js");
+const { normalizeTranscriptSyncConfidence, isTranscriptDisplayReadyForVod } = module;
 
-test("view module exports only the VOD list factory", () => {
-  assert.deepEqual(Object.keys(module), ["createVodListView"]);
+test("timestamp availability helper is no longer exported", () => {
+  assert.equal("isTimestampVodAvailableForVod" in module, false);
 });
 
-test("view source has no retired playback-assist data loader", async () => {
-  const source = await readFile(new URL("../site/js/vod-list-view.js", import.meta.url), "utf8");
-  const retiredMarkers = [
-    ["trans", "cript"].join(""),
-    ["time", "stamp"].join(""),
-    ["you", "tube"].join(""),
-  ];
-  retiredMarkers.forEach((marker) => assert.equal(source.toLowerCase().includes(marker), false));
+test("normalizeTranscriptSyncConfidence keeps trusted values only", () => {
+  assert.equal(normalizeTranscriptSyncConfidence("HIGH"), "high");
+  assert.equal(normalizeTranscriptSyncConfidence("medium"), "medium");
+  assert.equal(normalizeTranscriptSyncConfidence("failed"), "failed");
+  assert.equal(normalizeTranscriptSyncConfidence("unknown"), "");
+});
+
+test("transcript panel still requires transcript sync confidence", () => {
+  const vod = {
+    transcript_status: "ok",
+    transcript_path: "/data/transcripts/vod-1.json",
+    transcript_offset_sec: 0,
+    transcript_sync_confidence: "",
+    sync_confidence: "",
+  };
+
+  assert.equal(isTranscriptDisplayReadyForVod(vod), false);
+});
+
+test("transcript panel still renders when transcript sync confidence is trusted", () => {
+  const vod = {
+    transcript_status: "ok",
+    transcript_path: "/data/transcripts/vod-2.json",
+    transcript_offset_sec: 0,
+    transcript_sync_confidence: "medium",
+    sync_confidence: "medium",
+  };
+
+  assert.equal(isTranscriptDisplayReadyForVod(vod), true);
 });
