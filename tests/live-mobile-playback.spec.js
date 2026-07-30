@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-const EXPECTED_BUILD_LABEL = "mobile player fitted 20260730";
+const EXPECTED_BUILD_LABEL = "mobile player fit inline 20260730";
 
 test("production mobile player fits viewport and tap starts real Twitch playback", async ({ page }) => {
   await waitForDeployedBuild(page);
@@ -13,6 +13,7 @@ test("production mobile player fits viewport and tap starts real Twitch playback
   await expect(segment).toBeEnabled({ timeout: 60_000 });
   await expect(frame).toHaveAttribute("data-player-mode", "interactive", { timeout: 60_000 });
   await expect(sdkIframe).toBeVisible({ timeout: 60_000 });
+  await expect(page.locator("#mobile-player-fit-styles")).toHaveCount(1);
 
   const frameBox = await frame.boundingBox();
   const playerBox = await sdkIframe.boundingBox();
@@ -21,6 +22,7 @@ test("production mobile player fits viewport and tap starts real Twitch playback
 
   const viewport = page.viewportSize();
   expect(viewport).not.toBeNull();
+  console.log(`[player-fit] viewport=${viewport.width}x${viewport.height} frame=${JSON.stringify(frameBox)} iframe=${JSON.stringify(playerBox)}`);
   expect(frameBox.x).toBeGreaterThanOrEqual(-0.5);
   expect(frameBox.x + frameBox.width).toBeLessThanOrEqual(viewport.width + 0.5);
   expect(playerBox.x).toBeGreaterThanOrEqual(frameBox.x - 1);

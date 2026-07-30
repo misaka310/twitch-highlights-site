@@ -2,7 +2,7 @@ export const DATA_URL = "../../data/vods.json?v=20260327-3";
 export const DATA_INDEX_URL = "../../data/vod_index.json?v=20260414-1";
 export const DETAILS_PER_PAGE = 3;
 export const CACHE_KEY = "twitch-highlights-site:vod-data:v7";
-export const SITE_BUILD_LABEL = "mobile player fitted 20260730";
+export const SITE_BUILD_LABEL = "mobile player fit inline 20260730";
 export const SCHEDULE_TEXT = {
   dataUpdated: "更新",
   nextDataUpdate: "次回更新予定",
