@@ -2,7 +2,7 @@ export const DATA_URL = "../../data/vods.json?v=20260327-3";
 export const DATA_INDEX_URL = "../../data/vod_index.json?v=20260414-1";
 export const DETAILS_PER_PAGE = 3;
 export const CACHE_KEY = "twitch-highlights-site:vod-data:v7";
-export const SITE_BUILD_LABEL = "mobile original iframe restored 20260730";
+export const SITE_BUILD_LABEL = "build at 05.25";
 export const SCHEDULE_TEXT = {
   dataUpdated: "更新",
   nextDataUpdate: "次回更新予定",
@@ -31,31 +31,32 @@ export const INTERACTIVE_CONTAINER_WAIT_TIMEOUT_MS = 3200;
 
 export function createInitialState() {
   return {
-    vods: [],
-    pageOffset: 0,
-    selectedVodId: null,
-    selectedSegmentId: null,
-    requestedVodId: null,
-    requestedStartSec: null,
-    desiredPlayback: null,
-    playbackToken: 0,
-    playerMode: "iframe",
-    playerReady: false,
-    playbackBlocked: false,
-    playerInstance: null,
-    interactiveVodId: null,
-    interactiveMountInFlight: false,
-    interactiveMountToken: 0,
-    interactiveMountVodId: null,
-    playerScriptReady: typeof window.Twitch?.Player === "function",
-    playerPollId: null,
-    currentPlaybackSec: null,
-    lastInteractiveSeekTargetSec: null,
-    lastInteractiveSeekAt: 0,
-  };
+  vods: [],
+  pageOffset: 0,
+  selectedVodId: null,
+  selectedSegmentId: null,
+  requestedVodId: null,
+  requestedStartSec: null,
+  desiredPlayback: null,
+  playbackToken: 0,
+  playerMode: "iframe",
+  playerReady: false,
+  playbackBlocked: false,
+  playerInstance: null,
+  interactiveVodId: null,
+  interactiveMountInFlight: false,
+  interactiveMountToken: 0,
+  interactiveMountVodId: null,
+  playerScriptReady: typeof window.Twitch?.Player === "function",
+  playerPollId: null,
+  currentPlaybackSec: null,
+  lastInteractiveSeekTargetSec: null,
+  lastInteractiveSeekAt: 0,
+};
 }
 
 export function applyDebugFlags() {
   document.documentElement.classList.toggle("debug-small-player", DEBUG_SMALL_PLAYER);
   document.documentElement.classList.toggle("debug-no-floating-unmute", DEBUG_NO_FLOATING_UNMUTE);
 }
+

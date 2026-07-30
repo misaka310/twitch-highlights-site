@@ -32,7 +32,6 @@ module.exports = defineConfig({
     },
     {
       name: "mobile",
-      testIgnore: /rewind\.spec\.js$/,
       use: {
         ...devices["Pixel 5"],
         viewport: { width: 430, height: 932 },
