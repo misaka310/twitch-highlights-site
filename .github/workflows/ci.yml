@@ -69,6 +69,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build production publish directory
+        run: bash scripts/build_public.sh
+
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
