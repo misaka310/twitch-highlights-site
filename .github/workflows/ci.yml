@@ -25,15 +25,15 @@ jobs:
           ref: fix/verify-real-mobile-playback-20260730
           fetch-depth: 0
 
-      - name: Apply source fix
-        run: python scripts/apply_real_mobile_playback_fix.py
+      - name: Apply Twitch minimum-size fix
+        run: python scripts/apply_mobile_player_size_fix.py
 
-      - name: Commit source fix
+      - name: Commit Twitch minimum-size fix
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/js/player-controller.js site/js/vod-list-view.js site/js/config.js tests/rewind.spec.js tests/mobile-playback-recovery.spec.js tests/mobile-iframe-autoplay.spec.js
-          git commit -m "Restore verified mobile SDK playback"
+          git add site/styles.css tests/mobile-player-size.spec.js
+          git commit -m "Meet Twitch mobile embed dimensions"
           git push origin HEAD:fix/verify-real-mobile-playback-20260730
 
   frontend-tests:
@@ -77,5 +77,7 @@ jobs:
           tests/playback-policy.spec.js
           tests/player-portal.spec.js
           tests/latest-vods-public.spec.js
-          tests/mobile-iframe-autoplay.spec.js
+          tests/mobile-playback-recovery.spec.js
+          tests/rewind.spec.js
+          tests/mobile-player-size.spec.js
           --project=mobile
