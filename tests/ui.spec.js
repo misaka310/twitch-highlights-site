@@ -659,6 +659,80 @@ test.describe("UI playback regression guards", () => {
     });
   });
 
+  test("ready cross-VOD switch mounts only the final Twitch SDK iframe", async ({ page }) => {
+    const initialButton = await getSegmentButton(page, 0, 0, { enabledOrder: true });
+    await initialButton.click();
+
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() => {
+            const instances = window.__mockTwitch?.instances || [];
+            const active = instances[instances.length - 1];
+            return Boolean(active?.__ready && document.querySelector("#twitch-player .mock-twitch-sdk-iframe"));
+          }),
+        { timeout: 10000 }
+      )
+      .toBeTruthy();
+
+    const initialInstanceCount = await page.evaluate(() => window.__mockTwitch?.instances?.length || 0);
+    await page.evaluate(() => {
+      const player = document.querySelector("#twitch-player");
+      const probe = { added: [], removed: [] };
+      const collectIframeClasses = (node, target) => {
+        if (!(node instanceof Element)) {
+          return;
+        }
+        if (node.matches("iframe")) {
+          target.push(node.className || "");
+        }
+        node.querySelectorAll("iframe").forEach((iframe) => {
+          target.push(iframe.className || "");
+        });
+      };
+      const observer = new MutationObserver((records) => {
+        records.forEach((record) => {
+          record.addedNodes.forEach((node) => collectIframeClasses(node, probe.added));
+          record.removedNodes.forEach((node) => collectIframeClasses(node, probe.removed));
+        });
+      });
+      observer.observe(player, { childList: true, subtree: true });
+      window.__iframeMountProbe = probe;
+      window.__iframeMountProbeObserver = observer;
+    });
+
+    const switchButton = await getSegmentButton(page, 1, 0, { enabledOrder: true });
+    const expectedVodId = String(await switchButton.getAttribute("data-vod-id"));
+    const expectedStartSec = Number(await switchButton.getAttribute("data-start-sec"));
+    await switchButton.click();
+
+    await expectPlayerState(page, {
+      vodId: expectedVodId,
+      startSec: expectedStartSec,
+      mode: "interactive",
+    });
+    await expect
+      .poll(
+        async () =>
+          page.evaluate((minimumCount) => {
+            const instances = window.__mockTwitch?.instances || [];
+            const active = instances[instances.length - 1];
+            return instances.length > minimumCount && active?.__ready === true;
+          }, initialInstanceCount),
+        { timeout: 10000 }
+      )
+      .toBeTruthy();
+
+    const probe = await page.evaluate(() => {
+      window.__iframeMountProbeObserver?.disconnect();
+      return window.__iframeMountProbe;
+    });
+    expect(probe.added).toEqual(["mock-twitch-sdk-iframe"]);
+    expect(probe.removed).toHaveLength(1);
+    expect(probe.removed[0]).toContain("mock-twitch-sdk-iframe");
+    expect(probe.removed.join(" ")).not.toContain("player-embed-frame");
+  });
+
   test("different VOD double-click keeps player size stable from initial URL load", async ({ page }, testInfo) => {
     const differentVodButton = await getSegmentButton(page, 1, 0, { enabledOrder: true });
     const expectedVodId = String(await differentVodButton.getAttribute("data-vod-id"));
