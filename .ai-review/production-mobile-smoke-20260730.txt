@@ -1,1 +1,1 @@
-Run the production mobile playback smoke test against the deployed Render site.
+Run the production mobile playback smoke test after the 12-minute deployment wait fix.
