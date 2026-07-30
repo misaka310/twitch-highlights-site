@@ -1,8 +1,8 @@
 const { test, expect } = require("@playwright/test");
 
-const EXPECTED_BUILD_LABEL = "mobile playback verified 20260730";
+const EXPECTED_BUILD_LABEL = "mobile player fitted 20260730";
 
-test("production mobile tap starts real Twitch playback and advances time", async ({ page }) => {
+ test("production mobile player fits viewport and tap starts real Twitch playback", async ({ page }) => {
   await waitForDeployedBuild(page);
 
   const frame = page.locator("#player-frame");
@@ -14,10 +14,19 @@ test("production mobile tap starts real Twitch playback and advances time", asyn
   await expect(frame).toHaveAttribute("data-player-mode", "interactive", { timeout: 60_000 });
   await expect(sdkIframe).toBeVisible({ timeout: 60_000 });
 
+  const frameBox = await frame.boundingBox();
   const playerBox = await sdkIframe.boundingBox();
+  expect(frameBox).not.toBeNull();
   expect(playerBox).not.toBeNull();
-  expect(playerBox.width).toBeGreaterThanOrEqual(400);
-  expect(playerBox.height).toBeGreaterThanOrEqual(300);
+
+  const viewport = page.viewportSize();
+  expect(viewport).not.toBeNull();
+  expect(frameBox.x).toBeGreaterThanOrEqual(-0.5);
+  expect(frameBox.x + frameBox.width).toBeLessThanOrEqual(viewport.width + 0.5);
+  expect(playerBox.x).toBeGreaterThanOrEqual(frameBox.x - 1);
+  expect(playerBox.x + playerBox.width).toBeLessThanOrEqual(frameBox.x + frameBox.width + 1);
+  expect(Math.abs(playerBox.width - frameBox.width)).toBeLessThanOrEqual(1);
+  expect(Math.abs(playerBox.height - frameBox.height)).toBeLessThanOrEqual(1);
 
   const pageHasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth + 1
