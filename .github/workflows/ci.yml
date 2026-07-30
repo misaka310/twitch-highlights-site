@@ -41,6 +41,7 @@ jobs:
           tests/player-portal.spec.js
           tests/rewind.spec.js
           tests/latest-vods-public.spec.js
+          tests/mobile-playback-recovery.spec.js
           --project=desktop
 
       - name: Run mobile browser tests
