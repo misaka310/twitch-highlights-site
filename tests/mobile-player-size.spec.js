@@ -62,11 +62,7 @@ for (const viewport of MOBILE_VIEWPORTS) {
 
     await expect(segment).toBeEnabled();
     await expect(iframe).toBeVisible();
-    await expect
-      .poll(() => page.evaluate(() =>
-        Array.from(document.styleSheets).some((sheet) => sheet.href?.includes("mobile-player-fit.css"))
-      ))
-      .toBe(true);
+    await expect(page.locator("#mobile-player-fit-styles")).toHaveCount(1);
 
     const frameBox = await frame.boundingBox();
     const iframeBox = await iframe.boundingBox();
