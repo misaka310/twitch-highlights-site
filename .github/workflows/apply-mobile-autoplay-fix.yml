@@ -1,0 +1,137 @@
+name: Apply mobile autoplay regression fix
+
+on:
+  push:
+    branches:
+      - fix/restore-mobile-autoplay-20260730
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/restore-mobile-autoplay-20260730
+          fetch-depth: 0
+
+      - name: Restore synchronous mobile iframe playback
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          controller = Path('site/js/player-controller.js')
+          text = controller.read_text(encoding='utf-8')
+
+          old_import = '''  INTERACTIVE_SEEK_STABILIZE_MS,
+            TWITCH_PLAYER_SCRIPT_URL,'''
+          new_import = '''  INTERACTIVE_SEEK_STABILIZE_MS,
+            MOBILE_MEDIA_QUERY,
+            TWITCH_PLAYER_SCRIPT_URL,'''
+          if text.count(old_import) != 1:
+              raise SystemExit('player-controller import anchor not found exactly once')
+          text = text.replace(old_import, new_import, 1)
+
+          anchor = '''  setPlayerUiState("loading", playback.vodId, loadingStartSec, playback.statusLabel, loadingMode);
+
+            if (isSeekReadySameVod) {'''
+          replacement = '''  setPlayerUiState("loading", playback.vodId, loadingStartSec, playback.statusLabel, loadingMode);
+
+            // On narrow mobile layouts, keep the user-triggered playback action synchronous.
+            // Starting the Twitch SDK during initial rendering can finish after the tap gesture,
+            // causing browsers to reject the later unmuted play() call as autoplay.
+            if (isMobileIframePlayback()) {
+              if (state.playerMode === "interactive") {
+                destroyInteractivePlayer();
+              }
+              clearInteractiveMountState();
+              mountIframePlayer(playback);
+              return;
+            }
+
+            if (isSeekReadySameVod) {'''
+          if text.count(anchor) != 1:
+              raise SystemExit('requestPlayback anchor not found exactly once')
+          text = text.replace(anchor, replacement, 1)
+
+          function_anchor = '''
+
+          function mountIframePlayer(playback) {'''
+          function_replacement = '''
+
+          function isMobileIframePlayback() {
+            return (
+              typeof window.matchMedia === "function" &&
+              window.matchMedia(MOBILE_MEDIA_QUERY).matches
+            );
+          }
+
+
+          function mountIframePlayer(playback) {'''
+          if text.count(function_anchor) != 1:
+              raise SystemExit('mountIframePlayer anchor not found exactly once')
+          text = text.replace(function_anchor, function_replacement, 1)
+          controller.write_text(text, encoding='utf-8')
+
+          test_file = Path('tests/mobile-iframe-autoplay.spec.js')
+          test_file.write_text(r'''const { test, expect } = require("@playwright/test");
+
+          test("mobile tap keeps playback on the synchronous iframe path", async ({ page }, testInfo) => {
+            test.skip(testInfo.project.name !== "mobile", "Mobile playback path only");
+
+            await page.route("https://player.twitch.tv/js/embed/v1.js", (route) => route.abort());
+            await page.goto("/");
+
+            const frame = page.locator("#player-frame");
+            const iframe = page.locator("#twitch-player iframe");
+            const segment = page.locator(".vod-card:not([hidden]) .segment-button").first();
+
+            await expect(segment).toBeVisible();
+            await expect(iframe).toHaveCount(1);
+            await expect(iframe).toHaveAttribute("src", /autoplay=false/);
+            await expect(frame).toHaveAttribute("data-player-mode", "iframe");
+
+            const vodId = await segment.getAttribute("data-vod-id");
+            const startSec = await segment.getAttribute("data-start-sec");
+            const box = await segment.boundingBox();
+            expect(box).not.toBeNull();
+            await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+
+            await expect(frame).toHaveAttribute("data-current-vod-id", String(vodId));
+            await expect(frame).toHaveAttribute("data-current-start-sec", String(startSec));
+            await expect(frame).toHaveAttribute("data-player-mode", "iframe");
+            await expect(iframe).toHaveAttribute("src", /autoplay=true/);
+            await expect(iframe).toHaveAttribute("src", /muted=false/);
+            await expect(iframe).toHaveAttribute("src", new RegExp(`video=${vodId}`));
+
+            const sdkScriptCount = await page.locator('script[src="https://player.twitch.tv/js/embed/v1.js"]').count();
+            expect(sdkScriptCount).toBe(0);
+          });
+          ''', encoding='utf-8')
+
+          ci = Path('.github/workflows/ci.yml')
+          ci_text = ci.read_text(encoding='utf-8')
+          ci_anchor = '''          tests/mobile-playback-recovery.spec.js
+                    --project=desktop'''
+          ci_replacement = '''          tests/mobile-playback-recovery.spec.js
+                    tests/mobile-iframe-autoplay.spec.js
+                    --project=desktop'''
+          if ci_text.count(ci_anchor) != 1:
+              raise SystemExit('CI test list anchor not found exactly once')
+          ci.write_text(ci_text.replace(ci_anchor, ci_replacement, 1), encoding='utf-8')
+          PY
+
+          rm .github/workflows/apply-mobile-autoplay-fix.yml
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/js/player-controller.js tests/mobile-iframe-autoplay.spec.js .github/workflows/ci.yml .github/workflows/apply-mobile-autoplay-fix.yml
+          git commit -m "Restore synchronous mobile playback"
+          git push origin HEAD:fix/restore-mobile-autoplay-20260730
