@@ -1,0 +1,39 @@
+@media (max-width: 640px) {
+  /* Keep the complete Twitch player visible on narrow phones. */
+  .player-surface {
+    width: 100%;
+    min-width: 0;
+    margin-inline: 0;
+    overflow: visible;
+  }
+
+  .player-surface__inner {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .player-frame {
+    left: auto;
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    margin-inline: auto;
+    transform: none;
+    overflow: hidden;
+  }
+
+  .player-embed,
+  .player-embed--mounted,
+  .player-embed-slot,
+  .player-frame[data-player-mode="interactive"] .player-embed-slot--interactive,
+  .player-frame[data-player-mode="interactive"] .player-embed-slot__sdk-wrapper,
+  .player-frame[data-player-mode="interactive"] .player-embed-slot__sdk-iframe,
+  .player-embed-frame {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+}
