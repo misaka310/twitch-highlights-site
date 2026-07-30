@@ -52,6 +52,15 @@ function requestPlayback(vodId, startSec, options = {}) {
   const loadingMode = isSeekReadySameVod || isMountInFlightSameVod ? "interactive" : "iframe";
   setPlayerUiState("loading", playback.vodId, loadingStartSec, playback.statusLabel, loadingMode);
 
+  if (
+    playback.triggeredByUser &&
+    isInteractivePlayerReady() &&
+    !isInteractiveSeekReadyForVod(playback.vodId) &&
+    switchInteractiveVideo(playback)
+  ) {
+    return;
+  }
+
   if (isSeekReadySameVod) {
     seekDesiredPlayback(playback);
     return;
@@ -119,6 +128,36 @@ function mountIframePlayer(playback) {
 }
 
 
+function switchInteractiveVideo(playback) {
+  const player = state.playerInstance;
+  if (!isInteractivePlayerReady() || !player) {
+    return false;
+  }
+
+  const shouldPlay = playback.autoplay !== false;
+  ensureInteractiveEmbedLayout();
+  safeSetMuted(player, playback.muted);
+  state.currentPlaybackSec = playback.startSec;
+  markInteractiveSeek(playback.startSec);
+  setInteractiveUiState(shouldPlay ? "starting" : "ready", playback.statusLabel);
+
+  if (!safeSetVideo(player, playback.vodId, playback.startSec)) {
+    return false;
+  }
+
+  state.interactiveVodId = playback.vodId;
+  state.playerMode = "interactive";
+  state.playerReady = true;
+  state.playbackBlocked = false;
+  startPlayerPolling();
+  if (shouldPlay) {
+    safePlay(player);
+  }
+  scheduleInteractiveTimeSync();
+  return true;
+}
+
+
 function seekDesiredPlayback(playback) {
   if (!isInteractiveSeekReadyForVod(playback.vodId)) {
     return;
@@ -126,15 +165,16 @@ function seekDesiredPlayback(playback) {
 
   ensureInteractiveEmbedLayout();
   const player = state.playerInstance;
+  const shouldPlay = playback.autoplay !== false;
   safeSetMuted(player, playback.muted);
   state.currentPlaybackSec = playback.startSec;
-  seekInteractivePlayer(player, playback.startSec, { shouldPlay: playback.autoplay !== false });
+  setInteractiveUiState(shouldPlay ? "starting" : "ready", playback.statusLabel);
+  seekInteractivePlayer(player, playback.startSec, { shouldPlay });
 
   state.playerMode = "interactive";
   state.playerReady = true;
   state.playbackBlocked = false;
   startPlayerPolling();
-  setInteractiveUiState(playback.autoplay !== false ? "playing" : "ready", playback.statusLabel);
 }
 
 
@@ -207,6 +247,9 @@ async function mountInteractivePlayer(playback) {
     clearInteractiveMountState(playback.token);
     state.playbackBlocked = false;
     setInteractiveUiState("ready", "Player ready");
+    window.dispatchEvent(
+      new CustomEvent("twitch-player-ready", { detail: { vodId: String(playback.vodId || "") } })
+    );
 
     const targetPlayback = state.desiredPlayback || playback;
     if (targetPlayback.vodId !== playback.vodId) {
@@ -216,12 +259,12 @@ async function mountInteractivePlayer(playback) {
     safeSetMuted(player, targetPlayback.muted);
     state.currentPlaybackSec = targetPlayback.startSec;
     const shouldAutoplay = targetPlayback.autoplay !== false;
+    setInteractiveUiState(shouldAutoplay ? "starting" : "ready", targetPlayback.statusLabel);
     if (Number(targetPlayback.startSec) !== mountStartSec) {
       seekInteractivePlayer(player, targetPlayback.startSec, { shouldPlay: shouldAutoplay });
     } else if (shouldAutoplay) {
       safePlay(player);
     }
-    setInteractiveUiState(shouldAutoplay ? "playing" : "ready", targetPlayback.statusLabel);
   });
 
   addPlayerEventListener(player, playEventName, () => {
@@ -294,6 +337,15 @@ function destroyInteractivePlayer(options = {}) {
     // Ignore cleanup failures from the Twitch embed.
   }
   state.playerInstance = null;
+}
+
+
+function isInteractivePlayerReady() {
+  return (
+    state.playerMode === "interactive" &&
+    Boolean(state.playerInstance) &&
+    state.playerReady === true
+  );
 }
 
 
@@ -376,6 +428,19 @@ function addPlayerEventListener(player, eventName, callback) {
     return;
   }
   player.addEventListener(eventName, callback);
+}
+
+
+function safeSetVideo(player, vodId, startSec) {
+  if (!player || typeof player.setVideo !== "function") {
+    return false;
+  }
+  try {
+    player.setVideo(String(vodId || "").replace(/^v/i, ""), Math.max(0, Number(startSec) || 0));
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 

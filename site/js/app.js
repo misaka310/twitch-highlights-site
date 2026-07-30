@@ -72,48 +72,6 @@
 
   window.requestPlayback = requestPlayback;
 
-  // Switching to another VOD used to destroy the ready Twitch player and mount a
-  // new one asynchronously. The later play() call was no longer part of the
-  // user's click, so Twitch correctly treated it as blocked autoplay. Keep the
-  // ready player and synchronously switch it while the click activation is live.
-  document.addEventListener(
-    "click",
-    (event) => {
-      const button = event.target instanceof Element ? event.target.closest(".segment-button") : null;
-      if (!button) {
-        return;
-      }
-      if (state.playerMode !== "interactive" || state.playerReady !== true || !state.playerInstance) {
-        return;
-      }
-
-      const vodId = String(button.dataset.vodId || "");
-      const startSec = Math.max(0, Number(button.dataset.startSec) || 0);
-      if (!vodId || String(state.interactiveVodId || "") === vodId) {
-        return;
-      }
-
-      const player = state.playerInstance;
-      if (typeof player.setVideo !== "function") {
-        return;
-      }
-
-      try {
-        player.setMuted?.(false);
-        player.setVideo(vodId, startSec);
-        player.play?.();
-        state.interactiveVodId = vodId;
-        state.requestedVodId = vodId;
-        state.requestedStartSec = startSec;
-        state.currentPlaybackSec = startSec;
-        state.playbackBlocked = false;
-      } catch (error) {
-        // Fall through to the controller's normal replacement path.
-      }
-    },
-    true
-  );
-
 async function bootstrap() {
   applyDebugFlags();
   applySiteConfig(await loadSiteConfig());
