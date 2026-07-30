@@ -1,0 +1,1 @@
+Verify the deployed Render site at 390x844 after the responsive player fix.
