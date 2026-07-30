@@ -1,1 +1,1 @@
-Run the production mobile playback smoke test after the 12-minute deployment wait fix.
+Run the production mobile playback smoke test after waiting for JavaScript to update the build label.
