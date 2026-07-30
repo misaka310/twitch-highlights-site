@@ -34,17 +34,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run desktop and mobile browser tests
-        run: >-
-          npx playwright test
-          tests/ui.spec.js
-          tests/playback-policy.spec.js
-          tests/player-portal.spec.js
-          tests/rewind.spec.js
-          tests/latest-vods-public.spec.js
-          tests/mobile-playback-recovery.spec.js
-          tests/mobile-player-size.spec.js
-          --project=desktop
-          --project=mobile
+        run: npx playwright test --project=desktop --project=mobile
 
   production-mobile-playback:
     if: >-
