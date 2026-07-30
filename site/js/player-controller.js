@@ -30,6 +30,11 @@ function requestPlayback(vodId, startSec, options = {}) {
   const isSeekReadySameVod = isInteractiveSeekReadyForVod(playback.vodId);
   const isMountInFlightSameVod = isInteractiveMountInFlightForVod(playback.vodId);
   const isMountInFlightAnyVod = state.interactiveMountInFlight === true;
+  const canSwitchReadyInteractivePlayerDirectly =
+    state.playerMode === "interactive" &&
+    Boolean(state.playerInstance) &&
+    state.playerReady === true &&
+    typeof window.Twitch?.Player === "function";
 
   state.desiredPlayback = playback;
   state.requestedVodId = playback.vodId;
@@ -62,7 +67,10 @@ function requestPlayback(vodId, startSec, options = {}) {
     previousVodId === playback.vodId &&
     Number.isFinite(previousStartSec) &&
     previousStartSec === playback.startSec;
-  const shouldRefreshIframe = !isMountInFlightSameVod && !hasSameIframeTarget;
+  const shouldRefreshIframe =
+    !canSwitchReadyInteractivePlayerDirectly &&
+    !isMountInFlightSameVod &&
+    !hasSameIframeTarget;
 
   if (shouldRefreshIframe) {
     if (state.playerMode === "interactive") {
