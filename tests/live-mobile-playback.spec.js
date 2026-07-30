@@ -1,9 +1,9 @@
 const { test, expect } = require("@playwright/test");
 
-const EXPECTED_BUILD_LABEL = "mobile Twitch min size 20260730";
-const AUTOPLAY_SIZE_WARNING = /Autoplay disabled|minimum requirements for autoplay|style visibility/i;
+const EXPECTED_BUILD_LABEL = "mobile original iframe restored 20260730";
+const AUTOPLAY_WARNING = /Autoplay disabled|minimum requirements for autoplay|style visibility|playback[_ ]blocked/i;
 
-test("production 430px mobile player fits and starts without Twitch size rejection", async ({ page }) => {
+test("production mobile segment tap starts the original Twitch iframe playback", async ({ page }) => {
   const consoleMessages = [];
   page.on("console", (message) => {
     consoleMessages.push(message.text());
@@ -13,19 +13,20 @@ test("production 430px mobile player fits and starts without Twitch size rejecti
 
   const frame = page.locator("#player-frame");
   const segment = page.locator(".vod-card:not([hidden]) .segment-button").first();
-  const sdkIframe = page.locator(".player-embed-slot__sdk-iframe");
+  const iframe = page.locator(".player-embed-frame");
 
   await expect(segment).toBeVisible();
   await expect(segment).toBeEnabled({ timeout: 60_000 });
-  await expect(frame).toHaveAttribute("data-player-mode", "interactive", { timeout: 60_000 });
-  await expect(sdkIframe).toBeVisible({ timeout: 60_000 });
+  await expect(iframe).toBeVisible({ timeout: 60_000 });
   await expect(page.locator("#mobile-player-fit-styles")).toHaveCount(1);
+  await expect(page.locator('script[src="https://player.twitch.tv/js/embed/v1.js"]')).toHaveCount(0);
+  await expect(page.locator(".player-embed-slot__sdk-iframe")).toHaveCount(0);
   await expect(frame).toHaveAttribute("data-player-layout-width", "400");
   await expect(frame).toHaveAttribute("data-player-layout-height", "300");
 
   const frameBox = await frame.boundingBox();
-  const playerBox = await sdkIframe.boundingBox();
-  const playerLayoutSize = await sdkIframe.evaluate((node) => ({
+  const playerBox = await iframe.boundingBox();
+  const playerLayoutSize = await iframe.evaluate((node) => ({
     width: node.offsetWidth,
     height: node.offsetHeight,
   }));
@@ -42,15 +43,7 @@ test("production 430px mobile player fits and starts without Twitch size rejecti
   );
   expect(frameBox.x).toBeGreaterThanOrEqual(-0.5);
   expect(frameBox.x + frameBox.width).toBeLessThanOrEqual(viewport.width + 0.5);
-  expect(playerBox.x).toBeGreaterThanOrEqual(frameBox.x - 1);
-  expect(playerBox.x + playerBox.width).toBeLessThanOrEqual(frameBox.x + frameBox.width + 1);
-  expect(Math.abs(playerBox.width - frameBox.width)).toBeLessThanOrEqual(1.1);
-  expect(Math.abs(playerBox.height - frameBox.height)).toBeLessThanOrEqual(1.1);
-
-  const pageHasHorizontalOverflow = await page.evaluate(
-    () => document.documentElement.scrollWidth > window.innerWidth + 1
-  );
-  expect(pageHasHorizontalOverflow).toBe(false);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
 
   consoleMessages.length = 0;
   await segment.scrollIntoViewIfNeeded();
@@ -61,28 +54,66 @@ test("production 430px mobile player fits and starts without Twitch size rejecti
     segmentBox.y + segmentBox.height / 2
   );
 
-  await expect(frame).toHaveAttribute("data-player-status", "playing", { timeout: 30_000 });
+  await expect(frame).toHaveAttribute("data-player-mode", "iframe");
+  await expect(iframe).toHaveAttribute("src", /autoplay=true/);
+  await expect(iframe).toHaveAttribute("src", /muted=false/);
   await expect(frame).not.toHaveAttribute("data-player-status", /blocked|error/);
 
-  const playingAt = Number(await frame.getAttribute("data-current-start-sec"));
-  expect(Number.isFinite(playingAt)).toBe(true);
+  const initialPlayback = await expect
+    .poll(
+      async () => readActiveVideo(page),
+      {
+        message: "A real Twitch video element should be playing after the segment tap",
+        timeout: 30_000,
+        intervals: [500, 1000, 1000, 2000],
+      }
+    )
+    .toMatchObject({ paused: false });
 
+  const baseline = (await readActiveVideo(page))?.currentTime;
+  expect(Number.isFinite(baseline)).toBe(true);
   await expect
     .poll(
-      async () => Number(await frame.getAttribute("data-current-start-sec")),
+      async () => (await readActiveVideo(page))?.currentTime ?? -1,
       {
-        message: "Twitch playback time should advance after the real PLAYING event",
+        message: "The real Twitch video currentTime should advance",
         timeout: 20_000,
         intervals: [500, 1000, 1000, 2000],
       }
     )
-    .toBeGreaterThan(playingAt + 1);
+    .toBeGreaterThan(baseline + 1);
 
   await page.waitForTimeout(1500);
-  const sizeWarnings = consoleMessages.filter((message) => AUTOPLAY_SIZE_WARNING.test(message));
-  console.log(`[autoplay-size-warnings] ${JSON.stringify(sizeWarnings)}`);
-  expect(sizeWarnings).toEqual([]);
+  const autoplayWarnings = consoleMessages.filter((message) => AUTOPLAY_WARNING.test(message));
+  console.log(`[autoplay-warnings] ${JSON.stringify(autoplayWarnings)}`);
+  expect(autoplayWarnings).toEqual([]);
 });
+
+async function readActiveVideo(page) {
+  let best = null;
+  for (const childFrame of page.frames()) {
+    try {
+      const videos = childFrame.locator("video");
+      const count = await videos.count();
+      for (let index = 0; index < count; index += 1) {
+        const state = await videos.nth(index).evaluate((video) => ({
+          currentTime: Number(video.currentTime),
+          paused: Boolean(video.paused),
+          readyState: Number(video.readyState),
+        }));
+        if (!Number.isFinite(state.currentTime)) {
+          continue;
+        }
+        if (!best || state.currentTime > best.currentTime || (!state.paused && best.paused)) {
+          best = state;
+        }
+      }
+    } catch (error) {
+      // Twitch replaces nested frames while the player initializes.
+    }
+  }
+  return best;
+}
 
 async function waitForDeployedBuild(page) {
   const deadline = Date.now() + 10 * 60_000;
@@ -106,7 +137,7 @@ async function waitForDeployedBuild(page) {
     }
 
     try {
-      lastLabel = String(await label.textContent() || "").trim();
+      lastLabel = String((await label.textContent()) || "").trim();
     } catch (error) {
       lastLabel = "";
     }
