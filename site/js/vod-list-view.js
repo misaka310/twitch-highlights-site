@@ -20,6 +20,14 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
   const vodTabState = {
     activeVodId: null,
   };
+  const gatePlaybackControls =
+    typeof window.matchMedia === "function" && window.matchMedia("(max-width: 640px)").matches;
+  let playbackControlsReady = !gatePlaybackControls;
+
+  window.addEventListener("twitch-player-ready", () => {
+    playbackControlsReady = true;
+    syncPlaybackControlAvailability();
+  });
 
   bindPlayerFrameSummarySync();
 
@@ -105,6 +113,7 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
         button.dataset.segmentId = segment.id;
         button.dataset.startSec = String(segment.start_sec);
         button.dataset.hasThumbnail = "false";
+        setPlaybackControlReadyState(button);
         button.querySelector(".segment-summary").textContent = segment.summary;
         if (startTimeBadge) {
           startTimeBadge.textContent = formatSegmentLabelCompact(segment.start_sec);
@@ -129,6 +138,24 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
     updateActiveButtons();
     renderVodTabs();
     applyVodTabVisibility();
+    syncPlaybackControlAvailability();
+  }
+
+  function setPlaybackControlReadyState(control) {
+    if (!control) {
+      return;
+    }
+    const disabled = !playbackControlsReady;
+    control.disabled = disabled;
+    control.setAttribute("aria-disabled", String(disabled));
+    control.dataset.playerReady = String(playbackControlsReady);
+    control.title = disabled ? "プレイヤー準備中" : "";
+  }
+
+  function syncPlaybackControlAvailability() {
+    elements.vodList?.querySelectorAll(".segment-button").forEach(setPlaybackControlReadyState);
+    setPlaybackControlReadyState(elements.activityMapButton);
+    setPlaybackControlReadyState(elements.playerRewind10);
   }
 
   function renderSegmentTags(container, tags) {

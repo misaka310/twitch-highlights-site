@@ -54,12 +54,10 @@ test.beforeEach(async ({ page }) => {
 
       setVideo(video, seconds) {
         this.setVideoCalls += 1;
-        if (String(video) === String(this.video)) {
-          return;
-        }
         this.video = video;
-        this.pendingTime = Number(seconds);
-        this.emit("ready");
+        this.currentTime = Number(seconds);
+        this.pendingTime = null;
+        this.emit("playing");
       }
 
       loadVideo(video, seconds) {

@@ -3117,3 +3117,35 @@ body {
 .vod-rail .vod-tab:disabled .vod-tab__weekday {
   color: #5f6b7d;
 }
+
+@media (max-width: 640px) {
+  /* Twitch mobile minimum embed size */
+  .player-surface {
+    margin-inline: -10px;
+    overflow: hidden;
+  }
+
+  .player-frame {
+    left: 50%;
+    width: 400px;
+    max-width: none;
+    height: 300px;
+    aspect-ratio: auto;
+    margin-inline: 0;
+    transform: translateX(-50%);
+  }
+
+  .player-embed,
+  .player-embed--mounted,
+  .player-embed-slot,
+  .player-frame[data-player-mode="interactive"] .player-embed-slot--interactive,
+  .player-frame[data-player-mode="interactive"] .player-embed-slot__sdk-wrapper,
+  .player-frame[data-player-mode="interactive"] .player-embed-slot__sdk-iframe,
+  .player-embed-frame {
+    width: 400px !important;
+    min-width: 400px !important;
+    height: 300px !important;
+    min-height: 300px !important;
+  }
+}
+
