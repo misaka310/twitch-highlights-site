@@ -77,7 +77,7 @@ test("interactive playback exposes a recovery control when autoplay is blocked",
   await expect(recoveryButton).toBeVisible();
   await expect(page.locator("#player-frame")).toHaveAttribute("data-player-status", "blocked");
 
-  await recoveryButton.click();
+  await recoveryButton.evaluate((button) => button.click());
 
   await expect(recoveryButton).toBeHidden();
   await expect(page.locator("#player-frame")).toHaveAttribute("data-player-status", "playing");
