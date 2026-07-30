@@ -15,6 +15,7 @@ module.exports = defineConfig({
   reporter: [["list"]],
   use: {
     baseURL: liveBaseUrl,
+    actionTimeout: 30_000,
     trace: "retain-on-failure",
     video: "retain-on-failure",
     screenshot: "only-on-failure",
