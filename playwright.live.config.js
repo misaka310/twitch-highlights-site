@@ -16,7 +16,7 @@ module.exports = defineConfig({
   use: {
     ...devices["Pixel 5"],
     baseURL: liveBaseUrl,
-    viewport: { width: 383, height: 841 },
+    viewport: { width: 430, height: 932 },
     trace: "retain-on-failure",
     video: "retain-on-failure",
     screenshot: "only-on-failure",
