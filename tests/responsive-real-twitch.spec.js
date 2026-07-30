@@ -2,7 +2,7 @@ const { test, expect } = require("@playwright/test");
 
 const AUTOPLAY_WARNING = /Autoplay disabled|minimum requirements for autoplay|style visibility|playback[_ ]blocked/i;
 
-test("626px responsive view portals the real Twitch player and plays another VOD", async ({ page }, testInfo) => {
+test("626px responsive view keeps the trusted direct iframe and plays another VOD", async ({ page }, testInfo) => {
   test.slow();
   test.skip(testInfo.project.name !== "desktop", "626px real Twitch check uses desktop Chromium");
 
@@ -41,13 +41,20 @@ test("626px responsive view portals the real Twitch player and plays another VOD
   consoleMessages.length = 0;
   await target.click();
 
+  const iframe = page.locator(".player-embed-frame");
+  await expect(iframe).toBeVisible({ timeout: 30_000 });
   await expect(frame).toHaveAttribute("data-current-vod-id", targetVodId, { timeout: 30_000 });
-  await expect(frame).toHaveAttribute("data-player-mode", "interactive");
+  await expect(frame).toHaveAttribute("data-player-mode", "iframe");
+  await expect(frame).toHaveAttribute("data-triggered-by-user", "true");
+  await expect(iframe).toHaveAttribute("src", new RegExp(`video=${targetVodId}`));
+  await expect(iframe).toHaveAttribute("src", /autoplay=true/);
+  await expect(iframe).toHaveAttribute("src", /muted=false/);
   await expect(player).toHaveClass(/player-embed--portal/);
+  await expect(page.locator("#twitch-player-inner")).toHaveCount(0);
 
   await expect
     .poll(async () => readActiveVideo(page), {
-      message: "Real Twitch video should play after a cross-VOD click at 626px",
+      message: "Real Twitch video should play from the direct iframe after a cross-VOD click at 626px",
       timeout: 45_000,
       intervals: [500, 1000, 1000, 2000],
     })
