@@ -80,12 +80,17 @@ test("cross-VOD click reuses the ready Twitch player synchronously", async ({ pa
   const frame = page.locator("#player-frame");
   await expect(frame).toHaveAttribute("data-player-status", "ready");
 
-  const firstVodId = await page.locator(".segment-button").first().getAttribute("data-vod-id");
-  const target = page.locator(`.segment-button:not([data-vod-id="${firstVodId}"])`).first();
+  const initialVodId = await frame.getAttribute("data-current-vod-id");
+  const tabs = page.locator(".vod-tab, .mobile-vod-tab");
+  await expect(tabs.nth(1)).toBeVisible();
+  await tabs.nth(1).click();
+
+  const target = page.locator(".vod-card:not([hidden]) .segment-button").first();
   await expect(target).toBeVisible();
 
   const targetVodId = await target.getAttribute("data-vod-id");
   const targetStartSec = Number(await target.getAttribute("data-start-sec"));
+  expect(targetVodId).not.toBe(initialVodId);
   await target.click();
 
   await expect
