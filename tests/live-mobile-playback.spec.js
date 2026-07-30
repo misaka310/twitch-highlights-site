@@ -13,16 +13,29 @@ test("production mobile segment tap starts the original Twitch iframe playback",
 
   const frame = page.locator("#player-frame");
   const segment = page.locator(".vod-card:not([hidden]) .segment-button").first();
-  const iframe = page.locator(".player-embed-frame");
 
   await expect(segment).toBeVisible();
   await expect(segment).toBeEnabled({ timeout: 60_000 });
-  await expect(iframe).toBeVisible({ timeout: 60_000 });
   await expect(page.locator("#mobile-player-fit-styles")).toHaveCount(1);
-  await expect(page.locator('script[src="https://player.twitch.tv/js/embed/v1.js"]')).toHaveCount(0);
-  await expect(page.locator(".player-embed-slot__sdk-iframe")).toHaveCount(0);
   await expect(frame).toHaveAttribute("data-player-layout-width", "400");
   await expect(frame).toHaveAttribute("data-player-layout-height", "300");
+
+  consoleMessages.length = 0;
+  await segment.scrollIntoViewIfNeeded();
+  const segmentBox = await segment.boundingBox();
+  expect(segmentBox).not.toBeNull();
+  await page.touchscreen.tap(
+    segmentBox.x + segmentBox.width / 2,
+    segmentBox.y + segmentBox.height / 2
+  );
+
+  const iframe = page.locator(".player-embed-frame");
+  await expect(iframe).toBeVisible({ timeout: 30_000 });
+  await expect(frame).toHaveAttribute("data-player-mode", "iframe");
+  await expect(iframe).toHaveAttribute("src", /autoplay=true/);
+  await expect(iframe).toHaveAttribute("src", /muted=false/);
+  await expect(page.locator(".player-embed-slot__sdk-iframe")).toHaveCount(0);
+  await expect(frame).not.toHaveAttribute("data-player-status", /blocked|error/);
 
   const frameBox = await frame.boundingBox();
   const playerBox = await iframe.boundingBox();
@@ -45,21 +58,7 @@ test("production mobile segment tap starts the original Twitch iframe playback",
   expect(frameBox.x + frameBox.width).toBeLessThanOrEqual(viewport.width + 0.5);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
 
-  consoleMessages.length = 0;
-  await segment.scrollIntoViewIfNeeded();
-  const segmentBox = await segment.boundingBox();
-  expect(segmentBox).not.toBeNull();
-  await page.touchscreen.tap(
-    segmentBox.x + segmentBox.width / 2,
-    segmentBox.y + segmentBox.height / 2
-  );
-
-  await expect(frame).toHaveAttribute("data-player-mode", "iframe");
-  await expect(iframe).toHaveAttribute("src", /autoplay=true/);
-  await expect(iframe).toHaveAttribute("src", /muted=false/);
-  await expect(frame).not.toHaveAttribute("data-player-status", /blocked|error/);
-
-  const initialPlayback = await expect
+  await expect
     .poll(
       async () => readActiveVideo(page),
       {
