@@ -1,0 +1,1 @@
+Verify the 430px production player retains Twitch's 400x300 layout and emits no autoplay size warning.
