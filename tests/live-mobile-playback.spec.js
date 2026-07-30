@@ -1,8 +1,14 @@
 const { test, expect } = require("@playwright/test");
 
-const EXPECTED_BUILD_LABEL = "mobile player fit inline 20260730";
+const EXPECTED_BUILD_LABEL = "mobile Twitch min size 20260730";
+const AUTOPLAY_SIZE_WARNING = /Autoplay disabled|minimum requirements for autoplay|style visibility/i;
 
-test("production mobile player fits viewport and tap starts real Twitch playback", async ({ page }) => {
+test("production 430px mobile player fits and starts without Twitch size rejection", async ({ page }) => {
+  const consoleMessages = [];
+  page.on("console", (message) => {
+    consoleMessages.push(message.text());
+  });
+
   await waitForDeployedBuild(page);
 
   const frame = page.locator("#player-frame");
@@ -14,27 +20,39 @@ test("production mobile player fits viewport and tap starts real Twitch playback
   await expect(frame).toHaveAttribute("data-player-mode", "interactive", { timeout: 60_000 });
   await expect(sdkIframe).toBeVisible({ timeout: 60_000 });
   await expect(page.locator("#mobile-player-fit-styles")).toHaveCount(1);
+  await expect(frame).toHaveAttribute("data-player-layout-width", "400");
+  await expect(frame).toHaveAttribute("data-player-layout-height", "300");
 
   const frameBox = await frame.boundingBox();
   const playerBox = await sdkIframe.boundingBox();
+  const playerLayoutSize = await sdkIframe.evaluate((node) => ({
+    width: node.offsetWidth,
+    height: node.offsetHeight,
+  }));
+
   expect(frameBox).not.toBeNull();
   expect(playerBox).not.toBeNull();
+  expect(playerLayoutSize.width).toBeGreaterThanOrEqual(400);
+  expect(playerLayoutSize.height).toBeGreaterThanOrEqual(300);
 
   const viewport = page.viewportSize();
   expect(viewport).not.toBeNull();
-  console.log(`[player-fit] viewport=${viewport.width}x${viewport.height} frame=${JSON.stringify(frameBox)} iframe=${JSON.stringify(playerBox)}`);
+  console.log(
+    `[player-fit] viewport=${viewport.width}x${viewport.height} frame=${JSON.stringify(frameBox)} iframe=${JSON.stringify(playerBox)} layout=${JSON.stringify(playerLayoutSize)}`
+  );
   expect(frameBox.x).toBeGreaterThanOrEqual(-0.5);
   expect(frameBox.x + frameBox.width).toBeLessThanOrEqual(viewport.width + 0.5);
   expect(playerBox.x).toBeGreaterThanOrEqual(frameBox.x - 1);
   expect(playerBox.x + playerBox.width).toBeLessThanOrEqual(frameBox.x + frameBox.width + 1);
-  expect(Math.abs(playerBox.width - frameBox.width)).toBeLessThanOrEqual(2.1);
-  expect(Math.abs(playerBox.height - frameBox.height)).toBeLessThanOrEqual(2.1);
+  expect(Math.abs(playerBox.width - frameBox.width)).toBeLessThanOrEqual(1.1);
+  expect(Math.abs(playerBox.height - frameBox.height)).toBeLessThanOrEqual(1.1);
 
   const pageHasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth + 1
   );
   expect(pageHasHorizontalOverflow).toBe(false);
 
+  consoleMessages.length = 0;
   await segment.scrollIntoViewIfNeeded();
   const segmentBox = await segment.boundingBox();
   expect(segmentBox).not.toBeNull();
@@ -59,6 +77,11 @@ test("production mobile player fits viewport and tap starts real Twitch playback
       }
     )
     .toBeGreaterThan(playingAt + 1);
+
+  await page.waitForTimeout(1500);
+  const sizeWarnings = consoleMessages.filter((message) => AUTOPLAY_SIZE_WARNING.test(message));
+  console.log(`[autoplay-size-warnings] ${JSON.stringify(sizeWarnings)}`);
+  expect(sizeWarnings).toEqual([]);
 });
 
 async function waitForDeployedBuild(page) {
