@@ -10,32 +10,6 @@ permissions:
   contents: read
 
 jobs:
-  apply-real-mobile-playback-fix:
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.head_ref == 'fix/verify-real-mobile-playback-20260730' &&
-      github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Check out fix branch
-        uses: actions/checkout@v4
-        with:
-          ref: fix/verify-real-mobile-playback-20260730
-          fetch-depth: 0
-
-      - name: Apply Twitch minimum-size fix
-        run: python scripts/apply_mobile_player_size_fix.py
-
-      - name: Commit Twitch minimum-size fix
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/styles.css tests/mobile-player-size.spec.js
-          git commit -m "Meet Twitch mobile embed dimensions"
-          git push origin HEAD:fix/verify-real-mobile-playback-20260730
-
   frontend-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -59,7 +33,7 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run desktop browser tests
+      - name: Run desktop and mobile browser tests
         run: >-
           npx playwright test
           tests/ui.spec.js
@@ -68,16 +42,45 @@ jobs:
           tests/rewind.spec.js
           tests/latest-vods-public.spec.js
           tests/mobile-playback-recovery.spec.js
-          --project=desktop
-
-      - name: Run mobile browser tests
-        run: >-
-          npx playwright test
-          tests/ui.spec.js
-          tests/playback-policy.spec.js
-          tests/player-portal.spec.js
-          tests/latest-vods-public.spec.js
-          tests/mobile-playback-recovery.spec.js
-          tests/rewind.spec.js
           tests/mobile-player-size.spec.js
+          --project=desktop
           --project=mobile
+
+  production-mobile-playback:
+    if: >-
+      github.event_name == 'push' &&
+      contains(github.event.head_commit.message, '[live-mobile]')
+    needs: frontend-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LIVE_BASE_URL: https://dotitao-moments.onrender.com
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify real production mobile playback
+        run: npx playwright test --config=playwright.live.config.js
+
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-mobile-playback-failure
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
