@@ -5,6 +5,16 @@ const path = require("path");
 
 const DEPLOY_WAIT_MS = 10 * 60_000;
 const LIVE_BASE_URL = process.env.LIVE_BASE_URL || "";
+const PUBLIC_ROOT = path.join(__dirname, "..", "public");
+const DEPLOYMENT_PATHS = [
+  "index.html",
+  "styles.css",
+  ...fs
+    .readdirSync(path.join(PUBLIC_ROOT, "js"), { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))
+    .map((entry) => `js/${entry.name}`)
+    .sort(),
+];
 
 test("deployed mobile first cross-VOD click starts audible playback without overflow", async ({ page, request }) => {
   test.skip(!LIVE_BASE_URL, "LIVE_BASE_URL is required for production verification");
@@ -73,32 +83,43 @@ test("deployed mobile first cross-VOD click starts audible playback without over
 });
 
 async function waitForExpectedDeployment(request) {
-  const expectedPath = path.join(__dirname, "..", "public", "js", "player-portal.js");
-  const expectedHash = sha256(fs.readFileSync(expectedPath));
+  const expectedHashes = new Map(
+    DEPLOYMENT_PATHS.map((relativePath) => [
+      relativePath,
+      sha256RuntimeText(fs.readFileSync(path.join(PUBLIC_ROOT, ...relativePath.split("/")))),
+    ])
+  );
   const deadline = Date.now() + DEPLOY_WAIT_MS;
-  let lastHash = "unavailable";
+  let lastMismatch = "unavailable";
 
   while (Date.now() < deadline) {
-    try {
-      const response = await request.get(
-        `${LIVE_BASE_URL.replace(/\/$/, "")}/js/player-portal.js?deployment-check=${Date.now()}`,
-        { headers: { "cache-control": "no-cache" } }
-      );
-      if (response.ok()) {
-        lastHash = sha256(await response.body());
-        if (lastHash === expectedHash) {
-          return;
+    const mismatches = [];
+    for (const relativePath of DEPLOYMENT_PATHS) {
+      try {
+        const response = await request.get(
+          `${LIVE_BASE_URL.replace(/\/$/, "")}/${relativePath}?deployment-check=${Date.now()}`,
+          { headers: { "cache-control": "no-cache" } }
+        );
+        if (!response.ok()) {
+          mismatches.push(`${relativePath}=HTTP ${response.status()}`);
+          continue;
         }
-      } else {
-        lastHash = `HTTP ${response.status()}`;
+        const actualHash = sha256RuntimeText(await response.body());
+        if (actualHash !== expectedHashes.get(relativePath)) {
+          mismatches.push(`${relativePath}=${actualHash}`);
+        }
+      } catch (error) {
+        mismatches.push(`${relativePath}=${String(error?.message || error)}`);
       }
-    } catch (error) {
-      lastHash = String(error?.message || error);
     }
+    if (mismatches.length === 0) {
+      return;
+    }
+    lastMismatch = mismatches.join(", ");
     await new Promise((resolve) => setTimeout(resolve, 10_000));
   }
 
-  throw new Error(`production deployment did not match expected player-portal.js; last=${lastHash}`);
+  throw new Error(`production deployment did not match expected runtime assets; last=${lastMismatch}`);
 }
 
 async function getPlaybackState(page) {
@@ -139,6 +160,7 @@ async function getPlaybackState(page) {
   }
 }
 
-function sha256(buffer) {
-  return crypto.createHash("sha256").update(buffer).digest("hex");
+function sha256RuntimeText(buffer) {
+  const normalized = Buffer.from(buffer).toString("utf8").replace(/\r\n/g, "\n");
+  return crypto.createHash("sha256").update(normalized, "utf8").digest("hex");
 }
