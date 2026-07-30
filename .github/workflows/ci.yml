@@ -10,6 +10,32 @@ permissions:
   contents: read
 
 jobs:
+  apply-real-mobile-playback-fix:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.head_ref == 'fix/verify-real-mobile-playback-20260730' &&
+      github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out fix branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/verify-real-mobile-playback-20260730
+          fetch-depth: 0
+
+      - name: Apply source fix
+        run: python scripts/apply_real_mobile_playback_fix.py
+
+      - name: Commit source fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/js/player-controller.js site/js/vod-list-view.js site/js/config.js tests/rewind.spec.js tests/mobile-playback-recovery.spec.js tests/mobile-iframe-autoplay.spec.js
+          git commit -m "Restore verified mobile SDK playback"
+          git push origin HEAD:fix/verify-real-mobile-playback-20260730
+
   frontend-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
