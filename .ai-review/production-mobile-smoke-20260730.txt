@@ -1,0 +1,1 @@
+Run the production mobile playback smoke test against the deployed Render site.
