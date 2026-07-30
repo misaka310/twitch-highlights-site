@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
-test("interactive playback exposes a recovery control when autoplay is blocked", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "Interactive SDK recovery is desktop-only");
+test("mobile playback exposes a recovery control when autoplay is blocked", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "Mobile user-gesture recovery only");
 
   await page.addInitScript(() => {
     class FakePlayer {
@@ -71,13 +71,17 @@ test("interactive playback exposes a recovery control when autoplay is blocked",
   await page.goto("/");
   const segment = page.locator(".vod-card:not([hidden]) .segment-button").first();
   await expect(segment).toBeVisible();
-  await segment.click();
+
+  await expect(segment).toBeEnabled();
+  const box = await segment.boundingBox();
+  expect(box).not.toBeNull();
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
 
   const recoveryButton = page.locator("#player-unmute");
   await expect(recoveryButton).toBeVisible();
   await expect(page.locator("#player-frame")).toHaveAttribute("data-player-status", "blocked");
 
-  await recoveryButton.evaluate((button) => button.click());
+  await recoveryButton.tap();
 
   await expect(recoveryButton).toBeHidden();
   await expect(page.locator("#player-frame")).toHaveAttribute("data-player-status", "playing");
