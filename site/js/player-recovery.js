@@ -1,7 +1,9 @@
 (() => {
   const TWITCH_MIN_WIDTH = 400;
   const TWITCH_MIN_HEIGHT = 300;
+  const TWITCH_PLAYER_SCRIPT_URL = "https://player.twitch.tv/js/embed/v1.js";
   const mobileFitStyleId = "mobile-player-fit-styles";
+  const mobileQuery = window.matchMedia("(max-width: 640px)");
 
   if (!document.getElementById(mobileFitStyleId)) {
     const style = document.createElement("style");
@@ -64,14 +66,14 @@
   }
 
   const frame = document.querySelector("#player-frame");
+  const playerHost = document.querySelector("#twitch-player");
   const recoveryButton = document.querySelector("#player-unmute");
   const statusText = document.querySelector("#player-status-text");
 
-  if (!frame || !recoveryButton) {
+  if (!frame || !playerHost || !recoveryButton) {
     return;
   }
 
-  const mobileQuery = window.matchMedia("(max-width: 640px)");
   const syncMobilePlayerScale = () => {
     if (!mobileQuery.matches) {
       frame.style.removeProperty("--twitch-player-scale");
@@ -96,6 +98,134 @@
   window.addEventListener("resize", syncMobilePlayerScale, { passive: true });
   window.visualViewport?.addEventListener("resize", syncMobilePlayerScale, { passive: true });
 
+  if (mobileQuery.matches) {
+    // The site originally used a direct Twitch iframe on phones. Keep the SDK
+    // out of the mobile path so a segment tap can navigate the iframe while the
+    // browser's user activation is still valid.
+    const nativeHeadAppend = document.head.append.bind(document.head);
+    document.head.append = (...nodes) => {
+      const acceptedNodes = [];
+      nodes.forEach((node) => {
+        const isTwitchSdk =
+          node instanceof HTMLScriptElement &&
+          String(node.src || "").split("?")[0] === TWITCH_PLAYER_SCRIPT_URL;
+        if (isTwitchSdk) {
+          queueMicrotask(() => node.dispatchEvent(new Event("error")));
+          return;
+        }
+        acceptedNodes.push(node);
+      });
+      if (acceptedNodes.length > 0) {
+        nativeHeadAppend(...acceptedNodes);
+      }
+    };
+
+    let readyEventDispatched = false;
+    const unlockMobilePlaybackControls = () => {
+      const controls = document.querySelectorAll(
+        ".segment-button, #activity-map-button, #player-rewind-10"
+      );
+      controls.forEach((control) => {
+        control.disabled = false;
+        control.setAttribute("aria-disabled", "false");
+        control.dataset.playerReady = "true";
+        control.title = "";
+      });
+      if (!readyEventDispatched && document.querySelector(".segment-button")) {
+        readyEventDispatched = true;
+        window.dispatchEvent(new CustomEvent("twitch-player-ready", { detail: { mode: "iframe" } }));
+      }
+    };
+
+    const buildLegacyEmbedUrl = (vodId, startSec) => {
+      const url = new URL("https://player.twitch.tv/");
+      url.searchParams.set("video", String(vodId || "").replace(/^v/i, ""));
+      url.searchParams.set("autoplay", "true");
+      url.searchParams.set("muted", "false");
+      url.searchParams.set("playsinline", "true");
+      url.searchParams.set("time", formatTwitchTime(startSec));
+      url.searchParams.set("seq", String(Date.now()));
+      [location.hostname, "localhost", "127.0.0.1"]
+        .filter(Boolean)
+        .filter((value, index, values) => values.indexOf(value) === index)
+        .forEach((parent) => url.searchParams.append("parent", parent));
+      return url.toString();
+    };
+
+    const forceLegacySegmentPlayback = (button) => {
+      const vodId = String(button?.dataset.vodId || "");
+      const startSec = Math.max(0, Number(button?.dataset.startSec) || 0);
+      if (!vodId) {
+        return;
+      }
+
+      let iframe = playerHost.querySelector(".player-embed-frame");
+      if (!iframe) {
+        iframe = document.createElement("iframe");
+        iframe.className = "player-embed-frame";
+        iframe.title = "Twitch";
+        iframe.allow = "autoplay; fullscreen; picture-in-picture";
+        iframe.setAttribute("allowfullscreen", "");
+        iframe.setAttribute("scrolling", "no");
+        iframe.setAttribute("frameborder", "0");
+        iframe.width = "400";
+        iframe.height = "300";
+        playerHost.replaceChildren(iframe);
+      }
+
+      playerHost.classList.add("player-embed--mounted");
+      frame.dataset.playerMode = "iframe";
+      frame.dataset.playerStatus = "starting";
+      frame.dataset.currentVodId = vodId;
+      frame.dataset.currentStartSec = String(startSec);
+      frame.dataset.expectedAutoplay = "true";
+      frame.dataset.expectedMuted = "false";
+      frame.dataset.triggeredByUser = "true";
+      iframe.addEventListener(
+        "load",
+        () => {
+          frame.dataset.playerMode = "iframe";
+          frame.dataset.playerStatus = "ready";
+          if (statusText) {
+            statusText.textContent = "プレイヤー準備完了";
+          }
+        },
+        { once: true }
+      );
+      iframe.src = buildLegacyEmbedUrl(vodId, startSec);
+    };
+
+    document.addEventListener(
+      "click",
+      (event) => {
+        const button = event.target instanceof Element ? event.target.closest(".segment-button") : null;
+        if (!button) {
+          return;
+        }
+        // Run after the site's selection handler, but still inside the same
+        // click task so Twitch receives a genuine user-initiated navigation.
+        queueMicrotask(() => forceLegacySegmentPlayback(button));
+      },
+      true
+    );
+
+    const mobileObserver = new MutationObserver(() => {
+      unlockMobilePlaybackControls();
+      const iframe = playerHost.querySelector(".player-embed-frame");
+      if (iframe && frame.dataset.playerStatus === "error") {
+        frame.dataset.playerMode = "iframe";
+        frame.dataset.playerStatus = "ready";
+      }
+    });
+    mobileObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-player-status", "disabled"],
+    });
+    unlockMobilePlaybackControls();
+  }
+
   const syncRecoveryControl = () => {
     const playbackBlocked = frame.dataset.playerStatus === "blocked";
     recoveryButton.hidden = !playbackBlocked;
@@ -114,4 +244,12 @@
   });
 
   syncRecoveryControl();
+
+  function formatTwitchTime(totalSeconds) {
+    const seconds = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    return `${hours}h${minutes}m${remainingSeconds}s`;
+  }
 })();
