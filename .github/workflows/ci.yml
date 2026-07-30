@@ -31,6 +31,9 @@ jobs:
       - name: Run JavaScript unit tests
         run: node --test tests/*.test.mjs
 
+      - name: Build production publish directory
+        run: bash scripts/build_public.sh
+
       - name: Run publication and Python tests
         run: python -m unittest discover -s tests -p "test_*.py"
 
