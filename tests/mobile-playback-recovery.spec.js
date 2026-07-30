@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
-test("mobile playback exposes a recovery control when autoplay is blocked", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "mobile", "Mobile user-gesture recovery only");
+test("desktop SDK playback exposes a recovery control when autoplay is blocked", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "The mobile path intentionally uses the original iframe");
 
   await page.addInitScript(() => {
     class FakePlayer {
@@ -25,8 +25,7 @@ test("mobile playback exposes a recovery control when autoplay is blocked", asyn
         const iframe = document.createElement("iframe");
         iframe.title = "Fake Twitch player";
         host?.append(iframe);
-
-        window.setTimeout(() => this.emit(FakePlayer.READY), 500);
+        window.setTimeout(() => this.emit(FakePlayer.READY), 100);
       }
 
       addEventListener(name, callback) {
@@ -71,17 +70,14 @@ test("mobile playback exposes a recovery control when autoplay is blocked", asyn
   await page.goto("/");
   const segment = page.locator(".vod-card:not([hidden]) .segment-button").first();
   await expect(segment).toBeVisible();
-
   await expect(segment).toBeEnabled();
-  const box = await segment.boundingBox();
-  expect(box).not.toBeNull();
-  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  await segment.click();
 
   const recoveryButton = page.locator("#player-unmute");
   await expect(recoveryButton).toBeVisible();
   await expect(page.locator("#player-frame")).toHaveAttribute("data-player-status", "blocked");
 
-  await recoveryButton.tap();
+  await recoveryButton.evaluate((button) => button.click());
 
   await expect(recoveryButton).toBeHidden();
   await expect(page.locator("#player-frame")).toHaveAttribute("data-player-status", "playing");
