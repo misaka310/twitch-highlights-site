@@ -1,4 +1,3 @@
-\
 const { test, expect } = require("@playwright/test");
 
 test("mobile tap keeps playback on the synchronous iframe path", async ({ page }, testInfo) => {
