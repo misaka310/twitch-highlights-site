@@ -5,10 +5,11 @@ const MOBILE_VIEWPORTS = [
   { width: 360, height: 800 },
   { width: 390, height: 844 },
   { width: 412, height: 915 },
+  { width: 430, height: 932 },
 ];
 
 for (const viewport of MOBILE_VIEWPORTS) {
-  test(`mobile Twitch player stays fully visible at ${viewport.width}px`, async ({ page }, testInfo) => {
+  test(`mobile Twitch player stays visible and retains 400x300 layout at ${viewport.width}px`, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile", "Mobile Twitch sizing only");
 
     await page.addInitScript(() => {
@@ -66,15 +67,22 @@ for (const viewport of MOBILE_VIEWPORTS) {
 
     const frameBox = await frame.boundingBox();
     const iframeBox = await iframe.boundingBox();
+    const layoutSize = await iframe.evaluate((node) => ({
+      width: node.offsetWidth,
+      height: node.offsetHeight,
+    }));
+
     expect(frameBox).not.toBeNull();
     expect(iframeBox).not.toBeNull();
+    expect(layoutSize.width).toBeGreaterThanOrEqual(400);
+    expect(layoutSize.height).toBeGreaterThanOrEqual(300);
 
     expect(frameBox.x).toBeGreaterThanOrEqual(-0.5);
     expect(frameBox.x + frameBox.width).toBeLessThanOrEqual(viewport.width + 0.5);
     expect(iframeBox.x).toBeGreaterThanOrEqual(frameBox.x - 1);
     expect(iframeBox.x + iframeBox.width).toBeLessThanOrEqual(frameBox.x + frameBox.width + 1);
-    expect(Math.abs(iframeBox.width - frameBox.width)).toBeLessThanOrEqual(2.1);
-    expect(Math.abs(iframeBox.height - frameBox.height)).toBeLessThanOrEqual(2.1);
+    expect(Math.abs(iframeBox.width - frameBox.width)).toBeLessThanOrEqual(1.1);
+    expect(Math.abs(iframeBox.height - frameBox.height)).toBeLessThanOrEqual(1.1);
     expect(frameBox.width / frameBox.height).toBeGreaterThan(1.31);
     expect(frameBox.width / frameBox.height).toBeLessThan(1.35);
 
