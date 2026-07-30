@@ -72,8 +72,7 @@ jobs:
           function mountIframePlayer(playback) {''')
           if text.count(function_anchor) != 1:
               raise SystemExit('mountIframePlayer anchor not found exactly once')
-          text = text.replace(function_anchor, function_replacement, 1)
-          controller.write_text(text, encoding='utf-8')
+          controller.write_text(text.replace(function_anchor, function_replacement, 1), encoding='utf-8')
 
           Path('tests/mobile-iframe-autoplay.spec.js').write_text(dedent(r'''\
           const { test, expect } = require("@playwright/test");
@@ -108,23 +107,13 @@ jobs:
             expect(await page.locator('script[src="https://player.twitch.tv/js/embed/v1.js"]').count()).toBe(0);
           });
           '''), encoding='utf-8')
-
-          ci = Path('.github/workflows/ci.yml')
-          ci_text = ci.read_text(encoding='utf-8')
-          ci_anchor = '          tests/mobile-playback-recovery.spec.js\n          --project=desktop'
-          ci_replacement = '          tests/mobile-playback-recovery.spec.js\n          tests/mobile-iframe-autoplay.spec.js\n          --project=desktop'
-          if ci_text.count(ci_anchor) != 1:
-              raise SystemExit('CI test list anchor not found exactly once')
-          ci.write_text(ci_text.replace(ci_anchor, ci_replacement, 1), encoding='utf-8')
           PY
-
-          rm .github/workflows/apply-mobile-autoplay-fix.yml
 
       - name: Commit fix
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add site/js/player-controller.js tests/mobile-iframe-autoplay.spec.js
           git commit -m "Restore synchronous mobile playback"
           git push origin HEAD:fix/restore-mobile-autoplay-20260730
