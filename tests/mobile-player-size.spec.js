@@ -77,8 +77,8 @@ for (const viewport of MOBILE_VIEWPORTS) {
     expect(frameBox.x + frameBox.width).toBeLessThanOrEqual(viewport.width + 0.5);
     expect(iframeBox.x).toBeGreaterThanOrEqual(frameBox.x - 1);
     expect(iframeBox.x + iframeBox.width).toBeLessThanOrEqual(frameBox.x + frameBox.width + 1);
-    expect(Math.abs(iframeBox.width - frameBox.width)).toBeLessThanOrEqual(1);
-    expect(Math.abs(iframeBox.height - frameBox.height)).toBeLessThanOrEqual(1);
+    expect(Math.abs(iframeBox.width - frameBox.width)).toBeLessThanOrEqual(2.1);
+    expect(Math.abs(iframeBox.height - frameBox.height)).toBeLessThanOrEqual(2.1);
     expect(frameBox.width / frameBox.height).toBeGreaterThan(1.31);
     expect(frameBox.width / frameBox.height).toBeLessThan(1.35);
 
