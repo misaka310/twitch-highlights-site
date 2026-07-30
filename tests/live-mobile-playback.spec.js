@@ -63,8 +63,16 @@ async function waitForDeployedBuild(page) {
     });
 
     const label = page.locator("#build-label-mobile");
+    let expectedBuildReached = false;
     try {
-      lastLabel = String(await label.textContent({ timeout: 15_000 }) || "").trim();
+      await expect(label).toHaveText(EXPECTED_BUILD_LABEL, { timeout: 15_000 });
+      expectedBuildReached = true;
+    } catch (error) {
+      expectedBuildReached = false;
+    }
+
+    try {
+      lastLabel = String(await label.textContent() || "").trim();
     } catch (error) {
       lastLabel = "";
     }
@@ -73,7 +81,7 @@ async function waitForDeployedBuild(page) {
       `[deploy-wait] attempt=${attempt} status=${response?.status() ?? "none"} label=${JSON.stringify(lastLabel)} url=${page.url()}`
     );
 
-    if (lastLabel === EXPECTED_BUILD_LABEL) {
+    if (expectedBuildReached) {
       console.log(`[deploy-wait] expected build is live after ${attempt} attempt(s)`);
       return;
     }
