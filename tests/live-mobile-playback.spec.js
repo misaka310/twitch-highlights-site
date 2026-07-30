@@ -24,6 +24,7 @@ test("production mobile tap starts real Twitch playback and advances time", asyn
   );
   expect(pageHasHorizontalOverflow).toBe(false);
 
+  await segment.scrollIntoViewIfNeeded();
   const segmentBox = await segment.boundingBox();
   expect(segmentBox).not.toBeNull();
   await page.touchscreen.tap(
