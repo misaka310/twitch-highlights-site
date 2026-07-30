@@ -1,0 +1,169 @@
+const { test, expect } = require("@playwright/test");
+
+const EXPECTED_BUILD_LABEL = "direct cross-vod iframe 20260730";
+const AUTOPLAY_WARNING = /Autoplay disabled|minimum requirements for autoplay|style visibility|playback[_ ]blocked/i;
+
+for (const projectName of ["responsive-626", "mobile-383"]) {
+  test(`production ${projectName} plays another VOD from one trusted tap`, async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== projectName, `Only ${projectName}`);
+
+    const consoleMessages = [];
+    page.on("console", (message) => {
+      consoleMessages.push(message.text());
+    });
+
+    await waitForDeployedBuild(page);
+
+    const playerFrame = page.locator("#player-frame");
+    await expect
+      .poll(async () => playerFrame.getAttribute("data-player-status"), { timeout: 60_000 })
+      .toMatch(/ready|playing/);
+
+    const initialVodId = await playerFrame.getAttribute("data-current-vod-id");
+    expect(initialVodId).toBeTruthy();
+
+    const targetTab = await findVisibleTab(page, 1);
+    await targetTab.scrollIntoViewIfNeeded();
+    await trustedTap(page, targetTab);
+
+    const target = page.locator(".vod-card:not([hidden]) .segment-button").first();
+    await expect(target).toBeVisible();
+    const targetVodId = await target.getAttribute("data-vod-id");
+    const targetStartSec = Number(await target.getAttribute("data-start-sec"));
+    expect(targetVodId).toBeTruthy();
+    expect(targetVodId).not.toBe(initialVodId);
+    expect(Number.isFinite(targetStartSec)).toBe(true);
+
+    consoleMessages.length = 0;
+    await target.scrollIntoViewIfNeeded();
+    await trustedTap(page, target);
+
+    const iframe = page.locator(".player-embed-frame");
+    await expect(iframe).toBeVisible({ timeout: 30_000 });
+    await expect(playerFrame).toHaveAttribute("data-current-vod-id", targetVodId, { timeout: 30_000 });
+    await expect(playerFrame).toHaveAttribute("data-current-start-sec", String(targetStartSec));
+    await expect(playerFrame).toHaveAttribute("data-player-mode", "iframe");
+    await expect(playerFrame).toHaveAttribute("data-triggered-by-user", "true");
+    await expect(playerFrame).not.toHaveAttribute("data-player-status", /blocked|error/);
+    await expect(iframe).toHaveAttribute("src", new RegExp(`video=${targetVodId}`));
+    await expect(iframe).toHaveAttribute("src", /autoplay=true/);
+    await expect(iframe).toHaveAttribute("src", /muted=false/);
+    await expect(page.locator("#twitch-player-inner")).toHaveCount(0);
+
+    const frameBox = await playerFrame.boundingBox();
+    const iframeBox = await iframe.boundingBox();
+    console.log(
+      `[direct-iframe-fit] project=${projectName} viewport=${JSON.stringify(page.viewportSize())} frame=${JSON.stringify(frameBox)} iframe=${JSON.stringify(iframeBox)}`
+    );
+
+    await expect
+      .poll(async () => readActiveVideo(page), {
+        message: "The real Twitch video should be playing after one cross-VOD tap",
+        timeout: 45_000,
+        intervals: [500, 1000, 1000, 2000],
+      })
+      .toMatchObject({ paused: false });
+
+    await expect
+      .poll(async () => (await readActiveVideo(page))?.currentTime ?? -1, {
+        message: `The real Twitch video should start near ${targetStartSec}`,
+        timeout: 45_000,
+        intervals: [500, 1000, 1000, 2000],
+      })
+      .toBeGreaterThan(targetStartSec - 15);
+
+    const baseline = (await readActiveVideo(page))?.currentTime;
+    expect(Number.isFinite(baseline)).toBe(true);
+    await expect
+      .poll(async () => (await readActiveVideo(page))?.currentTime ?? -1, {
+        message: "The real Twitch video currentTime should advance",
+        timeout: 25_000,
+        intervals: [500, 1000, 1000, 2000],
+      })
+      .toBeGreaterThan(baseline + 1);
+
+    await page.waitForTimeout(2000);
+    const warnings = consoleMessages.filter((message) => AUTOPLAY_WARNING.test(message));
+    console.log(
+      `[production-direct-cross-vod] project=${projectName} targetVod=${targetVodId} targetStart=${targetStartSec} warnings=${JSON.stringify(warnings)}`
+    );
+    expect(warnings).toEqual([]);
+  });
+}
+
+async function findVisibleTab(page, targetIndex) {
+  const tabs = page.locator(".vod-tab, .mobile-vod-tab");
+  const visibleTabs = [];
+  for (let index = 0; index < (await tabs.count()); index += 1) {
+    const tab = tabs.nth(index);
+    if (await tab.isVisible()) {
+      visibleTabs.push(tab);
+    }
+  }
+  expect(visibleTabs.length).toBeGreaterThan(targetIndex);
+  return visibleTabs[targetIndex];
+}
+
+async function trustedTap(page, locator) {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+}
+
+async function readActiveVideo(page) {
+  let best = null;
+  for (const childFrame of page.frames()) {
+    try {
+      const videos = childFrame.locator("video");
+      const count = await videos.count();
+      for (let index = 0; index < count; index += 1) {
+        const state = await videos.nth(index).evaluate((video) => ({
+          currentTime: Number(video.currentTime),
+          paused: Boolean(video.paused),
+          muted: Boolean(video.muted),
+          readyState: Number(video.readyState),
+        }));
+        if (!Number.isFinite(state.currentTime)) {
+          continue;
+        }
+        if (!best || (!state.paused && best.paused) || state.currentTime > best.currentTime) {
+          best = state;
+        }
+      }
+    } catch (error) {
+      // Twitch replaces nested frames while changing VODs.
+    }
+  }
+  return best;
+}
+
+async function waitForDeployedBuild(page) {
+  const deadline = Date.now() + 10 * 60_000;
+  let lastLabels = [];
+  let attempt = 0;
+
+  while (Date.now() < deadline) {
+    attempt += 1;
+    const response = await page.goto(`/?deploy_check=${Date.now()}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+
+    try {
+      await expect
+        .poll(async () => page.locator("#build-label, #build-label-mobile").allTextContents(), { timeout: 15_000 })
+        .toContain(EXPECTED_BUILD_LABEL);
+      console.log(`[deploy-wait] expected build live attempt=${attempt} status=${response?.status() ?? "none"}`);
+      return;
+    } catch (error) {
+      lastLabels = await page.locator("#build-label, #build-label-mobile").allTextContents().catch(() => []);
+      console.log(
+        `[deploy-wait] attempt=${attempt} status=${response?.status() ?? "none"} labels=${JSON.stringify(lastLabels)}`
+      );
+    }
+
+    await page.waitForTimeout(10_000);
+  }
+
+  throw new Error(`Render did not deploy ${EXPECTED_BUILD_LABEL}. Last labels: ${JSON.stringify(lastLabels)}`);
+}
