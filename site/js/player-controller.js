@@ -6,6 +6,7 @@ import {
   INTERACTIVE_CONTAINER_STABLE_FRAMES,
   INTERACTIVE_CONTAINER_WAIT_TIMEOUT_MS,
   INTERACTIVE_SEEK_STABILIZE_MS,
+  MOBILE_MEDIA_QUERY,
   TWITCH_PLAYER_SCRIPT_URL,
 } from "./config.js";
 import { formatTwitchTime } from "./formatters.js";
@@ -50,9 +51,20 @@ function requestPlayback(vodId, startSec, options = {}) {
       ? resolveInteractiveUiStartSec()
       : playback.startSec;
   const loadingMode = isSeekReadySameVod || isMountInFlightSameVod ? "interactive" : "iframe";
-  setPlayerUiState("loading", playback.vodId, loadingStartSec, playback.statusLabel, loadingMode);
+setPlayerUiState("loading", playback.vodId, loadingStartSec, playback.statusLabel, loadingMode);
 
-  if (isSeekReadySameVod) {
+// Keep mobile playback inside the tap event. The asynchronous Twitch SDK mount
+// can finish after the user gesture and browsers then reject unmuted play().
+if (isMobileIframePlayback()) {
+  if (state.playerMode === "interactive") {
+    destroyInteractivePlayer();
+  }
+  clearInteractiveMountState();
+  mountIframePlayer(playback);
+  return;
+}
+
+if (isSeekReadySameVod) {
     seekDesiredPlayback(playback);
     return;
   }
@@ -76,6 +88,14 @@ function requestPlayback(vodId, startSec, options = {}) {
   }
 
   void mountInteractivePlayer(playback);
+}
+
+
+function isMobileIframePlayback() {
+  return (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia(MOBILE_MEDIA_QUERY).matches
+  );
 }
 
 
