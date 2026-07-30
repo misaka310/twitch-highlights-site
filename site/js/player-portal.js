@@ -1,11 +1,13 @@
-const DESKTOP_PORTAL_QUERY = "(min-width: 641px)";
+// Keep Twitch as a direct body child at every viewport so its visibility checks
+// do not treat the mobile player as obscured by the application shell.
+const PLAYER_PORTAL_QUERY = "all";
 
 export function createPlayerPortal({ player, frame }) {
   if (!player || !frame) {
     return { sync: () => {}, destroy: () => {} };
   }
 
-  const mediaQuery = window.matchMedia(DESKTOP_PORTAL_QUERY);
+  const mediaQuery = window.matchMedia(PLAYER_PORTAL_QUERY);
   let frameObserver = null;
   let animationFrameId = null;
 

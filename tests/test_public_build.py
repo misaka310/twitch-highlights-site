@@ -65,6 +65,32 @@ class PublicBuildTests(unittest.TestCase):
             self.assertEqual(config["site"]["name"], "Configured Site")
             self.assertEqual(sorted(config), ["site", "twitch"])
 
+            for source_path in sorted((root / "site").rglob("*")):
+                if not source_path.is_file():
+                    continue
+                relative_path = source_path.relative_to(root / "site")
+                published_path = root / "public" / relative_path
+                self.assertTrue(published_path.is_file(), relative_path.as_posix())
+                self.assertEqual(
+                    source_path.read_bytes(),
+                    published_path.read_bytes(),
+                    relative_path.as_posix(),
+                )
+
+    def test_committed_public_runtime_matches_site(self):
+        root = Path(__file__).resolve().parents[1]
+        for source_path in sorted((root / "site").rglob("*")):
+            if not source_path.is_file():
+                continue
+            relative_path = source_path.relative_to(root / "site")
+            published_path = root / "public" / relative_path
+            self.assertTrue(published_path.is_file(), relative_path.as_posix())
+            self.assertEqual(
+                source_path.read_bytes(),
+                published_path.read_bytes(),
+                relative_path.as_posix(),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

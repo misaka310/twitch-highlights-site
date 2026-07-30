@@ -1,7 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-test("desktop keeps the Twitch player at the visual slot while portaling it to body", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "Desktop portal check is desktop only");
+test("Twitch player stays at its visual slot while portaled to body", async ({ page }, testInfo) => {
   await page.goto("/");
 
   const player = page.locator("#twitch-player");
@@ -10,28 +9,22 @@ test("desktop keeps the Twitch player at the visual slot while portaling it to b
   await expect
     .poll(async () => player.evaluate((element) => element.parentElement === document.body))
     .toBe(true);
+  await expect(player).toHaveClass(/player-embed--portal/);
+  await expect(frame).toHaveAttribute("data-player-portal", "body");
 
   await expect
     .poll(async () => measureDifference(frame, player))
     .toMatchObject({ left: 0, top: 0, width: 0, height: 0 });
 
-  await page.setViewportSize({ width: 1280, height: 900 });
+  const resizedViewport =
+    testInfo.project.name === "mobile"
+      ? { width: 390, height: 844 }
+      : { width: 1280, height: 900 };
+  await page.setViewportSize(resizedViewport);
 
   await expect
     .poll(async () => measureDifference(frame, player))
     .toMatchObject({ left: 0, top: 0, width: 0, height: 0 });
-});
-
-test("mobile keeps the Twitch player inside the normal frame", async ({ page }) => {
-  await page.setViewportSize({ width: 430, height: 932 });
-  await page.goto("/");
-
-  const player = page.locator("#twitch-player");
-  await expect
-    .poll(async () => player.evaluate((element) => element.parentElement?.id || ""))
-    .toBe("player-frame");
-
-  await expect(player).not.toHaveClass(/player-embed--portal/);
 });
 
 async function measureDifference(frame, player) {
