@@ -1,4 +1,12 @@
 (() => {
+  const mobileFitStylesheetHref = "./mobile-player-fit.css?v=20260730-1";
+  if (!document.querySelector(`link[href="${mobileFitStylesheetHref}"]`)) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = mobileFitStylesheetHref;
+    document.head.append(stylesheet);
+  }
+
   const frame = document.querySelector("#player-frame");
   const recoveryButton = document.querySelector("#player-unmute");
   const statusText = document.querySelector("#player-status-text");
