@@ -51,6 +51,7 @@ test("cross-VOD click reuses the ready Twitch player synchronously", async ({ pa
         window.__fakeTwitchState.setVideoCalls.push({
           videoId: this.video,
           timestamp: this.currentTime,
+          userActivationActive: Boolean(navigator.userActivation?.isActive),
         });
       }
 
@@ -91,7 +92,13 @@ test("cross-VOD click reuses the ready Twitch player synchronously", async ({ pa
     .poll(() => page.evaluate(() => window.__fakeTwitchState))
     .toMatchObject({
       instances: 1,
-      setVideoCalls: [{ videoId: targetVodId, timestamp: targetStartSec }],
+      setVideoCalls: [
+        {
+          videoId: targetVodId,
+          timestamp: targetStartSec,
+          userActivationActive: true,
+        },
+      ],
     });
 
   await expect
