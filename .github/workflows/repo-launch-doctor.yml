@@ -17,6 +17,7 @@ jobs:
     name: public-readiness
     if: github.event_name == 'workflow_dispatch' || github.event.repository.private == false
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Check out target repository
         uses: actions/checkout@v4
