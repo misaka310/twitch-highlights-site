@@ -32,6 +32,7 @@ on:
 permissions:
   actions: write
   contents: write
+  pull-requests: write
 
 jobs:
   update-vods:
@@ -166,7 +167,7 @@ jobs:
       - name: Verify no raw chat retention
         run: python -m unittest tests.test_privacy_retention -v
 
-      - name: Publish updated data through required readiness check
+      - name: Publish updated data through a checked pull request
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -177,21 +178,17 @@ jobs:
 
           diff_targets=(data/processed_vods.json data/vods.json data/vod_index.json data/vods data/segment-thumbnails)
           automation_branch="automation/update-vods"
-
-          cleanup_automation_branch() {
-            git push origin --delete "$automation_branch" >/dev/null 2>&1 || true
-          }
-          trap cleanup_automation_branch EXIT
+          pr_title="Update Twitch VOD data"
 
           if git diff --quiet -- "${diff_targets[@]}"; then
-            echo "No data changes to commit."
+            echo "No data changes to publish."
             exit 0
           fi
 
           git add -A -- "${diff_targets[@]}"
-          git commit -m "Update Twitch VOD data"
+          git commit -m "$pr_title"
 
-          for validation_attempt in 1 2 3; do
+          for publish_attempt in 1 2 3; do
             git fetch origin main
             git rebase origin/main
 
@@ -201,8 +198,28 @@ jobs:
             fi
 
             head_sha="$(git rev-parse HEAD)"
-            expected_main_sha="$(git rev-parse HEAD^)"
             git push --force origin "HEAD:refs/heads/$automation_branch"
+
+            pr_number="$(
+              gh pr list \
+                --head "$automation_branch" \
+                --base main \
+                --state open \
+                --limit 1 \
+                --json number \
+                --jq '.[0].number // empty'
+            )"
+
+            if [[ -z "$pr_number" ]]; then
+              pr_url="$(
+                gh pr create \
+                  --base main \
+                  --head "$automation_branch" \
+                  --title "$pr_title" \
+                  --body "Automated VOD data refresh. The update is merged only after the required public-readiness check passes."
+              )"
+              pr_number="${pr_url##*/}"
+            fi
 
             gh workflow run repo-launch-doctor.yml --ref "$automation_branch"
 
@@ -237,23 +254,32 @@ jobs:
               exit 1
             fi
 
-            for push_attempt in 1 2 3; do
+            current_pr_sha="$(gh pr view "$pr_number" --json headRefOid --jq '.headRefOid')"
+            if [[ "$current_pr_sha" != "$head_sha" ]]; then
+              echo "Pull request head moved from $head_sha to $current_pr_sha; retrying." >&2
+              continue
+            fi
+
+            expected_main_sha="$(git rev-parse HEAD^)"
+
+            for merge_attempt in 1 2 3 4 5 6; do
               current_main_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
               if [[ "$current_main_sha" != "$expected_main_sha" ]]; then
-                echo "main advanced from $expected_main_sha to $current_main_sha; rebasing and revalidating."
+                echo "main advanced from $expected_main_sha to $current_main_sha; rebasing and rechecking."
                 break
               fi
 
-              if git push --force-with-lease="refs/heads/main:$expected_main_sha" origin "HEAD:refs/heads/main"; then
+              if gh pr merge "$pr_number" --squash --delete-branch --match-head-commit "$head_sha"; then
+                echo "Merged automated VOD update PR #$pr_number."
                 exit 0
               fi
 
-              echo "Verified push attempt $push_attempt failed while main still points to $expected_main_sha; retrying."
+              echo "Merge attempt $merge_attempt for PR #$pr_number was not accepted yet; retrying."
               sleep 10
             done
 
-            echo "Publish validation attempt $validation_attempt did not complete; retrying from current main."
+            echo "Publish attempt $publish_attempt did not merge; retrying from current main."
           done
 
-          echo "Unable to publish verified VOD data after 3 validation attempts." >&2
+          echo "Unable to merge the automated VOD update after 3 checked attempts." >&2
           exit 1
