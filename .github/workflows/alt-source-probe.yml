@@ -1,0 +1,30 @@
+name: Alternative source probe
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Probe Piped and Invidious
+        run: python tools/probe_alt_video_sources.py
+      - name: Upload probe result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alternative-source-probe-kIujKrO80tk
+          if-no-files-found: warn
+          path: |
+            alternative-source-probe.json
+            alternative-source.json
