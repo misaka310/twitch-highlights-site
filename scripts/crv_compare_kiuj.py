@@ -34,6 +34,7 @@ RUN_INFO = ROOT / "run-info.json"
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "qwen/qwen3.6-27b").strip()
+YT_CLIENT = ""
 
 CANDIDATE_COUNT = 24
 SELECT_COUNT = 13
@@ -117,21 +118,43 @@ def reset_dirs() -> None:
     NORMALIZED_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def yt_common() -> list[str]:
-    return [
+def yt_common(client: str | None = None) -> list[str]:
+    args = [
         "yt-dlp",
         "--no-playlist",
-        "--no-warnings",
         "--retries", "5",
         "--fragment-retries", "5",
         "--js-runtimes", "node",
         "--remote-components", "ejs:github",
     ]
+    resolved = YT_CLIENT if client is None else client
+    if resolved:
+        args += ["--extractor-args", f"youtube:player_client={resolved}"]
+    return args
 
 
 def fetch_metadata() -> dict[str, Any]:
-    proc = run(yt_common() + ["--dump-single-json", "--skip-download", URL], capture=True, timeout=180)
-    return json.loads(proc.stdout)
+    global YT_CLIENT
+    errors: list[str] = []
+    for client in ("", "web_embedded", "web_safari", "android_vr", "tv"):
+        proc = run(
+            yt_common(client) + ["--dump-single-json", "--skip-download", URL],
+            capture=True,
+            check=False,
+            timeout=180,
+        )
+        output = proc.stdout or ""
+        print(f"yt-dlp metadata client={client or 'default'} exit={proc.returncode}\n{output[-3000:]}", flush=True)
+        if proc.returncode == 0:
+            try:
+                metadata = json.loads(output)
+            except json.JSONDecodeError:
+                errors.append(f"{client or 'default'}: invalid JSON")
+                continue
+            YT_CLIENT = client
+            return metadata
+        errors.append(f"{client or 'default'}: {output[-500:]}")
+    raise RuntimeError("all YouTube clients failed: " + " | ".join(errors))
 
 
 def download_audio() -> None:
