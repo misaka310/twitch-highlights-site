@@ -1,0 +1,49 @@
+name: GitHub Actions PR permission smoke
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/pr-permission-smoke.yml"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  verify-pr-creation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create and clean up a pull request with GITHUB_TOKEN
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          smoke_branch="automation/pr-permission-smoke-${GITHUB_RUN_ID}"
+          git switch -c "$smoke_branch"
+          printf 'run_id=%s\nverified_at=%s\n' "$GITHUB_RUN_ID" "$(date -u +%FT%TZ)" > pr-permission-smoke.txt
+          git add pr-permission-smoke.txt
+          git commit -m "Smoke test GitHub Actions PR permission"
+          git push origin "HEAD:refs/heads/$smoke_branch"
+
+          pr_url="$(gh pr create \
+            --base main \
+            --head "$smoke_branch" \
+            --title "Smoke: GitHub Actions PR permission" \
+            --body "Created automatically with the repository GITHUB_TOKEN to verify the Actions pull-request permission setting.")"
+          pr_number="${pr_url##*/}"
+          echo "Created smoke PR #$pr_number"
+
+          gh pr close "$pr_number" --comment "Smoke test passed: GITHUB_TOKEN created this pull request successfully."
+          git push origin --delete "$smoke_branch"
