@@ -1,14 +1,50 @@
 {
-  "updated_at": "2026-07-30T07:17:06+09:00",
-  "next_update_at": "2026-07-30T00:00:00+00:00",
+  "updated_at": "2026-07-31T20:28:49+09:00",
+  "next_update_at": "2026-08-01T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2833127190",
+      "vod_url": "https://www.twitch.tv/videos/2833127190",
+      "title": "【朝活】爽やかな朝の擬人化のようだとよく言われる女の朝雑",
+      "published_at": "2026-07-31T08:20:18+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/9f8beab908b55d3d4dfe_dotitao_316249856498_1785453613//thumb/thumb0-320x180.jpg",
+      "duration_sec": 8153,
+      "count": 3,
+      "chat_total": 1009,
+      "comments_per_hour": 445.529,
+      "detail_path": "/data/vods/2833127190.json"
+    },
+    {
+      "vod_id": "2832739253",
+      "vod_url": "https://www.twitch.tv/videos/2832739253",
+      "title": "今日発売！注目のダークファンタジーPVPVEを学ぶ！【Mistfall Hunter】※投げ銭禁止",
+      "published_at": "2026-07-30T22:38:00+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/fca17c874532687265c7_dotitao_316304417779_1785418675//thumb/thumb0-320x180.jpg",
+      "duration_sec": 10884,
+      "count": 3,
+      "chat_total": 1921,
+      "comments_per_hour": 635.391,
+      "detail_path": "/data/vods/2832739253.json"
+    },
+    {
+      "vod_id": "2832727194",
+      "vod_url": "https://www.twitch.tv/videos/2832727194",
+      "title": "今日発売！注目のダークファンタジーPVPVEを学ぶ！【Mistfall Hunter】※投げ銭禁止",
+      "published_at": "2026-07-30T22:13:48+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/f3a55905c1aaa45e3347_dotitao_316304293747_1785417223//thumb/thumb0-320x180.jpg",
+      "duration_sec": 1421,
+      "count": 1,
+      "chat_total": 498,
+      "comments_per_hour": 1261.647,
+      "detail_path": "/data/vods/2832727194.json"
+    },
     {
       "vod_id": "2831856289",
       "vod_url": "https://www.twitch.tv/videos/2831856289",
       "title": "ナイトレインの夜を超えて 火の粉みたいな星を見て たぶんどこかの戦場で【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-07-29T20:15:48+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/2ce329ae65d2eb53e886_dotitao_316234745841_1785323743//thumb/thumb0-320x180.jpg",
-      "duration_sec": 19164,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2595,
       "comments_per_hour": 487.477,
@@ -20,7 +56,7 @@
       "title": "異常ナイトレイン愛者のつどい【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-07-28T20:15:32+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/826f300b9cd917e61dbe_dotitao_316239047282_1785237327//thumb/thumb0-320x180.jpg",
-      "duration_sec": 17054,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2388,
       "comments_per_hour": 504.093,
@@ -32,7 +68,7 @@
       "title": "本日のフロムニュースのコーナー【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-07-27T21:35:34+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/7047ab56ee4f9ebd1a18_dotitao_316235208946_1785155729//thumb/thumb0-320x180.jpg",
-      "duration_sec": 12360,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2024,
       "comments_per_hour": 589.515,
@@ -541,18 +577,6 @@
       "chat_total": 3003,
       "comments_per_hour": 1114.975,
       "detail_path": "/data/vods/2786029874.json"
-    },
-    {
-      "vod_id": "2785204228",
-      "vod_url": "https://www.twitch.tv/videos/2785204228",
-      "title": "【ダメギさん主催】運否天賦のお祭りだ！スピリチュアル夜渡りの実力を披露しよう！【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-05-31T19:12:41+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/753bcda282d3ca531b81_dotitao_315974617586_1780222356//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 11081,
-      "comments_per_hour": 2162.264,
-      "detail_path": "/data/vods/2785204228.json"
     }
   ]
 }
