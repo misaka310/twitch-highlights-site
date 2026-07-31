@@ -43,6 +43,91 @@ jobs:
       - name: Run desktop and mobile browser tests
         run: npx playwright test --project=desktop --project=mobile
 
+  crv-local-comparison:
+    if: github.event_name == 'pull_request' && github.head_ref == 'experiment/crv-kIujKrO80tk-20260731'
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 180
+
+    steps:
+      - name: Check out comparison branch
+        uses: actions/checkout@v4
+
+      - name: Generate Oracle-free CRV comparison
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $localRoot = 'C:\00_dev\80_youtube-scream-highlight-pipeline'
+          $python = Join-Path $localRoot '.venv\Scripts\python.exe'
+          $workRoot = Join-Path $localRoot 'work'
+          $jobRoot = Join-Path $workRoot 'kIujKrO80tk'
+
+          if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
+            throw "Local project Python was not found: $python"
+          }
+          if (-not (Test-Path -LiteralPath (Join-Path $jobRoot 'segments.json') -PathType Leaf)) {
+            throw "Existing kIujKrO80tk job was not found: $jobRoot"
+          }
+          if (-not (Test-Path -LiteralPath (Join-Path $jobRoot 'clips') -PathType Container)) {
+            throw "Existing candidate clips were not found: $jobRoot\clips"
+          }
+
+          $env:PATH = "$(Join-Path $localRoot '.venv\Scripts');$env:PATH"
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+            throw 'ffmpeg was not found on PATH'
+          }
+          if (-not (Get-Command crv -ErrorAction SilentlyContinue)) {
+            if (Get-Command uv -ErrorAction SilentlyContinue) {
+              & uv pip install --python $python 'claude-real-video==0.7.17' 'Pillow>=10,<13'
+            } else {
+              & $python -m pip install 'claude-real-video==0.7.17' 'Pillow>=10,<13'
+            }
+            if ($LASTEXITCODE -ne 0) { throw "CRV installation failed: $LASTEXITCODE" }
+          }
+          & $python -c 'import PIL'
+          if ($LASTEXITCODE -ne 0) {
+            if (Get-Command uv -ErrorAction SilentlyContinue) {
+              & uv pip install --python $python 'Pillow>=10,<13'
+            } else {
+              & $python -m pip install 'Pillow>=10,<13'
+            }
+            if ($LASTEXITCODE -ne 0) { throw "Pillow installation failed: $LASTEXITCODE" }
+          }
+
+          & $python (Join-Path $env:GITHUB_WORKSPACE 'scripts\crv_compare_existing_job.py') `
+            --video-id 'kIujKrO80tk' `
+            --repository-root $env:GITHUB_WORKSPACE `
+            --work-root $workRoot
+          if ($LASTEXITCODE -ne 0) { throw "CRV comparison failed: $LASTEXITCODE" }
+
+      - name: Collect comparison outputs
+        if: always()
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $source = 'C:\00_dev\80_youtube-scream-highlight-pipeline\work\kIujKrO80tk\output-crv-comparison'
+          $destination = Join-Path $env:GITHUB_WORKSPACE 'artifacts\crv-comparison-kIujKrO80tk'
+          New-Item -ItemType Directory -Path $destination -Force | Out-Null
+          foreach ($name in @(
+            'kIujKrO80tk-crv-highlight-review.mp4',
+            'comparison.html',
+            'comparison.json',
+            'selected-crv-review-board.jpg'
+          )) {
+            $path = Join-Path $source $name
+            if (Test-Path -LiteralPath $path -PathType Leaf) {
+              Copy-Item -LiteralPath $path -Destination $destination -Force
+            }
+          }
+
+      - name: Upload CRV comparison
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crv-comparison-kIujKrO80tk-${{ github.run_id }}
+          path: artifacts/crv-comparison-kIujKrO80tk
+          if-no-files-found: warn
+          retention-days: 7
+
   production-mobile-playback:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     needs: frontend-tests
