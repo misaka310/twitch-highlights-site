@@ -190,49 +190,70 @@ jobs:
 
           git add -A -- "${diff_targets[@]}"
           git commit -m "Update Twitch VOD data"
-          git pull --rebase origin main
 
-          head_sha="$(git rev-parse HEAD)"
-          expected_main_sha="$(git rev-parse HEAD^)"
-          git push --force origin "HEAD:refs/heads/$automation_branch"
+          for validation_attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
 
-          gh workflow run repo-launch-doctor.yml --ref "$automation_branch"
-
-          readiness_run_id=""
-          for _ in $(seq 1 60); do
-            readiness_run_id="$(
-              gh run list \
-                --workflow repo-launch-doctor.yml \
-                --branch "$automation_branch" \
-                --event workflow_dispatch \
-                --commit "$head_sha" \
-                --limit 1 \
-                --json databaseId \
-                --jq '.[0].databaseId // empty'
-            )"
-            if [[ -n "$readiness_run_id" ]]; then
-              break
+            if git diff --quiet origin/main -- "${diff_targets[@]}"; then
+              echo "The generated data is already present on main."
+              exit 0
             fi
-            sleep 5
+
+            head_sha="$(git rev-parse HEAD)"
+            expected_main_sha="$(git rev-parse HEAD^)"
+            git push --force origin "HEAD:refs/heads/$automation_branch"
+
+            gh workflow run repo-launch-doctor.yml --ref "$automation_branch"
+
+            readiness_run_id=""
+            for _ in $(seq 1 60); do
+              readiness_run_id="$(
+                gh run list \
+                  --workflow repo-launch-doctor.yml \
+                  --branch "$automation_branch" \
+                  --event workflow_dispatch \
+                  --commit "$head_sha" \
+                  --limit 1 \
+                  --json databaseId \
+                  --jq '.[0].databaseId // empty'
+              )"
+              if [[ -n "$readiness_run_id" ]]; then
+                break
+              fi
+              sleep 5
+            done
+
+            if [[ -z "$readiness_run_id" ]]; then
+              echo "Timed out waiting for public-readiness to start for $head_sha." >&2
+              exit 1
+            fi
+
+            gh run watch "$readiness_run_id" --compact --exit-status
+
+            checked_sha="$(gh run view "$readiness_run_id" --json headSha --jq '.headSha')"
+            if [[ "$checked_sha" != "$head_sha" ]]; then
+              echo "public-readiness checked $checked_sha instead of $head_sha." >&2
+              exit 1
+            fi
+
+            for push_attempt in 1 2 3; do
+              current_main_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+              if [[ "$current_main_sha" != "$expected_main_sha" ]]; then
+                echo "main advanced from $expected_main_sha to $current_main_sha; rebasing and revalidating."
+                break
+              fi
+
+              if git push --force-with-lease="refs/heads/main:$expected_main_sha" origin "HEAD:refs/heads/main"; then
+                exit 0
+              fi
+
+              echo "Verified push attempt $push_attempt failed while main still points to $expected_main_sha; retrying."
+              sleep 10
+            done
+
+            echo "Publish validation attempt $validation_attempt did not complete; retrying from current main."
           done
 
-          if [[ -z "$readiness_run_id" ]]; then
-            echo "Timed out waiting for public-readiness to start for $head_sha." >&2
-            exit 1
-          fi
-
-          gh run watch "$readiness_run_id" --compact --exit-status
-
-          checked_sha="$(gh run view "$readiness_run_id" --json headSha --jq '.headSha')"
-          if [[ "$checked_sha" != "$head_sha" ]]; then
-            echo "public-readiness checked $checked_sha instead of $head_sha." >&2
-            exit 1
-          fi
-
-          current_main_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
-          if [[ "$current_main_sha" != "$expected_main_sha" ]]; then
-            echo "main advanced from $expected_main_sha to $current_main_sha while readiness ran; refusing an unverified rebase." >&2
-            exit 1
-          fi
-
-          git push origin "HEAD:refs/heads/main"
+          echo "Unable to publish verified VOD data after 3 validation attempts." >&2
+          exit 1
