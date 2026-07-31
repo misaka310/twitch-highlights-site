@@ -5,16 +5,20 @@ import re
 import ssl
 import sys
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
 VIDEO_ID = "kIujKrO80tk"
-TIMEOUT = 18
+TIMEOUT = 12
 USER_AGENT = "Mozilla/5.0 CRV-comparison-source-probe/1.0"
 
 
 def get_json(url: str) -> Any:
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
+    )
     context = ssl.create_default_context()
     with urllib.request.urlopen(request, timeout=TIMEOUT, context=context) as response:
         return json.loads(response.read().decode("utf-8"))
@@ -26,7 +30,72 @@ def get_text(url: str) -> str:
         return response.read().decode("utf-8", errors="replace")
 
 
-def probe_piped() -> list[dict[str, Any]]:
+def quality_number(item: dict[str, Any]) -> int:
+    value = str(item.get("qualityLabel") or item.get("quality") or "0").lower()
+    match = re.search(r"(\d+)", value)
+    return int(match.group(1)) if match else 0
+
+
+def probe_piped_endpoint(base: str) -> dict[str, Any] | None:
+    payload = get_json(f"{base}/streams/{VIDEO_ID}")
+    duration = int(payload.get("duration") or 0)
+    audio = [item for item in payload.get("audioStreams", []) if item.get("url")]
+    video = [item for item in payload.get("videoStreams", []) if item.get("url")]
+    if duration <= 19000 or not audio or not video:
+        raise RuntimeError(
+            f"incomplete payload duration={duration} audio={len(audio)} video={len(video)}"
+        )
+    return {
+        "provider": "piped",
+        "base_url": base,
+        "title": payload.get("title"),
+        "duration": duration,
+        "audio_stream_count": len(audio),
+        "video_stream_count": len(video),
+        "audio_url": max(audio, key=lambda item: int(item.get("bitrate") or 0))["url"],
+        "video_url": max(
+            video,
+            key=lambda item: (
+                int(item.get("height") or 0) <= 720,
+                min(int(item.get("height") or 0), 720),
+                int(item.get("bitrate") or 0),
+            ),
+        )["url"],
+    }
+
+
+def probe_invidious_endpoint(base: str) -> dict[str, Any] | None:
+    payload = get_json(f"{base}/api/v1/videos/{VIDEO_ID}?local=true")
+    duration = int(payload.get("lengthSeconds") or 0)
+    adaptive = [item for item in payload.get("adaptiveFormats", []) if item.get("url")]
+    progressive = [item for item in payload.get("formatStreams", []) if item.get("url")]
+    audio = [item for item in adaptive if str(item.get("type", "")).startswith("audio/")]
+    video = [item for item in adaptive if str(item.get("type", "")).startswith("video/")]
+    video_pool = video or progressive
+    if duration <= 19000 or not audio or not video_pool:
+        raise RuntimeError(
+            f"incomplete payload duration={duration} audio={len(audio)} video={len(video_pool)}"
+        )
+    return {
+        "provider": "invidious",
+        "base_url": base,
+        "title": payload.get("title"),
+        "duration": duration,
+        "audio_stream_count": len(audio),
+        "video_stream_count": len(video_pool),
+        "audio_url": max(audio, key=lambda item: int(item.get("bitrate") or 0))["url"],
+        "video_url": max(
+            video_pool,
+            key=lambda item: (
+                quality_number(item) <= 720,
+                min(quality_number(item), 720),
+                int(item.get("bitrate") or 0),
+            ),
+        )["url"],
+    }
+
+
+def piped_endpoints() -> list[str]:
     endpoints = {
         "https://pipedapi.kavin.rocks",
         "https://pipedapi.adminforge.de",
@@ -45,43 +114,10 @@ def probe_piped() -> list[dict[str, Any]]:
         )
     except Exception as exc:
         print(f"Piped instance-list fetch failed: {exc}", file=sys.stderr)
-
-    found = []
-    for base in sorted(endpoints):
-        try:
-            payload = get_json(f"{base}/streams/{VIDEO_ID}")
-            duration = int(payload.get("duration") or 0)
-            audio = [item for item in payload.get("audioStreams", []) if item.get("url")]
-            video = [item for item in payload.get("videoStreams", []) if item.get("url")]
-            if duration > 19000 and audio and video:
-                found.append(
-                    {
-                        "provider": "piped",
-                        "base_url": base,
-                        "title": payload.get("title"),
-                        "duration": duration,
-                        "audio_stream_count": len(audio),
-                        "video_stream_count": len(video),
-                        "audio_url": max(audio, key=lambda item: int(item.get("bitrate") or 0))["url"],
-                        "video_url": max(
-                            video,
-                            key=lambda item: (
-                                int(item.get("height") or 0) <= 720,
-                                min(int(item.get("height") or 0), 720),
-                                int(item.get("bitrate") or 0),
-                            ),
-                        )["url"],
-                    }
-                )
-                print(f"PIPED_OK {base} duration={duration} audio={len(audio)} video={len(video)}")
-                break
-            print(f"PIPED_EMPTY {base} duration={duration} audio={len(audio)} video={len(video)}")
-        except Exception as exc:
-            print(f"PIPED_FAIL {base}: {type(exc).__name__}: {exc}")
-    return found
+    return sorted(endpoints)
 
 
-def probe_invidious() -> list[dict[str, Any]]:
+def invidious_endpoints() -> list[str]:
     endpoints: list[str] = []
     try:
         instances = get_json("https://api.invidious.io/instances.json")
@@ -93,59 +129,53 @@ def probe_invidious() -> list[dict[str, Any]]:
                 endpoints.append(uri.rstrip("/"))
     except Exception as exc:
         print(f"Invidious instance-list fetch failed: {exc}", file=sys.stderr)
+    return endpoints[:50]
 
-    found = []
-    for base in endpoints[:40]:
-        try:
-            payload = get_json(f"{base}/api/v1/videos/{VIDEO_ID}?local=true")
-            duration = int(payload.get("lengthSeconds") or 0)
-            adaptive = [item for item in payload.get("adaptiveFormats", []) if item.get("url")]
-            progressive = [item for item in payload.get("formatStreams", []) if item.get("url")]
-            audio = [item for item in adaptive if str(item.get("type", "")).startswith("audio/")]
-            video = [item for item in adaptive if str(item.get("type", "")).startswith("video/")]
-            if duration > 19000 and audio and (video or progressive):
-                video_pool = video or progressive
-                found.append(
-                    {
-                        "provider": "invidious",
-                        "base_url": base,
-                        "title": payload.get("title"),
-                        "duration": duration,
-                        "audio_stream_count": len(audio),
-                        "video_stream_count": len(video_pool),
-                        "audio_url": max(audio, key=lambda item: int(item.get("bitrate") or 0))["url"],
-                        "video_url": max(
-                            video_pool,
-                            key=lambda item: (
-                                int(str(item.get("qualityLabel") or item.get("quality") or "0").rstrip("p") or 0) <= 720,
-                                min(int(str(item.get("qualityLabel") or item.get("quality") or "0").rstrip("p") or 0), 720),
-                                int(item.get("bitrate") or 0),
-                            ),
-                        )["url"],
-                    }
-                )
-                print(f"INVIDIOUS_OK {base} duration={duration} audio={len(audio)} video={len(video_pool)}")
-                break
-            print(f"INVIDIOUS_EMPTY {base} duration={duration} audio={len(audio)} video={len(video_pool)}")
-        except Exception as exc:
-            print(f"INVIDIOUS_FAIL {base}: {type(exc).__name__}: {exc}")
+
+def probe_all() -> list[dict[str, Any]]:
+    work: list[tuple[str, str]] = [
+        *(("piped", base) for base in piped_endpoints()),
+        *(("invidious", base) for base in invidious_endpoints()),
+    ]
+    found: list[dict[str, Any]] = []
+    with ThreadPoolExecutor(max_workers=min(24, max(1, len(work)))) as executor:
+        futures = {}
+        for provider, base in work:
+            fn = probe_piped_endpoint if provider == "piped" else probe_invidious_endpoint
+            futures[executor.submit(fn, base)] = (provider, base)
+        for future in as_completed(futures):
+            provider, base = futures[future]
+            try:
+                result = future.result()
+                if result:
+                    print(
+                        f"{provider.upper()}_OK {base} duration={result['duration']} "
+                        f"audio={result['audio_stream_count']} video={result['video_stream_count']}"
+                    )
+                    found.append(result)
+            except Exception as exc:
+                print(f"{provider.upper()}_FAIL {base}: {type(exc).__name__}: {exc}")
     return found
 
 
 def main() -> int:
-    results = [*probe_piped(), *probe_invidious()]
-    safe_results = []
-    for item in results:
-        safe_results.append({key: value for key, value in item.items() if not key.endswith("_url")})
+    results = probe_all()
+    safe_results = [
+        {key: value for key, value in item.items() if not key.endswith("_url")}
+        for item in results
+    ]
     Path("alternative-source-probe.json").write_text(
-        json.dumps(safe_results, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        json.dumps(safe_results, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
     )
     if not results:
         print("No alternative source API could resolve this video", file=sys.stderr)
         return 1
+    results.sort(key=lambda item: (item["provider"] != "piped", item["base_url"]))
     chosen = results[0]
     Path("alternative-source.json").write_text(
-        json.dumps(chosen, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        json.dumps(chosen, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
     )
     print(f"CHOSEN {chosen['provider']} {chosen['base_url']}")
     return 0
