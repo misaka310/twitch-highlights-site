@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/crv-compare-kiuj.yml
       - .github/workflows/crv-compare-kiuj-pr.yml
+      - scripts/crv_compare_kiuj.py
 
 permissions:
   contents: read
@@ -46,29 +47,14 @@ jobs:
           yt-dlp --version
           ffmpeg -version | head -n 1
 
-      - name: Materialize comparison runner
-        run: |
-          python - <<'PY'
-          import ast
-          import base64
-          import gzip
-          import re
-          from pathlib import Path
-
-          workflow = Path('.github/workflows/crv-compare-kiuj.yml').read_text(encoding='utf-8')
-          match = re.search(r"payload = ('[^\n]+')", workflow)
-          if not match:
-              raise SystemExit('Embedded runner payload was not found')
-          payload = ast.literal_eval(match.group(1))
-          Path('crv_compare_stream.py').write_bytes(gzip.decompress(base64.b64decode(payload)))
-          PY
-          python -m py_compile crv_compare_stream.py
+      - name: Verify comparison runner
+        run: python -m py_compile scripts/crv_compare_kiuj.py
 
       - name: Generate Oracle-free comparison
         shell: bash
         run: |
           set -o pipefail
-          python crv_compare_stream.py 2>&1 | tee crv-run.log
+          python scripts/crv_compare_kiuj.py 2>&1 | tee crv-run.log
 
       - name: Upload comparison artifact
         if: always()
