@@ -1,0 +1,83 @@
+name: CRV comparison kIujKrO80tk PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/crv-compare-kiuj.yml
+      - .github/workflows/crv-compare-kiuj-pr.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crv-compare-kIujKrO80tk-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      GROQ_MODEL: qwen/qwen3.6-27b
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install ffmpeg
+        uses: AnimMouse/setup-ffmpeg@v1
+
+      - name: Install Japanese font
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+
+      - name: Install CRV and runtime dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'claude-real-video==0.7.17' 'yt-dlp>=2026.7.4' requests Pillow
+          crv --help > /dev/null
+          yt-dlp --version
+          ffmpeg -version | head -n 1
+
+      - name: Materialize comparison runner
+        run: |
+          python - <<'PY'
+          import ast
+          import base64
+          import gzip
+          import re
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/crv-compare-kiuj.yml').read_text(encoding='utf-8')
+          match = re.search(r"payload = ('[^\n]+')", workflow)
+          if not match:
+              raise SystemExit('Embedded runner payload was not found')
+          payload = ast.literal_eval(match.group(1))
+          Path('crv_compare_stream.py').write_bytes(gzip.decompress(base64.b64decode(payload)))
+          PY
+          python -m py_compile crv_compare_stream.py
+
+      - name: Generate Oracle-free comparison
+        shell: bash
+        run: |
+          set -o pipefail
+          python crv_compare_stream.py 2>&1 | tee crv-run.log
+
+      - name: Upload comparison artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crv-compare-kIujKrO80tk-${{ github.run_id }}
+          path: |
+            artifacts/crv-compare-kIujKrO80tk
+            crv-run.log
+          if-no-files-found: warn
+          retention-days: 7
