@@ -4,7 +4,6 @@ import json
 import re
 import ssl
 import sys
-import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -86,7 +85,7 @@ def probe_invidious() -> list[dict[str, Any]]:
     endpoints: list[str] = []
     try:
         instances = get_json("https://api.invidious.io/instances.json")
-        for name, details in instances:
+        for _, details in instances:
             if not isinstance(details, dict) or not details.get("api"):
                 continue
             uri = details.get("uri")
@@ -118,8 +117,8 @@ def probe_invidious() -> list[dict[str, Any]]:
                         "video_url": max(
                             video_pool,
                             key=lambda item: (
-                                int(str(item.get("qualityLabel") or item.get("quality") or "0")).rstrip("p") or 0) <= 720,
-                                min(int(str(item.get("qualityLabel") or item.get("quality") or "0")).rstrip("p") or 0), 720),
+                                int(str(item.get("qualityLabel") or item.get("quality") or "0").rstrip("p") or 0) <= 720,
+                                min(int(str(item.get("qualityLabel") or item.get("quality") or "0").rstrip("p") or 0), 720),
                                 int(item.get("bitrate") or 0),
                             ),
                         )["url"],
