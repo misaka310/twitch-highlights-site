@@ -48,6 +48,8 @@ jobs:
     needs: frontend-tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
     env:
       LIVE_BASE_URL: https://dotitao-moments.onrender.com
 
@@ -72,6 +74,83 @@ jobs:
 
       - name: Verify real production mobile playback
         run: npx playwright test --config=playwright.live.config.js
+
+      - name: Verify deployed VOD data and build evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import time
+          import urllib.request
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          expected_bytes = Path("data/vods.json").read_bytes()
+          expected = json.loads(expected_bytes)
+          url = os.environ["LIVE_BASE_URL"].rstrip("/") + "/data/vods.json"
+          deadline = time.monotonic() + 600
+          last_observation = "no response"
+
+          while time.monotonic() < deadline:
+              try:
+                  request = urllib.request.Request(
+                      f"{url}?deployment-check={int(time.time())}",
+                      headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                  )
+                  with urllib.request.urlopen(request, timeout=30) as response:
+                      live_bytes = response.read()
+                  live = json.loads(live_bytes)
+                  if live == expected:
+                      break
+                  last_observation = (
+                      f"expected updated_at={expected.get('updated_at')} latest={expected.get('videos', [{}])[0].get('vod_id')}; "
+                      f"live updated_at={live.get('updated_at')} latest={live.get('videos', [{}])[0].get('vod_id')}"
+                  )
+              except Exception as exc:
+                  last_observation = f"{type(exc).__name__}: {exc}"
+              print(f"Deployment data not ready: {last_observation}")
+              time.sleep(10)
+          else:
+              raise SystemExit(f"Production VOD data did not match main within 10 minutes: {last_observation}")
+
+          marker = {
+              "verified": True,
+              "verified_at": datetime.now(timezone.utc).isoformat(),
+              "main_sha": os.environ["GITHUB_SHA"],
+              "updated_at": expected.get("updated_at"),
+              "latest_vod_id": expected.get("videos", [{}])[0].get("vod_id"),
+              "expected_sha256": hashlib.sha256(expected_bytes).hexdigest(),
+              "live_sha256": hashlib.sha256(live_bytes).hexdigest(),
+          }
+          Path("production-verification.json").write_text(
+              json.dumps(marker, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(marker, ensure_ascii=False))
+          PY
+
+      - name: Record successful production verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          verification_branch="automation/production-verification"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          blob_sha="$(git hash-object -w production-verification.json)"
+          tree_sha="$(printf '100644 blob %s\tproduction-verification.json\n' "$blob_sha" | git mktree)"
+          parent_sha="$(git ls-remote origin "refs/heads/$verification_branch" | awk '{print $1}')"
+
+          if [[ -n "$parent_sha" ]]; then
+            marker_commit="$(printf 'Record successful production verification for %s\n' "$GITHUB_SHA" | git commit-tree "$tree_sha" -p "$parent_sha")"
+          else
+            marker_commit="$(printf 'Record successful production verification for %s\n' "$GITHUB_SHA" | git commit-tree "$tree_sha")"
+          fi
+
+          git push --force origin "$marker_commit:refs/heads/$verification_branch"
 
       - name: Upload failure evidence
         if: failure()
