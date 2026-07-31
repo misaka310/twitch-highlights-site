@@ -1,0 +1,82 @@
+name: Temporary CRV same-stream runner
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: temporary-crv-kIujKrO80tk-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      GROQ_VISION_MODEL: ${{ vars.GROQ_VISION_MODEL }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fontconfig fonts-noto-cjk
+          python -m pip install --disable-pip-version-check \
+            "yt-dlp==2026.7.4" \
+            "claude-real-video==0.7.17" \
+            "openai>=1.68,<2"
+          python -m claude_real_video --help >/dev/null
+          ffmpeg -version | head -n 1
+
+      - name: Compile runner
+        run: python -m py_compile tools/crv_same_stream_compare.py
+
+      - name: Build same-stream comparison
+        run: python tools/crv_same_stream_compare.py
+
+      - name: Verify outputs
+        run: |
+          test -s crv-comparison-output/comparison.json
+          test -s crv-comparison-output/comparison.html
+          test -s crv-comparison-output/SUMMARY.md
+          test -s crv-comparison-output/crv-vision-comparison.mp4
+          test -s crv-comparison-output/oracle-reference-candidate-montage.mp4
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("crv-comparison-output")
+          report = json.loads((root / "comparison.json").read_text(encoding="utf-8"))
+          assert report["video"]["id"] == "kIujKrO80tk"
+          assert report["method"]["oracle_used_for_crv_selection"] is False
+          assert len(report["all_candidates"]) == 30
+          assert len(report["selected"]) == 13
+          assert len(report["oracle_reference"]) == 13
+          assert all(8 <= item["duration_seconds"] <= 22 for item in report["selected"])
+          print((root / "SUMMARY.md").read_text(encoding="utf-8"))
+          PY
+
+      - name: Upload result artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crv-oracle-comparison-kIujKrO80tk
+          retention-days: 14
+          if-no-files-found: error
+          compression-level: 6
+          path: |
+            crv-comparison-output/*.mp4
+            crv-comparison-output/*.json
+            crv-comparison-output/*.html
+            crv-comparison-output/*.md
+            crv-comparison-output/previews/**
