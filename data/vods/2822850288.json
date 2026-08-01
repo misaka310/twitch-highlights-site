@@ -1,0 +1,38 @@
+{
+  "vod_id": "2822850288",
+  "vod_url": "https://www.twitch.tv/videos/2822850288",
+  "title": "ダイジェスト：どうも、ナイトレインコーチング教室美人講師のドチタオです。【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+  "published_at": "2026-07-18T16:36:24+09:00",
+  "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b73374c7af016d3ef261_dotitao_79973973386_6755559792//thumb/thumb2822850288-320x180.jpg",
+  "duration_sec": null,
+  "count": 1,
+  "chat_total": 167,
+  "comments_per_hour": 927.778,
+  "items": [
+    {
+      "rank": 1,
+      "id": "2822850288_230_290",
+      "start_sec": 230,
+      "end_sec": 290,
+      "duration_sec": 60,
+      "start_time": "00:03:50",
+      "end_time": "00:04:50",
+      "reason": "Chat activity spike around 0h3m50s (z-score=4.138).",
+      "tags": [
+        "ww",
+        "好プレー",
+        "えっ"
+      ],
+      "watch_url": "https://www.twitch.tv/videos/2822850288?t=0h3m50s"
+    }
+  ],
+  "activity_map": {
+    "bucket_sec": 10,
+    "duration_sec": 648,
+    "last_comment_sec": 648,
+    "buckets": [
+      0, 3, 0, 7, 1, 2, 0, 1, 3, 1, 1, 1, 4, 0, 0, 1, 1, 2, 1, 3, 1, 1, 4, 0, 0, 9, 13, 7, 6, 2, 3, 0, 0, 4, 1, 0, 4, 1, 2, 4,
+      3, 9, 1, 1, 4, 2, 1, 3, 2, 3, 1, 2, 2, 2, 4, 3, 0, 3, 3, 3, 1, 3, 3, 7, 7, 0
+    ]
+  }
+}

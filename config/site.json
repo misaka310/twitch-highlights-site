@@ -1,0 +1,23 @@
+{
+  "site": {
+    "name": "dotitao moments",
+    "description": "dotitao のTwitch VODから、コメント量が大きく動いた時間帯を見どころとして表示する非公式ファンサイトです。",
+    "base_url": "https://dotitao-moments.onrender.com",
+    "language": "ja",
+    "analytics": {
+      "goatcounter_code": "dotitao-moments"
+    }
+  },
+  "twitch": {
+    "channel_login": "dotitao",
+    "channel_id": "709803150"
+  },
+  "analysis": {
+    "extra_tag_rules": [
+      {
+        "tag": "つべ",
+        "patterns": ["つべ", "つべべのべい"]
+      }
+    ]
+  }
+}

@@ -1,0 +1,285 @@
+name: Update VOD data
+
+concurrency:
+  group: update-vod-data
+  cancel-in-progress: false
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/update-vods.yml"
+      - "requirements-transcribe.txt"
+      - "scripts/headline_*.py"
+      - "scripts/transcribe_segments.py"
+      - "scripts/transcript_*.py"
+      - "scripts/transcription/**"
+      - "scripts/verify_public_enrichment.py"
+  schedule:
+    - cron: "7 21 * * *"
+  workflow_dispatch:
+    inputs:
+      force_refresh_transcripts:
+        description: Force re-transcribe and regenerate headlines
+        required: false
+        default: "false"
+      skip_segment_transcription:
+        description: Skip headline and screenshot generation
+        required: false
+        default: "false"
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-vods:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Tokyo
+      TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+      TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+      TWITCH_CHANNEL: ${{ vars.TWITCH_CHANNEL }}
+      TWITCH_CHANNEL_ID: ${{ vars.TWITCH_CHANNEL_ID }}
+      SITE_NAME: ${{ vars.SITE_NAME }}
+      SITE_DESCRIPTION: ${{ vars.SITE_DESCRIPTION }}
+      SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+      SITE_LANGUAGE: ${{ vars.SITE_LANGUAGE }}
+      GOATCOUNTER_CODE: ${{ vars.GOATCOUNTER_CODE }}
+      TWITCH_LIVE_CHECK_ENABLED: "1"
+      TWITCH_LIVE_CHECK_FAIL_OPEN: "1"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install TwitchDownloaderCLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp-tools/twitchdownloader
+          curl -L "https://github.com/lay295/TwitchDownloader/releases/download/1.56.4/TwitchDownloaderCLI-1.56.4-Linux-x64.zip" -o .tmp-tools/twitchdownloader/td.zip
+          unzip -o .tmp-tools/twitchdownloader/td.zip -d .tmp-tools/twitchdownloader
+          chmod +x .tmp-tools/twitchdownloader/TwitchDownloaderCLI
+          echo "TWITCHDOWNLOADER_BIN=$GITHUB_WORKSPACE/.tmp-tools/twitchdownloader/TwitchDownloaderCLI" >> "$GITHUB_ENV"
+
+      - name: Update VOD data
+        run: python scripts/update_vods.py
+
+      - name: Install ffmpeg
+        if: ${{ github.event.inputs.skip_segment_transcription != 'true' }}
+        timeout-minutes: 5
+        uses: AnimMouse/setup-ffmpeg@v1
+
+      - name: Install transcription dependencies
+        if: ${{ github.event.inputs.skip_segment_transcription != 'true' }}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-transcribe.txt
+
+      - name: Verify faster_whisper import
+        if: ${{ github.event.inputs.skip_segment_transcription != 'true' }}
+        run: python -c "import faster_whisper; print('faster_whisper import ok')"
+
+      - name: Generate highlight headlines and screenshots
+        if: ${{ github.event.inputs.skip_segment_transcription != 'true' }}
+        env:
+          TRANSCRIPT_MODEL: large-v3-turbo
+          TRANSCRIPT_BEAM_SIZE: 3
+          TRANSCRIPT_CONDITION_ON_PREVIOUS_TEXT: false
+          TRANSCRIPT_VAD_FILTER: true
+          TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS: 2000
+          TRANSCRIPT_MAX_SEGMENTS: 9
+          TRANSCRIPT_RETRY_ERRORS: 1
+          FORCE_TRANSCRIPT_REFRESH: ${{ github.event_name == 'push' && 'true' || github.event.inputs.force_refresh_transcripts || 'false' }}
+          FORCE_HEADLINE_REFRESH: ${{ github.event_name == 'push' && 'true' || github.event.inputs.force_refresh_transcripts || 'false' }}
+          TRANSCRIPT_MAX_DURATION_SEC: 150
+          GEMINI_API_KEY: ""
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: qwen/qwen3.6-27b
+          NVIDIA_API_KEY: ""
+          NVIDIA_MODEL: ${{ vars.NVIDIA_MODEL }}
+          NVIDIA_API_URL: ${{ vars.NVIDIA_API_URL }}
+          HEADLINE_MAX_CHARS: 28
+          TRANSCRIPT_SECOND_PASS_TOP_N: 3
+          SEGMENT_SCREENSHOT_GENERATION_ENABLED: true
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/transcribe_segments.py --print-headline-results | tee headline-generation.log
+
+      - name: Build headline diagnostics
+        if: ${{ always() && github.event.inputs.skip_segment_transcription != 'true' }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          source = Path("headline-generation.log")
+          output = Path("headline-diagnostics.txt")
+          lines = source.read_text(encoding="utf-8", errors="replace").splitlines() if source.exists() else []
+          blocks = []
+          current = []
+          collecting = False
+          for line in lines:
+              if line.startswith("headline-result "):
+                  if current:
+                      blocks.append("\n".join(current))
+                  current = [line]
+                  collecting = True
+                  continue
+              if collecting:
+                  current.append(line)
+                  if line.startswith("--------------------------------------------------------"):
+                      blocks.append("\n".join(current))
+                      current = []
+                      collecting = False
+          if current:
+              blocks.append("\n".join(current))
+          output.write_text("\n\n".join(blocks) + ("\n" if blocks else ""), encoding="utf-8")
+          print(f"headline diagnostic blocks={len(blocks)} path={output}")
+          PY
+
+      - name: Upload headline diagnostics
+        if: ${{ always() && github.event.inputs.skip_segment_transcription != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: headline-diagnostics-${{ github.run_id }}
+          path: headline-diagnostics.txt
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Verify public enrichment
+        if: ${{ github.event.inputs.skip_segment_transcription != 'true' }}
+        run: python scripts/verify_public_enrichment.py
+
+      - name: Verify no raw chat retention
+        run: python -m unittest tests.test_privacy_retention -v
+
+      - name: Publish updated data through a checked pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          diff_targets=(data/processed_vods.json data/vods.json data/vod_index.json data/vods data/segment-thumbnails)
+          automation_branch="automation/update-vods"
+          pr_title="Update Twitch VOD data"
+
+          if git diff --quiet -- "${diff_targets[@]}"; then
+            echo "No data changes to publish."
+            exit 0
+          fi
+
+          git add -A -- "${diff_targets[@]}"
+          git commit -m "$pr_title"
+
+          for publish_attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+
+            if git diff --quiet origin/main -- "${diff_targets[@]}"; then
+              echo "The generated data is already present on main."
+              exit 0
+            fi
+
+            head_sha="$(git rev-parse HEAD)"
+            git push --force origin "HEAD:refs/heads/$automation_branch"
+
+            pr_number="$(
+              gh pr list \
+                --head "$automation_branch" \
+                --base main \
+                --state open \
+                --limit 1 \
+                --json number \
+                --jq '.[0].number // empty'
+            )"
+
+            if [[ -z "$pr_number" ]]; then
+              pr_url="$(
+                gh pr create \
+                  --base main \
+                  --head "$automation_branch" \
+                  --title "$pr_title" \
+                  --body "Automated VOD data refresh. The update is merged only after the required public-readiness check passes."
+              )"
+              pr_number="${pr_url##*/}"
+            fi
+
+            gh workflow run repo-launch-doctor.yml --ref "$automation_branch"
+
+            readiness_run_id=""
+            for _ in $(seq 1 60); do
+              readiness_run_id="$(
+                gh run list \
+                  --workflow repo-launch-doctor.yml \
+                  --branch "$automation_branch" \
+                  --event workflow_dispatch \
+                  --commit "$head_sha" \
+                  --limit 1 \
+                  --json databaseId \
+                  --jq '.[0].databaseId // empty'
+              )"
+              if [[ -n "$readiness_run_id" ]]; then
+                break
+              fi
+              sleep 5
+            done
+
+            if [[ -z "$readiness_run_id" ]]; then
+              echo "Timed out waiting for public-readiness to start for $head_sha." >&2
+              exit 1
+            fi
+
+            gh run watch "$readiness_run_id" --compact --exit-status
+
+            checked_sha="$(gh run view "$readiness_run_id" --json headSha --jq '.headSha')"
+            if [[ "$checked_sha" != "$head_sha" ]]; then
+              echo "public-readiness checked $checked_sha instead of $head_sha." >&2
+              exit 1
+            fi
+
+            current_pr_sha="$(gh pr view "$pr_number" --json headRefOid --jq '.headRefOid')"
+            if [[ "$current_pr_sha" != "$head_sha" ]]; then
+              echo "Pull request head moved from $head_sha to $current_pr_sha; retrying." >&2
+              continue
+            fi
+
+            expected_main_sha="$(git rev-parse HEAD^)"
+
+            for merge_attempt in 1 2 3 4 5 6; do
+              current_main_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+              if [[ "$current_main_sha" != "$expected_main_sha" ]]; then
+                echo "main advanced from $expected_main_sha to $current_main_sha; rebasing and rechecking."
+                break
+              fi
+
+              if gh pr merge "$pr_number" --squash --delete-branch --match-head-commit "$head_sha"; then
+                echo "Merged automated VOD update PR #$pr_number."
+                exit 0
+              fi
+
+              echo "Merge attempt $merge_attempt for PR #$pr_number was not accepted yet; retrying."
+              sleep 10
+            done
+
+            echo "Publish attempt $publish_attempt did not merge; retrying from current main."
+          done
+
+          echo "Unable to merge the automated VOD update after 3 checked attempts." >&2
+          exit 1

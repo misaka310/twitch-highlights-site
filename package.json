@@ -1,0 +1,19 @@
+{
+  "name": "twitch-highlights-site",
+  "version": "1.0.0",
+  "description": "Static Twitch highlights site",
+  "main": "site/js/app.js",
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "start": "node scripts/dev-server.mjs",
+    "check:repo-hygiene": "python scripts/check_repository_hygiene.py",
+    "test": "playwright test",
+    "test:e2e": "playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}

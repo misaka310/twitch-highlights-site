@@ -1,0 +1,44 @@
+# Dependencies and generated output
+=/
+node_modules/
+public/
+artifacts/
+test-results/
+out/
+.cache/
+__pycache__/
+*.py[cod]
+headline-generation.log
+headline-diagnostics*.txt
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+cookies.txt
+*.cookies.txt
+*.json3
+.tmp-*/
+.tmp-tools/
+.browser-profile*/
+
+# Local agent state
+.ai-bridge/
+.ai-review/
+
+# Raw Twitch chat is intentionally never retained
+# The update job processes comments in memory and stores only aggregate metrics.
+data/chat-archive/
+*.chat.jsonl
+chat.json
+data/transcripts/
+data/transcript-alignments/
+data/timestamps/
+data/anosa-timestamps/
+
+# Local runtime files
+logs_job/
+*.log
+*.dmp
+.DS_Store
+Thumbs.db

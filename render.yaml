@@ -1,0 +1,18 @@
+services:
+  - type: static_site
+    name: twitch-highlights-site
+    buildCommand: sh scripts/build_public.sh
+    staticPublishPath: public
+    headers:
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=()
