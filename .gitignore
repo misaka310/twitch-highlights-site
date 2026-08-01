@@ -8,6 +8,8 @@ out/
 .cache/
 __pycache__/
 *.py[cod]
+headline-generation.log
+headline-diagnostics*.txt
 
 # Local configuration and credentials
 .env
