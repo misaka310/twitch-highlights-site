@@ -6,6 +6,11 @@ const TEST_BASE_URL = `http://localhost:${TEST_PORT}`;
 module.exports = defineConfig({
   testDir: "./tests",
   testMatch: /.*\.spec\.js$/,
+  testIgnore: [
+    /production-mobile-playback\.spec\.js$/,
+    /public-build\.spec\.js$/,
+    /real-twitch\.spec\.js$/,
+  ],
   fullyParallel: false,
   workers: 1,
   retries: 0,
