@@ -52,6 +52,11 @@ from update_vods import (
 
 HeadlineProviderError = hlg.HeadlineProviderError
 SourceValidationResult = hlp.SourceValidationResult
+extract_response_output_text = hlg.extract_response_output_text
+extract_gemini_output_text = hlg.extract_gemini_output_text
+read_http_error_detail = hlg.read_http_error_detail
+classify_gemini_http_error = hlg.classify_gemini_http_error
+is_temporary_transport_error = hlg.is_temporary_transport_error
 
 
 def apply_pipeline_settings(settings: PipelineSettings) -> None:
@@ -1296,14 +1301,7 @@ def build_headline_generator() -> hlg.ResilientHeadlineGenerator:
         choose_best_headline=choose_best_headline,
         ensure_usable_remote_headline=ensure_usable_remote_headline,
         score_headline_candidate_with_source=score_headline_candidate_with_source,
-        headline_confidence_label=headline_confidence_label,
-        compute_source_quality_penalty=compute_source_quality_penalty,
         build_headline_response_schema=build_headline_response_schema,
-        extract_gemini_output_text=extract_gemini_output_text,
-        extract_response_output_text=extract_response_output_text,
-        read_http_error_detail=read_http_error_detail,
-        classify_gemini_http_error=classify_gemini_http_error,
-        is_temporary_transport_error=is_temporary_transport_error,
         build_extractive_headline=build_extractive_headline,
         validate_headline_result=validate_headline_result,
         choose_best_remote_headline=choose_best_remote_headline,
@@ -1990,32 +1988,6 @@ def format_section_time(value: int) -> str:
     minutes = (value % 3600) // 60
     seconds = value % 60
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-
-
-def extract_response_output_text(payload: dict[str, Any]) -> str:
-    output_text = str(payload.get("output_text") or "").strip()
-    if output_text:
-        return output_text
-
-    parts: list[str] = []
-    for output in payload.get("output") or []:
-        for content in output.get("content") or []:
-            if content.get("type") == "output_text":
-                text = str(content.get("text") or "").strip()
-                if text:
-                    parts.append(text)
-    return " ".join(parts).strip()
-
-
-def extract_gemini_output_text(payload: dict[str, Any]) -> str:
-    parts: list[str] = []
-    for candidate in payload.get("candidates") or []:
-        content = candidate.get("content") or {}
-        for part in content.get("parts") or []:
-            text = str(part.get("text") or "").strip()
-            if text:
-                parts.append(text)
-    return " ".join(parts).strip()
 
 
 def _merge_source_config(config: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -3282,60 +3254,6 @@ def extract_json_like_fragment(text: str) -> str:
     if start < 0 or end <= start:
         return ""
     return text[start : end + 1].strip()
-
-
-def read_http_error_detail(exc: error.HTTPError) -> str:
-    if not hasattr(exc, "read"):
-        return ""
-    try:
-        return exc.read().decode("utf-8", errors="ignore")
-    except Exception:
-        return ""
-
-
-def classify_gemini_http_error(code: int, detail: str) -> tuple[str, bool]:
-    payload_status = ""
-    payload_message = ""
-    try:
-        payload = json.loads(detail) if detail else {}
-    except json.JSONDecodeError:
-        payload = {}
-    if isinstance(payload, dict):
-        error_payload = payload.get("error") or {}
-        if isinstance(error_payload, dict):
-            payload_status = str(error_payload.get("status") or "").strip()
-            payload_message = str(error_payload.get("message") or "").strip()
-
-    detail_text = " ".join(part for part in (payload_status, payload_message, detail[:200]) if part).strip()
-    normalized = detail_text.lower()
-    retryable = code in {408, 409, 429, 500, 502, 503, 504}
-    if code == 429 or "resource_exhausted" in normalized:
-        return ("RESOURCE_EXHAUSTED / HTTP 429", True)
-    if "unavailable" in normalized or code == 503:
-        return (f"temporary unavailable (HTTP {code})", True)
-    if "deadline_exceeded" in normalized or "timeout" in normalized or "timed out" in normalized:
-        return (f"request timed out (HTTP {code})", True)
-    if retryable:
-        return (f"temporary API error (HTTP {code})", True)
-    message = payload_message or detail[:200] or f"HTTP {code}"
-    return (f"HTTP {code}: {message}", False)
-
-
-def is_temporary_transport_error(reason: str) -> bool:
-    normalized = str(reason or "").lower()
-    return any(
-        keyword in normalized
-        for keyword in (
-            "timed out",
-            "timeout",
-            "temporary",
-            "temporarily unavailable",
-            "connection reset",
-            "connection aborted",
-            "connection refused",
-            "service unavailable",
-        )
-    )
 
 
 def build_fallback_extractive_result(
