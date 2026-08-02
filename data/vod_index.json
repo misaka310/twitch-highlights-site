@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-02T15:04:22+09:00",
+  "updated_at": "2026-08-03T02:38:03+09:00",
   "next_update_at": "2026-08-03T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2834998317",
+      "vod_url": "https://www.twitch.tv/videos/2834998317",
+      "title": "2000時間プレイヤー魂の深度4到達【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-02T11:49:20+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/51e9ef0322afc12611b6_dotitao_316259382514_1785638955//thumb/thumb0-320x180.jpg",
+      "duration_sec": 30495,
+      "count": 3,
+      "chat_total": 3700,
+      "comments_per_hour": 436.793,
+      "detail_path": "/data/vods/2834998317.json"
+    },
     {
       "vod_id": "2833526837",
       "vod_url": "https://www.twitch.tv/videos/2833526837",
@@ -32,7 +44,7 @@
       "title": "今日発売！注目のダークファンタジーPVPVEを学ぶ！【Mistfall Hunter】※投げ銭禁止",
       "published_at": "2026-07-30T22:38:00+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/fca17c874532687265c7_dotitao_316304417779_1785418675//thumb/thumb0-320x180.jpg",
-      "duration_sec": 10884,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1921,
       "comments_per_hour": 635.391,
@@ -553,18 +565,6 @@
       "chat_total": 2201,
       "comments_per_hour": 668.884,
       "detail_path": "/data/vods/2788405822.json"
-    },
-    {
-      "vod_id": "2787578920",
-      "vod_url": "https://www.twitch.tv/videos/2787578920",
-      "title": "【シリーズ初見】カプコンによる”志向の剣戟アクション”を体験したい【鬼武者 Way of the Sword体験版】",
-      "published_at": "2026-06-03T20:59:51+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/ecf9827c6c4e2fffb888_dotitao_316043466483_1780487986//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 3226,
-      "comments_per_hour": 970.307,
-      "detail_path": "/data/vods/2787578920.json"
     }
   ]
 }
