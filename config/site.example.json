@@ -11,8 +11,5 @@
   "twitch": {
     "channel_login": "your_channel",
     "channel_id": ""
-  },
-  "analysis": {
-    "extra_tag_rules": []
   }
 }
