@@ -29,8 +29,10 @@
   - データ取得、metadata更新、media queryなどReactライフサイクルを伴う処理。
 - `src/lib/`
   - React、`window`、`document`へ依存しない正規化、表示形式、盛り上がりマップ計算。
+- `src/player/playback-types.ts`、`playback-request.ts`、`playback-decision.ts`、`twitch-url.ts`
+  - React、DOM、`window`へ依存しない再生要求、状態判断、Twitch URL生成。
 - `src/twitch-player.tsx`
-  - 現時点ではプレイヤー公開APIと内部処理の正本。プレイヤー分割PRまで責務を移動しない。
+  - プレイヤー公開APIと、SDK・iframe・portal・pollingなど副作用の接続を担うfacade。
 
 ## ローカル配信経路
 
