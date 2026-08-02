@@ -11,6 +11,7 @@ concurrency:
 
 permissions:
   contents: read
+  statuses: write
 
 jobs:
   doctor:
@@ -29,6 +30,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Publish pending readiness status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CHECK_SHA: ${{ github.sha }}
+        run: python target/.github/scripts/publish_status.py pending "Repo Launch Doctor is running"
 
       - name: Check out Repo Launch Doctor
         uses: actions/checkout@v4
@@ -68,3 +76,10 @@ jobs:
           path: ${{ runner.temp }}/repo-launch-doctor
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Publish successful readiness status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CHECK_SHA: ${{ github.sha }}
+        run: python target/.github/scripts/publish_status.py success "Repo Launch Doctor passed"

@@ -128,3 +128,56 @@ def format_rejection_summary(validation_result: hlv.ValidationResult) -> str:
     if not validation_result.hard_issues:
         return ""
     return "; ".join(validation_result.hard_issues[:2])
+
+
+@dataclass(frozen=True)
+class SourceValidationResult:
+    accepted: bool
+    reasons: list[str]
+    content_word_count: int
+    subject_hint_count: int
+    action_hint_count: int
+    unknown_ratio: float
+
+
+SOURCE_VALIDATION_PENALTY_WEIGHTS: dict[str, float] = {
+    "missing_action_hint": 0.8,
+    "missing_subject_hint": 1.0,
+    "too_few_content_words": 1.0,
+    "incomplete_sentence": 0.6,
+    "too_many_unknown_tokens": 1.4,
+    "too_many_symbols": 1.2,
+    "repeated_noise_phrase": 1.1,
+    "greeting_only": 1.8,
+    "reaction_only": 1.8,
+    "call_only": 1.6,
+    "empty_source": 2.4,
+}
+SOFT_SOURCE_REASONS = {
+    "missing_action_hint",
+    "missing_subject_hint",
+    "too_few_content_words",
+    "incomplete_sentence",
+}
+
+
+def compute_source_quality_penalty(validation: SourceValidationResult) -> float:
+    return sum(SOURCE_VALIDATION_PENALTY_WEIGHTS.get(reason, 1.0) for reason in validation.reasons)
+
+
+def decide_headline_generation_strategy(validation: SourceValidationResult) -> tuple[str, str, float]:
+    if validation.accepted:
+        return ("llm_ranked", "high", 0.0)
+
+    penalty = compute_source_quality_penalty(validation)
+    severe_reasons = [reason for reason in validation.reasons if reason not in SOFT_SOURCE_REASONS]
+    if severe_reasons and penalty >= 3.0:
+        return ("fallback_extractive", "low", penalty)
+
+    confidence = "medium" if penalty <= 2.6 else "low"
+    return ("weak_llm", confidence, penalty)
+
+
+def should_skip_headline_generation(source_text: str, validation: SourceValidationResult) -> bool:
+    del source_text, validation
+    return False

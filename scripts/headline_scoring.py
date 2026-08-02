@@ -89,3 +89,12 @@ def diff_summary(winner: CandidateEvaluation, runner_up: CandidateEvaluation | N
         return "winner only"
     delta = winner.score.total - runner_up.score.total
     return f"score_delta={delta:.2f}"
+
+
+def headline_confidence_label(*, score_total: float, candidate_confidence: float, penalty: float = 0.0) -> str:
+    weighted = score_total + (candidate_confidence * 2.0) - (penalty * 0.8)
+    if weighted >= 9.5:
+        return "high"
+    if weighted >= 5.0:
+        return "medium"
+    return "low"
