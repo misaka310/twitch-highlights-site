@@ -7,7 +7,6 @@ import { fileURLToPath } from "node:url";
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const dataDirectory = resolve(currentDirectory, "../data");
 const siteConfigPath = resolve(currentDirectory, "../config/site.json");
-const faviconPath = resolve(currentDirectory, "../site/favicon.svg");
 
 const contentTypes: Record<string, string> = {
   ".json": "application/json; charset=utf-8",
@@ -39,13 +38,6 @@ function localDataPlugin(): Plugin {
             response.statusCode = 500;
             response.end("Unable to read site configuration");
           }
-          return;
-        }
-        if (requestUrl.pathname === "/favicon.svg") {
-          response.statusCode = 200;
-          response.setHeader("Cache-Control", "no-store");
-          response.setHeader("Content-Type", "image/svg+xml");
-          createReadStream(faviconPath).pipe(response);
           return;
         }
         if (!requestUrl.pathname.startsWith("/data/")) {
@@ -82,7 +74,7 @@ function localDataPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [react(), localDataPlugin()],
-  publicDir: false,
+  publicDir: resolve(currentDirectory, "public"),
   build: {
     outDir: "dist",
     emptyOutDir: true,

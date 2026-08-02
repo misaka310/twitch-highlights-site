@@ -44,7 +44,6 @@ npm run build --prefix frontend
 rm -rf public
 mkdir -p public/data
 cp -R frontend/dist/. public/
-cp site/favicon.svg public/favicon.svg
 
 copy_json_without_bom data/vods.json public/data/vods.json
 copy_json_without_bom data/vod_index.json public/data/vod_index.json

@@ -126,6 +126,20 @@ class RepositoryArchitectureTests(unittest.TestCase):
             [{"tag": "つべ", "patterns": ["つべ"]}],
         )
 
+    def test_production_frontend_has_no_legacy_site_dependency(self):
+        production_paths = (
+            ROOT / "frontend" / "vite.config.ts",
+            ROOT / "scripts" / "build_public.sh",
+            ROOT / "render.yaml",
+        )
+        matches = []
+        for path in production_paths:
+            value = path.read_text(encoding="utf-8-sig")
+            if "site/" in value or "site\\" in value:
+                matches.append(str(path.relative_to(ROOT)))
+        self.assertEqual(matches, [])
+        self.assertTrue((ROOT / "frontend" / "public" / "favicon.svg").is_file())
+
     def test_public_site_specification_is_canonical_and_complete(self):
         agents_path = ROOT / "AGENTS.md"
         spec_path = ROOT / "docs" / "PUBLIC_SITE_SPEC.md"

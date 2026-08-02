@@ -62,7 +62,7 @@
 3. `src/main.tsx` がKumo standalone CSS、`src/styles.css`、`App.tsx` を読み込む。
 4. Viteプラグインがリポジトリ直下の `data/` を `/data/` として読み取り専用配信する。
 5. Viteプラグインが `config/site.json` を `/site-config.json` として返す。
-6. Viteプラグインが `site/favicon.svg` を `/favicon.svg` として返す。
+6. Viteのpublic directoryが `frontend/public/favicon.svg` を `/favicon.svg` として返す。
 
 ## 公開配信経路
 
@@ -70,7 +70,7 @@
 2. `public/` を再作成し、Viteバンドルを配置する。
 3. 公開可能な `data/vod_index.json`、`data/vods.json`、個別VOD JSON、見どころサムネイルをコピーする。
 4. `config/site.json` から `public/site-config.json` を生成する。
-5. `site/favicon.svg` を `public/favicon.svg` へコピーする。
+5. Vite bundleに含まれる `frontend/public/favicon.svg` をそのまま配信生成物へ含める。
 6. robots.txtとsitemap.xmlを生成する。
 7. Renderは `public/` を静的配信する。
 
