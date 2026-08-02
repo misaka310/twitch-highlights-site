@@ -31,8 +31,12 @@
   - React、`window`、`document`へ依存しない正規化、表示形式、盛り上がりマップ計算。
 - `src/player/playback-types.ts`、`playback-request.ts`、`playback-decision.ts`、`twitch-url.ts`
   - React、DOM、`window`へ依存しない再生要求、状態判断、Twitch URL生成。
+- `src/player/twitch-sdk-loader.ts`、`twitch-player-adapter.ts`、`iframe-fallback.ts`
+  - Twitch SDK、player操作、iframe fallbackの副作用境界。
+- `src/hooks/use-player-portal.ts`、`use-position-polling.ts`、`use-interactive-player.ts`
+  - portal同期、位置polling、SDKイベントと再生ライフサイクル。
 - `src/twitch-player.tsx`
-  - プレイヤー公開APIと、SDK・iframe・portal・pollingなど副作用の接続を担うfacade。
+  - 公開component、imperative handle、DOM契約だけを担うfacade。
 
 ## ローカル配信経路
 

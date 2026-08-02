@@ -36,6 +36,9 @@ test("renders production layout and preserves same-VOD playback behavior", async
 
   const frame = page.locator(".player-frame");
   await expect(frame).toHaveAttribute("data-player-mode", "interactive");
+  await expect(page.locator("body > .player-embed--portal")).toHaveCount(1);
+  await expect(page.locator("body > .player-embed--portal iframe")).toHaveCount(0);
+  await expect(page.locator("body > .player-embed--portal [data-fake-twitch-player='true']")).toHaveCount(1);
   await expect(frame).toHaveAttribute("data-expected-autoplay", "false");
   await expect(frame).toHaveAttribute("data-expected-muted", "true");
 
@@ -136,6 +139,10 @@ test("latest click wins and a different VOD remounts with sound", async ({ page 
   await expect(frame).toHaveAttribute("data-expected-muted", "false");
   await expect.poll(async () => (await getFakeTwitchLog(page)).mounts.length).toBeGreaterThan(1);
   expect((await getFakeTwitchLog(page)).mounts.at(-1)).toMatchObject({ autoplay: true, muted: false });
+  await expect(page.locator("body > .player-embed--portal")).toHaveCount(1);
+  await expect(page.locator("body > .player-embed--portal iframe")).toHaveCount(0);
+  await expect(page.locator("body > .player-embed--portal [data-fake-twitch-player='true']")).toHaveCount(1);
+  expect((await getFakeTwitchLog(page)).destroys).toBeGreaterThan(0);
 });
 
 test("keeps legacy ordering and missing metadata fallbacks", async ({ page }) => {
