@@ -43,9 +43,7 @@ class RepositoryArchitectureTests(unittest.TestCase):
             "".join(("ano", "sa")),
             "".join(("cloud", "flare")),
         )
-        # `site/**` intentionally matches repository 19 byte-for-byte, including
-        # its backward-compatible data field names. Public-only infrastructure
-        # must not reintroduce the corresponding private backend integrations.
+        # Public infrastructure must not introduce private backend integrations.
         roots = [ROOT / "scripts", ROOT / ".github", ROOT / "config"]
         matches = []
         for source_root in roots:
@@ -140,6 +138,29 @@ class RepositoryArchitectureTests(unittest.TestCase):
         self.assertEqual(matches, [])
         self.assertTrue((ROOT / "frontend" / "public" / "favicon.svg").is_file())
 
+    def test_legacy_ui_assets_and_tools_are_removed(self):
+        removed_paths = (
+            ROOT / "site",
+            ROOT / "scripts" / "dev-server.mjs",
+            ROOT / "scripts" / "sync_public_runtime.py",
+            ROOT / "playwright.config.js",
+            ROOT / "playwright.selfhosted.config.js",
+            ROOT / "tests" / "formatters.test.mjs",
+            ROOT / "tests" / "site-shell.test.mjs",
+            ROOT / "tests" / "vod-list-view.test.mjs",
+            ROOT / "tests" / "vod-normalizer.test.mjs",
+            ROOT / "tests" / "latest-vods-public.spec.js",
+            ROOT / "tests" / "mobile-click-autoplay.spec.js",
+            ROOT / "tests" / "playback-policy.spec.js",
+            ROOT / "tests" / "player-portal.spec.js",
+            ROOT / "tests" / "rewind.spec.js",
+            ROOT / "tests" / "ui.spec.js",
+        )
+        self.assertEqual(
+            [str(path.relative_to(ROOT)) for path in removed_paths if path.exists()],
+            [],
+        )
+
     def test_public_site_specification_is_canonical_and_complete(self):
         agents_path = ROOT / "AGENTS.md"
         spec_path = ROOT / "docs" / "PUBLIC_SITE_SPEC.md"
@@ -159,7 +180,7 @@ class RepositoryArchitectureTests(unittest.TestCase):
         self.assertIn("docs/PUBLIC_SITE_SPEC.md", agents)
         self.assertIn("1792 x 864", agents)
         self.assertIn("縦スクロールを発生させない", agents)
-        self.assertIn("公開UIの正本は `frontend/`", agents)
+        self.assertIn("公開UIの唯一の正本は `frontend/`", agents)
         self.assertIn("docs/OPERATIONS.md", agents)
 
         required_spec_markers = (
@@ -178,7 +199,7 @@ class RepositoryArchitectureTests(unittest.TestCase):
 
         self.assertIn("`frontend/`", architecture)
         self.assertIn("公開UIの正本", architecture)
-        self.assertIn("`site/` を公開UIの正本へ戻さない", architecture)
+        self.assertIn("公開UIの別実装や同期経路を追加せず", architecture)
 
         required_operations_markers = (
             "## 定期VOD更新",

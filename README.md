@@ -29,7 +29,6 @@ Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい�
 ```text
 frontend/                    React + TypeScript + Vite + Cloudflare Kumoの公開UI
 scripts/                     VOD更新、集計、見出し生成、公開ビルド
-site/                        移行前UIと互換実装の参照元
 data/                        公開可能な集計データとサムネイル
 config/site.json             現在の公開インスタンスのサイト基本設定
 config/tag-rules.json        現在のチャンネル固有の追加タグ規則
@@ -87,13 +86,11 @@ sh scripts/build_public.sh
 ## テスト
 
 ```powershell
-npm run check:repo-hygiene
-npm run typecheck
-npm run lint
-npm test
-python -m unittest discover -s tests -p "test_*.py"
-python scripts/verify_public_enrichment.py
+npm run setup
+npm run verify
 ```
+
+Twitch実サービスとデプロイ済みRenderを確認する場合は、通常ゲート成功後に`npm run verify:live`を実行します。
 
 フロントE2EはTwitch SDK互換の偽プレイヤーを使い、初期再生方針、音声付きクリック再生、同一VODのseek、別VOD切替、last-click-wins、10秒戻る、PC・スマホ表示を外部通信なしで検証します。
 

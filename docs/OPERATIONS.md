@@ -16,7 +16,7 @@ npm run setup
 npm run verify
 ```
 
-このゲートはfrontendのtypecheck、lint、単体テスト、Pythonテスト、frontend E2E、再現可能なlegacy回帰、`public/`生成・内容検証・同一環境での再生成一致、生成済み`public/`の静的配信E2E、repository hygieneを含む。本物のTwitchとデプロイ済みRenderへ依存する検証は含めない。
+このゲートはfrontendのtypecheck、lint、単体テスト、Pythonテスト、frontend E2E、`public/`生成・内容検証・同一環境での再生成一致、生成済み`public/`の静的配信E2E、repository hygieneを含む。本物のTwitchとデプロイ済みRenderへ依存する検証は含めない。
 
 Twitchプレイヤーまたは公開経路へ影響する変更は、通常ゲート成功後かつデプロイ完了後に次を独立実行する。
 
