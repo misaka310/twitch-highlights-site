@@ -41,6 +41,12 @@ test("renders production layout and preserves same-VOD playback behavior", async
 
   await expect(page.locator(".highlight-item")).toHaveCount(3);
   await expect(page.locator(".highlight-item").first()).toHaveClass(/is-selected/);
+  const firstTags = page.locator(".highlight-item").first().locator(".highlight-tag");
+  expect(await firstTags.count()).toBeLessThanOrEqual(2);
+  if (await firstTags.count()) {
+    await expect(firstTags.first()).toHaveCSS("background-color", "rgb(33, 29, 45)");
+    await expect(firstTags.first()).toHaveCSS("color", "rgb(216, 204, 233)");
+  }
 
   const activityChart = page.locator(".activity-chart");
   const activityPath = (await page.locator(".activity-area").getAttribute("d")) || "";

@@ -483,7 +483,9 @@ export default function App() {
                         <span className="highlight-copy">
                           <strong>{title}</strong>
                           <span className="tag-row">
-                            {(segment.tags || []).slice(0, 3).map((tag) => <Badge key={tag} variant="neutral">{tag}</Badge>)}
+                            {(segment.tags || []).slice(0, 2).map((tag) => (
+                              <Badge key={tag} className="highlight-tag" variant="neutral">{tag}</Badge>
+                            ))}
                           </span>
                         </span>
                       </button>
