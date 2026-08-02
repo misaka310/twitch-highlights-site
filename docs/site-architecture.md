@@ -52,6 +52,8 @@
   - source品質penalty、generation strategy、skip判断を含む純粋な見出し品質判断。
 - `scripts/headline_scoring.py`
   - candidate score、ranking、confidence labelの正本。
+- `scripts/headline_generation.py`
+  - provider応答抽出、HTTPエラー分類、transport一時障害判定、retry/fallback順序とSDK・HTTP境界。provider固有処理はcallbackへ戻さない。
 
 ## ローカル配信経路
 

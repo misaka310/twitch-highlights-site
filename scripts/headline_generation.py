@@ -8,6 +8,7 @@ from typing import Any, Callable
 from urllib import error, request
 
 import headline_pipeline as hlp
+import headline_scoring as hls
 
 
 @dataclass(frozen=True)
@@ -30,14 +31,7 @@ class HeadlineGenerationCallbacks:
     choose_best_headline: Callable[..., Any]
     ensure_usable_remote_headline: Callable[..., str]
     score_headline_candidate_with_source: Callable[..., Any]
-    headline_confidence_label: Callable[..., str]
-    compute_source_quality_penalty: Callable[..., float]
     build_headline_response_schema: Callable[..., dict[str, Any]]
-    extract_gemini_output_text: Callable[..., str]
-    extract_response_output_text: Callable[..., str]
-    read_http_error_detail: Callable[..., str]
-    classify_gemini_http_error: Callable[..., tuple[str, bool]]
-    is_temporary_transport_error: Callable[..., bool]
     build_extractive_headline: Callable[..., str]
     validate_headline_result: Callable[..., Any]
     choose_best_remote_headline: Callable[..., tuple[Any, dict[str, Any]]]
@@ -60,6 +54,95 @@ def _parse_retry_after_value(value: Any) -> float | None:
     if not match:
         return None
     return min(max(0.0, float(match.group(1))), HEADLINE_RETRY_MAX_WAIT_SEC)
+
+
+def extract_response_output_text(payload: dict[str, Any]) -> str:
+    output_text = str(payload.get("output_text") or "").strip()
+    if output_text:
+        return output_text
+
+    parts: list[str] = []
+    for output in payload.get("output") or []:
+        if not isinstance(output, dict):
+            continue
+        for content in output.get("content") or []:
+            if not isinstance(content, dict) or content.get("type") != "output_text":
+                continue
+            value = str(content.get("text") or "").strip()
+            if value:
+                parts.append(value)
+    return " ".join(parts).strip()
+
+
+def extract_gemini_output_text(payload: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for candidate in payload.get("candidates") or []:
+        if not isinstance(candidate, dict):
+            continue
+        content = candidate.get("content") or {}
+        if not isinstance(content, dict):
+            continue
+        for part in content.get("parts") or []:
+            if not isinstance(part, dict):
+                continue
+            value = str(part.get("text") or "").strip()
+            if value:
+                parts.append(value)
+    return " ".join(parts).strip()
+
+
+def read_http_error_detail(exc: error.HTTPError) -> str:
+    if not hasattr(exc, "read"):
+        return ""
+    try:
+        return exc.read().decode("utf-8", errors="ignore")
+    except Exception:
+        return ""
+
+
+def classify_gemini_http_error(code: int, detail: str) -> tuple[str, bool]:
+    payload_status = ""
+    payload_message = ""
+    try:
+        payload = json.loads(detail) if detail else {}
+    except json.JSONDecodeError:
+        payload = {}
+    if isinstance(payload, dict):
+        error_payload = payload.get("error") or {}
+        if isinstance(error_payload, dict):
+            payload_status = str(error_payload.get("status") or "").strip()
+            payload_message = str(error_payload.get("message") or "").strip()
+
+    detail_text = " ".join(part for part in (payload_status, payload_message, detail[:200]) if part).strip()
+    normalized = detail_text.lower()
+    retryable = code in {408, 409, 429, 500, 502, 503, 504}
+    if code == 429 or "resource_exhausted" in normalized:
+        return ("RESOURCE_EXHAUSTED / HTTP 429", True)
+    if "unavailable" in normalized or code == 503:
+        return (f"temporary unavailable (HTTP {code})", True)
+    if "deadline_exceeded" in normalized or "timeout" in normalized or "timed out" in normalized:
+        return (f"request timed out (HTTP {code})", True)
+    if retryable:
+        return (f"temporary API error (HTTP {code})", True)
+    message = payload_message or detail[:200] or f"HTTP {code}"
+    return (f"HTTP {code}: {message}", False)
+
+
+def is_temporary_transport_error(reason: str) -> bool:
+    normalized = str(reason or "").lower()
+    return any(
+        keyword in normalized
+        for keyword in (
+            "timed out",
+            "timeout",
+            "temporary",
+            "temporarily unavailable",
+            "connection reset",
+            "connection aborted",
+            "connection refused",
+            "service unavailable",
+        )
+    )
 
 
 def resolve_http_retry_after_seconds(exc: Any, detail: str) -> float | None:
@@ -149,10 +232,10 @@ class GeminiHeadlineGenerator:
             source_text,
             config={"source_validation": source_validation},
         )
-        confidence = self.callbacks.headline_confidence_label(
+        confidence = hls.headline_confidence_label(
             score_total=chosen_score.total,
             candidate_confidence=chosen.confidence,
-            penalty=self.callbacks.compute_source_quality_penalty(source_validation) if source_validation else 0.0,
+            penalty=hlp.compute_source_quality_penalty(source_validation) if source_validation else 0.0,
         )
         return self.callbacks.make_headline_result(
             text=finalized,
@@ -215,17 +298,17 @@ class GeminiHeadlineGenerator:
             with request.urlopen(req, timeout=self.settings.gemini_timeout_sec) as resp:
                 payload = json.loads(resp.read().decode("utf-8"))
         except error.HTTPError as exc:
-            detail = self.callbacks.read_http_error_detail(exc)
-            reason, retryable = self.callbacks.classify_gemini_http_error(exc.code, detail)
+            detail = read_http_error_detail(exc)
+            reason, retryable = classify_gemini_http_error(exc.code, detail)
             raise HeadlineProviderError("Gemini", reason, retryable=retryable) from exc
         except error.URLError as exc:
             reason = str(exc.reason)
-            retryable = self.callbacks.is_temporary_transport_error(reason)
+            retryable = is_temporary_transport_error(reason)
             label = "request timed out" if retryable and "tim" in reason.lower() else f"request failed: {reason}"
             raise HeadlineProviderError("Gemini", label, retryable=retryable) from exc
         except TimeoutError as exc:
             raise HeadlineProviderError("Gemini", "request timed out", retryable=True) from exc
-        return self.callbacks.extract_gemini_output_text(payload)
+        return extract_gemini_output_text(payload)
 
 
 class GroqHeadlineGenerator:
@@ -281,10 +364,10 @@ class GroqHeadlineGenerator:
             source_text,
             config={"source_validation": source_validation},
         )
-        confidence = self.callbacks.headline_confidence_label(
+        confidence = hls.headline_confidence_label(
             score_total=chosen_score.total,
             candidate_confidence=chosen.confidence,
-            penalty=self.callbacks.compute_source_quality_penalty(source_validation) if source_validation else 0.0,
+            penalty=hlp.compute_source_quality_penalty(source_validation) if source_validation else 0.0,
         )
         return self.callbacks.make_headline_result(
             text=finalized,
@@ -423,10 +506,10 @@ class NvidiaHeadlineGenerator:
             source_text,
             config={"source_validation": source_validation},
         )
-        confidence = self.callbacks.headline_confidence_label(
+        confidence = hls.headline_confidence_label(
             score_total=chosen_score.total,
             candidate_confidence=chosen.confidence,
-            penalty=self.callbacks.compute_source_quality_penalty(source_validation) if source_validation else 0.0,
+            penalty=hlp.compute_source_quality_penalty(source_validation) if source_validation else 0.0,
         )
         return self.callbacks.make_headline_result(
             text=finalized,
@@ -481,11 +564,11 @@ class NvidiaHeadlineGenerator:
             with request.urlopen(req, timeout=self.settings.nvidia_timeout_sec) as resp:
                 payload = json.loads(resp.read().decode("utf-8"))
         except error.HTTPError as exc:
-            detail = self.callbacks.read_http_error_detail(exc)
+            detail = read_http_error_detail(exc)
             raise HeadlineProviderError("NVIDIA", f"HTTP {exc.code}: {detail[:300] or 'request failed'}") from exc
         except error.URLError as exc:
             reason = str(exc.reason)
-            retryable = self.callbacks.is_temporary_transport_error(reason)
+            retryable = is_temporary_transport_error(reason)
             label = "request timed out" if retryable and "tim" in reason.lower() else f"request failed: {reason}"
             raise HeadlineProviderError("NVIDIA", label, retryable=retryable) from exc
         except TimeoutError as exc:
