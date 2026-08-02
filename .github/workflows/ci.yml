@@ -40,7 +40,11 @@ jobs:
       - name: Install repository dependencies
         run: npm run setup
 
-      - name: Install Playwright Chromium
+      - name: Install root Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Install frontend Playwright Chromium
+        working-directory: frontend
         run: npx playwright install --with-deps chromium
 
       - name: Run canonical verification
@@ -89,7 +93,7 @@ jobs:
       - name: Install repository dependencies
         run: npm run setup
 
-      - name: Install Playwright Chromium
+      - name: Install root Playwright Chromium
         run: npx playwright install --with-deps chromium
 
       - name: Build production publish directory
