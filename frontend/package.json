@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
+    "test:unit": "tsc -p tsconfig.unit.json && node --test .unit-test-dist/tests/unit/*.test.js",
     "test:e2e": "playwright test"
   },
   "dependencies": {
