@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import json
 import os
 import re
@@ -30,6 +29,8 @@ from transcription import screenshot as tx_screenshot
 from transcription import segment_persistence as tx_persistence
 from transcription import target_selection as tx_targets
 from transcription import whisper_runner as tx_whisper
+from transcription.cli import RunOptions, build_run_options, parse_cli_args
+from transcription.config import PipelineSettings
 
 from transcript_postprocess import (
     NormalizedTranscriptResult,
@@ -48,175 +49,20 @@ from update_vods import (
     write_public_data,
 )
 
-load_local_env(ENV_PATH)
 HeadlineProviderError = hlg.HeadlineProviderError
 
-TRANSCRIPT_MODEL = os.environ.get("TRANSCRIPT_MODEL", "small")
-TRANSCRIPT_COMPUTE_TYPE = os.environ.get("TRANSCRIPT_COMPUTE_TYPE", "int8")
-TRANSCRIPT_DEVICE = os.environ.get("TRANSCRIPT_DEVICE", "cpu")
-TRANSCRIPT_MAX_SEGMENTS = max(1, int(os.environ.get("TRANSCRIPT_MAX_SEGMENTS", "9")))
-TRANSCRIPT_PADDING_SEC = max(0, int(os.environ.get("TRANSCRIPT_PADDING_SEC", "15")))
-TRANSCRIPT_MAX_DURATION_SEC = max(30, int(os.environ.get("TRANSCRIPT_MAX_DURATION_SEC", "150")))
-TRANSCRIPT_DOWNLOAD_TIMEOUT_SEC = max(30, int(os.environ.get("TRANSCRIPT_DOWNLOAD_TIMEOUT_SEC", "180")))
-TRANSCRIPT_TARGET_SCOPE = (os.environ.get("TRANSCRIPT_TARGET_SCOPE") or "recent_public").strip().lower()
-TRANSCRIPT_RECENT_ANALYZED_WINDOW_HOURS = max(
-    1,
-    int(os.environ.get("TRANSCRIPT_RECENT_ANALYZED_WINDOW_HOURS", "36")),
-)
+
+def apply_pipeline_settings(settings: PipelineSettings) -> None:
+    globals().update(settings.as_globals())
+
+
+apply_pipeline_settings(PipelineSettings.from_env({}))
+
 SEGMENT_SCREENSHOT_WIDTH = 192
 SEGMENT_SCREENSHOT_HEIGHT = 108
 SEGMENT_SCREENSHOT_CAPTURE_OFFSET_SEC = 1.0
 SEGMENT_SCREENSHOT_TIMEOUT_SEC = 30
 SEGMENT_SCREENSHOT_QUALITY = 72
-SEGMENT_SCREENSHOT_GENERATION_ENABLED_RAW = (
-    os.environ.get("SEGMENT_SCREENSHOT_GENERATION_ENABLED") or ""
-).strip().lower()
-if SEGMENT_SCREENSHOT_GENERATION_ENABLED_RAW:
-    SEGMENT_SCREENSHOT_GENERATION_ENABLED = SEGMENT_SCREENSHOT_GENERATION_ENABLED_RAW in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
-else:
-    SEGMENT_SCREENSHOT_GENERATION_ENABLED = os.environ.get("CI", "").strip().lower() not in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
-TRANSCRIPT_DRY_RUN = os.environ.get("TRANSCRIPT_DRY_RUN", "0").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-TRANSCRIPT_RETRY_ERRORS = os.environ.get("TRANSCRIPT_RETRY_ERRORS", "0").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-HEADLINE_RETRY_ERRORS = os.environ.get("HEADLINE_RETRY_ERRORS", "1").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-FORCE_TRANSCRIPT_REFRESH = os.environ.get("FORCE_TRANSCRIPT_REFRESH", "0").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-FORCE_HEADLINE_REFRESH = os.environ.get("FORCE_HEADLINE_REFRESH", "0").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-TRANSCRIPT_PREPROCESS_PROFILE = (os.environ.get("TRANSCRIPT_PREPROCESS_PROFILE") or "light").strip().lower()
-TRANSCRIPT_PREPROCESS_DENOISE_STRENGTH = (
-    os.environ.get("TRANSCRIPT_PREPROCESS_DENOISE_STRENGTH") or "-25"
-).strip()
-TRANSCRIPT_BEAM_SIZE = max(1, int(os.environ.get("TRANSCRIPT_BEAM_SIZE", "1")))
-TRANSCRIPT_CONDITION_ON_PREVIOUS_TEXT = os.environ.get(
-    "TRANSCRIPT_CONDITION_ON_PREVIOUS_TEXT",
-    "0",
-).strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-TRANSCRIPT_VAD_FILTER = os.environ.get("TRANSCRIPT_VAD_FILTER", "1").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS_RAW = (
-    os.environ.get("TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS") or ""
-).strip()
-TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS: int | None
-if TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS_RAW:
-    try:
-        TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS = max(0, int(TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS_RAW))
-    except ValueError:
-        TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS = None
-else:
-    TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS = None
-TRANSCRIPT_SECOND_PASS_ENABLED = os.environ.get("TRANSCRIPT_SECOND_PASS_ENABLED", "1").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-TRANSCRIPT_SECOND_PASS_MODEL = (os.environ.get("TRANSCRIPT_SECOND_PASS_MODEL") or TRANSCRIPT_MODEL).strip()
-TRANSCRIPT_SECOND_PASS_SELECTION_MODE = (
-    os.environ.get("TRANSCRIPT_SECOND_PASS_SELECTION_MODE") or "hybrid"
-).strip().lower()
-TRANSCRIPT_SECOND_PASS_TOP_N = max(0, int(os.environ.get("TRANSCRIPT_SECOND_PASS_TOP_N", "2")))
-TRANSCRIPT_SECOND_PASS_EXTRA_PADDING_SEC = max(
-    0, int(os.environ.get("TRANSCRIPT_SECOND_PASS_EXTRA_PADDING_SEC", "3"))
-)
-TRANSCRIPT_SECOND_PASS_WORD_TIMESTAMPS = (
-    os.environ.get("TRANSCRIPT_SECOND_PASS_WORD_TIMESTAMPS", "1").strip().lower()
-    in {"1", "true", "yes", "on"}
-)
-TRANSCRIPT_SECOND_PASS_PREPROCESS_PROFILE = (
-    os.environ.get("TRANSCRIPT_SECOND_PASS_PREPROCESS_PROFILE") or TRANSCRIPT_PREPROCESS_PROFILE
-).strip().lower()
-TRANSCRIPT_LOW_INFO_TOKEN_THRESHOLD = max(1, int(os.environ.get("TRANSCRIPT_LOW_INFO_TOKEN_THRESHOLD", "6")))
-TRANSCRIPT_SUSPICIOUS_RATIO_THRESHOLD = min(
-    1.0, max(0.0, float(os.environ.get("TRANSCRIPT_SUSPICIOUS_RATIO_THRESHOLD", "0.2")))
-)
-TERM_DICTIONARY_PATH = os.environ.get("TERM_DICTIONARY_PATH", str(Path("data") / "term_dictionary.json")).strip()
-GAME_TERM_DICTIONARY_PATH = os.environ.get(
-    "GAME_TERM_DICTIONARY_PATH",
-    str(Path("data") / "game_term_dictionary.json"),
-).strip()
-TERM_NORMALIZATION_ENABLED = os.environ.get("TERM_NORMALIZATION_ENABLED", "1").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-USE_GAME_TERM_DICTIONARY_DEFAULT = os.environ.get("USE_GAME_TERM_DICTIONARY", "1").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-TERM_NORMALIZATION_SIMILARITY = min(100, max(0, int(os.environ.get("TERM_NORMALIZATION_SIMILARITY", "88"))))
-TERM_NORMALIZATION_MIN_TOKEN_LEN = max(2, int(os.environ.get("TERM_NORMALIZATION_MIN_TOKEN_LEN", "3")))
-TERM_NORMALIZATION_MIN_TERM_LEN = max(2, int(os.environ.get("TERM_NORMALIZATION_MIN_TERM_LEN", "3")))
-SOURCE_SENTENCE_LIMIT_DEFAULT = max(1, min(2, int(os.environ.get("SOURCE_SENTENCE_LIMIT", "2"))))
-PRINT_SOURCE_SELECTION_DEFAULT = os.environ.get("PRINT_SOURCE_SELECTION", "0").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-    "on",
-}
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
-GEMINI_MODEL = (os.environ.get("GEMINI_MODEL") or "gemini-2.5-flash").strip()
-GEMINI_API_URL = (
-    os.environ.get("GEMINI_API_URL")
-    or "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-).strip()
-GEMINI_TIMEOUT_SEC = max(10, int(os.environ.get("GEMINI_TIMEOUT_SEC", "45")))
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
-GROQ_MODEL = os.environ.get("GROQ_MODEL", "").strip()
-GROQ_RESPONSES_URL = os.environ.get("GROQ_RESPONSES_URL", "https://api.groq.com/openai/v1/responses").strip()
-GROQ_TIMEOUT_SEC = max(10, int(os.environ.get("GROQ_TIMEOUT_SEC", "45")))
-NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY", "").strip()
-NVIDIA_MODEL = (os.environ.get("NVIDIA_MODEL") or "mistralai/mistral-large-3-675b-instruct-2512").strip()
-NVIDIA_API_URL = (
-    os.environ.get("NVIDIA_API_URL")
-    or "https://integrate.api.nvidia.com/v1/chat/completions"
-).strip()
-NVIDIA_TIMEOUT_SEC = max(10, int(os.environ.get("NVIDIA_TIMEOUT_SEC", "45")))
-HEADLINE_MAX_CHARS = max(12, int(os.environ.get("HEADLINE_MAX_CHARS", "28")))
 LOCAL_HEADLINE_MODEL = "extractive-ja-v1"
 DEFAULT_HEADLINE_TEXT = "\u898b\u3069\u3053\u308d\u30af\u30ea\u30c3\u30d7"
 JAPANESE_CHAR_RE = re.compile(r"[\u3040-\u30ff\u3400-\u9fff]")
@@ -245,11 +91,9 @@ HEADLINE_BROKEN_PHRASE_RE = re.compile(
 HEADLINE_FUNCTION_WORD_RE = re.compile(r"(?:\u3067|\u306b|\u3092|\u304c|\u306f|\u306e|\u3068|\u3082|\u3078|\u3084|\u304b|\u306a|\u306d)")
 HEADLINE_ALLOWED_CHARS_RE = hlv.HEADLINE_ALLOWED_CHARS_RE
 HEADLINE_NOUN_LIST_ONLY_RE = HEADLINE_ALLOWED_CHARS_RE
-HEADLINE_MAX_ATTEMPTS = max(1, int(os.environ.get("HEADLINE_MAX_ATTEMPTS", "2")))
 REFLECTIVE_HEADLINE_TOKENS = hlv.REFLECTIVE_HEADLINE_TOKENS
 SOFT_DROP_HEADLINE_TOKENS = hlv.SOFT_DROP_HEADLINE_TOKENS
 SOFT_HEADLINE_ISSUES = hlv.SOFT_HEADLINE_ISSUES
-HEADLINE_STREAMER_ID = os.environ.get("HEADLINE_STREAMER_ID", "").strip() or None
 SOURCE_CLAUSE_EXTRA_CHARS = hpp.SOURCE_CLAUSE_EXTRA_CHARS
 PREPROCESS_CONTEXT = hlp.merge_preprocess_context(
     headline_max_chars=HEADLINE_MAX_CHARS,
@@ -579,186 +423,12 @@ class RetranscribeConfig:
     suspicious_ratio_threshold: float
 
 
-@dataclass(frozen=True)
-class RunOptions:
-    force_transcript_refresh: bool
-    force_headline_refresh: bool
-    max_segments: int
-    headline_only: bool
-    only_item_id: str | None
-    only_vod_id: str | None
-    print_headline_results: bool
-    print_source_selection: bool
-    source_sentence_limit: int
-    use_game_term_dictionary: bool
-    second_pass_selection_mode: str
-    second_pass_top_n: int
-    second_pass_extra_padding_sec: int
-    second_pass_word_timestamps: bool
-    second_pass_preprocess_profile: str
-    dry_run: bool
-
-
 @dataclass
 class RunSummary:
     transcript_success: int = 0
     transcript_skipped: int = 0
     headline_success: int = 0
     headline_skipped: int = 0
-
-
-def parse_cli_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Transcribe segments and generate headlines")
-    parser.add_argument(
-        "--force-transcript-refresh",
-        action="store_true",
-        help="Regenerate transcripts even when transcript_status is already ok/empty",
-    )
-    parser.add_argument(
-        "--force-headline-refresh",
-        action="store_true",
-        help="Regenerate headlines even when headline_status is already ok",
-    )
-    parser.add_argument("--max-segments", type=int, default=None, help="Limit number of target segments")
-    parser.add_argument(
-        "--headline-only",
-        action="store_true",
-        help="Skip transcription and regenerate headlines only for items that already have transcript",
-    )
-    parser.add_argument("--item-id", "--only-item-id", dest="only_item_id", default=None, help="Process only this item id")
-    parser.add_argument("--vod-id", "--only-vod-id", dest="only_vod_id", default=None, help="Process only this vod id")
-    parser.add_argument(
-        "--print-headline-results",
-        action="store_true",
-        help="Print detailed headline candidates and final selection for each processed item",
-    )
-    parser.add_argument(
-        "--print-source-selection",
-        action="store_true",
-        help="Print source sentence candidates, scores, and selected 1-2 sentences",
-    )
-    parser.add_argument(
-        "--source-sentence-limit",
-        type=int,
-        default=None,
-        help="Number of selected source sentences passed to headline generation (1-2)",
-    )
-    parser.add_argument(
-        "--second-pass-selection-mode",
-        choices=("rank", "zscore", "quality", "hybrid"),
-        default=None,
-        help="Second-pass target selection mode override",
-    )
-    parser.add_argument(
-        "--second-pass-top-n",
-        type=int,
-        default=None,
-        help="Second-pass retranscribe count override",
-    )
-    parser.add_argument(
-        "--second-pass-extra-padding-sec",
-        type=int,
-        default=None,
-        help="Second-pass transcript window extra padding (seconds) override",
-    )
-    second_pass_word_timestamps_group = parser.add_mutually_exclusive_group()
-    second_pass_word_timestamps_group.add_argument(
-        "--second-pass-word-timestamps",
-        dest="second_pass_word_timestamps",
-        action="store_true",
-        help="Enable second-pass word timestamps override",
-    )
-    second_pass_word_timestamps_group.add_argument(
-        "--no-second-pass-word-timestamps",
-        dest="second_pass_word_timestamps",
-        action="store_false",
-        help="Disable second-pass word timestamps override",
-    )
-    parser.add_argument(
-        "--second-pass-preprocess-profile",
-        default=None,
-        help="Second-pass preprocess profile override",
-    )
-    game_term_group = parser.add_mutually_exclusive_group()
-    game_term_group.add_argument(
-        "--use-game-term-dictionary",
-        dest="use_game_term_dictionary",
-        action="store_true",
-        help="Enable the configured game term dictionary for source selection and normalization",
-    )
-    game_term_group.add_argument(
-        "--no-game-term-dictionary",
-        dest="use_game_term_dictionary",
-        action="store_false",
-        help="Disable the configured game term dictionary",
-    )
-    parser.set_defaults(
-        use_game_term_dictionary=None,
-        second_pass_word_timestamps=None,
-    )
-    return parser.parse_args(argv)
-
-
-def _normalize_cli_id(value: str | None) -> str | None:
-    normalized = str(value or "").strip()
-    return normalized or None
-
-
-def build_run_options(args: argparse.Namespace) -> RunOptions:
-    max_segments = TRANSCRIPT_MAX_SEGMENTS if args.max_segments is None else max(1, int(args.max_segments))
-    headline_only = bool(args.headline_only)
-    force_headline_refresh = bool(FORCE_HEADLINE_REFRESH or args.force_headline_refresh or headline_only)
-    source_sentence_limit_raw = SOURCE_SENTENCE_LIMIT_DEFAULT if args.source_sentence_limit is None else int(args.source_sentence_limit)
-    source_sentence_limit = max(1, min(2, source_sentence_limit_raw))
-    use_game_term_dictionary = (
-        USE_GAME_TERM_DICTIONARY_DEFAULT
-        if args.use_game_term_dictionary is None
-        else bool(args.use_game_term_dictionary)
-    )
-    second_pass_selection_mode = (
-        TRANSCRIPT_SECOND_PASS_SELECTION_MODE
-        if args.second_pass_selection_mode is None
-        else str(args.second_pass_selection_mode).strip().lower()
-    ) or "hybrid"
-    second_pass_top_n = (
-        max(0, int(TRANSCRIPT_SECOND_PASS_TOP_N))
-        if args.second_pass_top_n is None
-        else max(0, int(args.second_pass_top_n))
-    )
-    second_pass_extra_padding_sec = (
-        max(0, int(TRANSCRIPT_SECOND_PASS_EXTRA_PADDING_SEC))
-        if args.second_pass_extra_padding_sec is None
-        else max(0, int(args.second_pass_extra_padding_sec))
-    )
-    second_pass_word_timestamps = (
-        bool(TRANSCRIPT_SECOND_PASS_WORD_TIMESTAMPS)
-        if args.second_pass_word_timestamps is None
-        else bool(args.second_pass_word_timestamps)
-    )
-    second_pass_preprocess_profile = (
-        TRANSCRIPT_SECOND_PASS_PREPROCESS_PROFILE
-        if args.second_pass_preprocess_profile is None
-        else str(args.second_pass_preprocess_profile).strip().lower()
-    ) or TRANSCRIPT_PREPROCESS_PROFILE
-    print_source_selection = bool(PRINT_SOURCE_SELECTION_DEFAULT or args.print_source_selection)
-    return RunOptions(
-        force_transcript_refresh=bool(FORCE_TRANSCRIPT_REFRESH or args.force_transcript_refresh),
-        force_headline_refresh=force_headline_refresh,
-        max_segments=max_segments,
-        headline_only=headline_only,
-        only_item_id=_normalize_cli_id(args.only_item_id),
-        only_vod_id=_normalize_cli_id(args.only_vod_id),
-        print_headline_results=bool(args.print_headline_results),
-        print_source_selection=print_source_selection,
-        source_sentence_limit=source_sentence_limit,
-        use_game_term_dictionary=use_game_term_dictionary,
-        second_pass_selection_mode=second_pass_selection_mode,
-        second_pass_top_n=second_pass_top_n,
-        second_pass_extra_padding_sec=second_pass_extra_padding_sec,
-        second_pass_word_timestamps=second_pass_word_timestamps,
-        second_pass_preprocess_profile=second_pass_preprocess_profile,
-        dry_run=bool(TRANSCRIPT_DRY_RUN),
-    )
 
 
 @dataclass
@@ -919,7 +589,11 @@ def main(argv: list[str] | None = None) -> None:
 
 
 def _setup_execution(argv: list[str] | None = None) -> tuple[RunOptions, dict[str, Any]]:
-    options = build_run_options(parse_cli_args(argv))
+    load_local_env(ENV_PATH)
+    settings = PipelineSettings.from_env(os.environ)
+    apply_pipeline_settings(settings)
+    refresh_runtime_configuration()
+    options = build_run_options(parse_cli_args(argv), settings)
     set_active_term_dictionary(options.use_game_term_dictionary)
     headline_source_config = build_headline_source_config(
         source_sentence_limit=options.source_sentence_limit,
@@ -3134,6 +2808,43 @@ def build_headline_source_config(
 
 
 HEADLINE_SOURCE_CONFIG = build_headline_source_config()
+
+
+def refresh_runtime_configuration() -> None:
+    global PREPROCESS_CONTEXT
+    global SOURCE_SENTENCE_SPLIT_RE
+    global SOURCE_INTERJECTION_RE
+    global SOURCE_TRAILING_CHATTER_RE
+    global SOURCE_LOW_SIGNAL_CLAUSE_RE
+    global SOURCE_CLAUSE_MAX_CHARS
+    global BASE_TERM_DICTIONARY
+    global GAME_TERM_DICTIONARY
+    global TERM_NORMALIZATION_CONFIG
+    global ACTIVE_TERM_DICTIONARY
+    global HEADLINE_SOURCE_CONFIG
+
+    PREPROCESS_CONTEXT = hlp.merge_preprocess_context(
+        headline_max_chars=HEADLINE_MAX_CHARS,
+        streamer_id=HEADLINE_STREAMER_ID,
+    )
+    SOURCE_SENTENCE_SPLIT_RE = PREPROCESS_CONTEXT.patterns.sentence_split_re
+    SOURCE_INTERJECTION_RE = PREPROCESS_CONTEXT.patterns.interjection_re
+    SOURCE_TRAILING_CHATTER_RE = PREPROCESS_CONTEXT.patterns.trailing_chatter_re
+    SOURCE_LOW_SIGNAL_CLAUSE_RE = PREPROCESS_CONTEXT.patterns.low_signal_re
+    SOURCE_CLAUSE_MAX_CHARS = PREPROCESS_CONTEXT.source_clause_max_chars
+    BASE_TERM_DICTIONARY = load_term_dictionary(Path(TERM_DICTIONARY_PATH))
+    GAME_TERM_DICTIONARY = load_term_dictionary(Path(GAME_TERM_DICTIONARY_PATH))
+    TERM_NORMALIZATION_CONFIG = TermNormalizationConfig(
+        similarity_threshold=TERM_NORMALIZATION_SIMILARITY,
+        min_token_len=TERM_NORMALIZATION_MIN_TOKEN_LEN,
+        min_term_len=TERM_NORMALIZATION_MIN_TERM_LEN,
+    )
+    ACTIVE_TERM_DICTIONARY = resolve_active_term_dictionary(USE_GAME_TERM_DICTIONARY_DEFAULT)
+    HEADLINE_SOURCE_CONFIG = build_headline_source_config(
+        source_sentence_limit=SOURCE_SENTENCE_LIMIT_DEFAULT,
+        print_source_selection=PRINT_SOURCE_SELECTION_DEFAULT,
+        use_game_term_dictionary=USE_GAME_TERM_DICTIONARY_DEFAULT,
+    )
 
 
 def _contains_dictionary_term(text: str, term: str) -> bool:
