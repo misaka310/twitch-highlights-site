@@ -1,3 +1,5 @@
+"""Validate publishable headlines and screenshots for the latest public VOD entries."""
+
 from __future__ import annotations
 
 import json
