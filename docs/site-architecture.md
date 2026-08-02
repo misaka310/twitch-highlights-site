@@ -48,6 +48,10 @@
   - 対象収集、dry-run停止、first pass、second pass、見出し生成、保存、summaryの実行順序。外部処理は`PipelineSteps`境界から呼ぶ。
 - `scripts/transcribe_segments.py`
   - entry pointと既存処理の互換facade。`.env`読込、runtime設定適用、辞書・headline context再構築を行い、各処理をorchestratorへ接続する。
+- `scripts/headline_pipeline.py`
+  - source品質penalty、generation strategy、skip判断を含む純粋な見出し品質判断。
+- `scripts/headline_scoring.py`
+  - candidate score、ranking、confidence labelの正本。
 
 ## ローカル配信経路
 
