@@ -12,6 +12,8 @@ class PublicBuildTests(unittest.TestCase):
         self.assertIn("npm run build --prefix frontend", script)
         self.assertNotIn("npm ci --prefix frontend", script)
         self.assertIn("cp -R frontend/dist/. public/", script)
+        self.assertNotIn("site/favicon.svg", script)
+        self.assertTrue((ROOT / "frontend" / "public" / "favicon.svg").is_file())
         self.assertIn("public/data/vod_index.json", script)
         self.assertIn("public/data/vods/", script)
         self.assertIn("public/data/segment-thumbnails", script)
