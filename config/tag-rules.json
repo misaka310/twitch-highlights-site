@@ -1,0 +1,8 @@
+{
+  "extra_tag_rules": [
+    {
+      "tag": "つべ",
+      "patterns": ["つべ"]
+    }
+  ]
+}

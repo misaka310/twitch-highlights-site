@@ -4,12 +4,12 @@
 
 https://dotitao-moments.onrender.com/
 
-Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。現在の公開インスタンスは`dotitao moments`です。対象チャンネル、サイト名、公開URL、追加タグ規則は`config/site.json`へ分離されているため、汎用ロジックを書き換えずに別のTwitchチャンネルへ切り替えられます。
+Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。現在の公開インスタンスは`dotitao moments`です。対象チャンネル、サイト名、公開URLは`config/site.json`、チャンネル固有の追加タグ規則は`config/tag-rules.json`へ分離されているため、汎用ロジックを書き換えずに別のTwitchチャンネルへ切り替えられます。
 
 > **非公式・非提携について**
 > このプロジェクトは独立して開発された非公式ツールであり、Twitchまたは対象チャンネル・配信者の公式製品、提携製品、承認製品、スポンサー製品ではありません。Twitch、チャンネル名、配信者名および関連する名称・商標・コンテンツの権利は各権利者に帰属します。
 
-このリポジトリに含まれる`config/site.json`は、現在の公開サイト`dotitao moments`用のインスタンス設定です。汎用ロジック自体は特定の配信者名を前提にしません。
+このリポジトリに含まれる`config/site.json`は、現在の公開サイト`dotitao moments`用のサイト基本設定です。`config/tag-rules.json`は、現在のチャンネルにだけ追加するタグ規則です。汎用ロジック自体は特定の配信者名を前提にしません。
 
 ## 主な機能
 
@@ -27,12 +27,13 @@ Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい�
 ## 構成
 
 ```text
-frontend/              React + TypeScript + Vite + Cloudflare Kumoの公開UI
-scripts/               VOD更新、集計、見出し生成、公開ビルド
-site/                  移行前UIと互換実装の参照元
-data/                  公開可能な集計データとサムネイル
-config/site.json       現在の公開インスタンス設定
-public/                公開ビルドの生成先
+frontend/                    React + TypeScript + Vite + Cloudflare Kumoの公開UI
+scripts/                     VOD更新、集計、見出し生成、公開ビルド
+site/                        移行前UIと互換実装の参照元
+data/                        公開可能な集計データとサムネイル
+config/site.json             現在の公開インスタンスのサイト基本設定
+config/tag-rules.json        現在のチャンネル固有の追加タグ規則
+public/                      公開ビルドの生成先
 ```
 
 公開UIは`frontend/`を正本とします。`scripts/build_public.sh`が本番バンドルを生成し、許可したVOD集計JSONと見どころサムネイルだけを`public/data/`へコピーします。
@@ -52,7 +53,9 @@ public/                公開ビルドの生成先
 
 ## インスタンス設定
 
-`config/site.example.json`を参考に`config/site.json`を編集します。次の環境変数またはGitHub Repository Variablesで設定値を上書きできます。
+`config/site.example.json`を参考に`config/site.json`へサイト名、公開URL、Twitchチャンネル、アクセス解析を設定します。`config/tag-rules.example.json`を参考に`config/tag-rules.json`へ、そのチャンネルにだけ必要な追加タグ規則を設定します。共通タグ規則はコード側に保持し、チャンネル固有の語だけを`tag-rules.json`へ追加します。
+
+次の環境変数またはGitHub Repository Variablesでサイト基本設定を上書きできます。
 
 - `TWITCH_CHANNEL`
 - `TWITCH_CHANNEL_ID`

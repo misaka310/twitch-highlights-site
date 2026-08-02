@@ -12,6 +12,8 @@
   - 公開可能な集計JSON、個別VOD JSON、サムネイル、内部再利用キャッシュ。
 - `config/site.json`
   - サイト名、説明、公開URL、Twitchチャンネル、アクセス解析設定。
+- `config/tag-rules.json`
+  - 現在のTwitchチャンネルにだけ追加するコメント解析用タグ規則。
 
 製品仕様の正本は `docs/PUBLIC_SITE_SPEC.md`、再生状態遷移は `docs/PLAYBACK_SPEC.md`、データ形式は `docs/data-contract.md` とする。
 
@@ -33,6 +35,8 @@
 5. `site/favicon.svg` を `public/favicon.svg` へコピーする。
 6. robots.txtとsitemap.xmlを生成する。
 7. Renderは `public/` を静的配信する。
+
+`config/tag-rules.json`はコメント解析時だけ読み込み、公開用`site-config.json`には含めない。`scripts/update_vods.py`はコード内の共通タグ規則と、専用ローダーが返すチャンネル固有の追加規則を結合する。
 
 ## データ読込
 

@@ -7,6 +7,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
 
+try:
+    from .tag_rules import load_extra_tag_rules
+except ImportError:
+    from tag_rules import load_extra_tag_rules
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG_PATH = REPO_ROOT / "config" / "site.json"
 CHANNEL_LOGIN_PATTERN = re.compile(r"^[A-Za-z0-9_]{1,25}$")
@@ -77,25 +82,10 @@ def _env_or_config(env: Mapping[str, str], key: str, value: object) -> str:
     return env_value if env_value else _string(value)
 
 
-def _parse_tag_rules(value: object) -> tuple[tuple[str, tuple[str, ...]], ...]:
-    if not isinstance(value, list):
-        return ()
-    parsed: list[tuple[str, tuple[str, ...]]] = []
-    for row in value:
-        item = _mapping(row)
-        label = _string(item.get("tag"))
-        raw_patterns = item.get("patterns")
-        if not label or not isinstance(raw_patterns, list):
-            continue
-        patterns = tuple(_string(pattern) for pattern in raw_patterns if _string(pattern))
-        if patterns:
-            parsed.append((label, patterns))
-    return tuple(parsed)
-
-
 def load_project_config(
     path: Path | None = None,
     env: Mapping[str, str] | None = None,
+    tag_rules_path: Path | None = None,
 ) -> ProjectConfig:
     config_path = path or DEFAULT_CONFIG_PATH
     source = _read_config(config_path)
@@ -104,7 +94,6 @@ def load_project_config(
     site = _mapping(source.get("site"))
     analytics = _mapping(site.get("analytics"))
     twitch = _mapping(source.get("twitch"))
-    analysis = _mapping(source.get("analysis"))
 
     channel_login = _env_or_config(environment, "TWITCH_CHANNEL", twitch.get("channel_login")).lower()
     if not CHANNEL_LOGIN_PATTERN.fullmatch(channel_login):
@@ -126,5 +115,5 @@ def load_project_config(
         goatcounter_code=_env_or_config(environment, "GOATCOUNTER_CODE", analytics.get("goatcounter_code")),
         twitch_channel_login=channel_login,
         twitch_channel_id=_env_or_config(environment, "TWITCH_CHANNEL_ID", twitch.get("channel_id")),
-        extra_tag_rules=_parse_tag_rules(analysis.get("extra_tag_rules")),
+        extra_tag_rules=load_extra_tag_rules(tag_rules_path),
     )

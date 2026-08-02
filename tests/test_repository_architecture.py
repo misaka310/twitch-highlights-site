@@ -101,11 +101,30 @@ class RepositoryArchitectureTests(unittest.TestCase):
                         matches.append(f"{path.relative_to(ROOT)}:{marker}")
         self.assertEqual(matches, [])
 
-    def test_instance_configuration_and_example_exist(self):
-        self.assertTrue((ROOT / "config" / "site.json").is_file())
-        self.assertTrue((ROOT / "config" / "site.example.json").is_file())
-        example = json.loads((ROOT / "config" / "site.example.json").read_text(encoding="utf-8"))
-        self.assertEqual(sorted(example), ["analysis", "site", "twitch"])
+    def test_instance_configuration_and_examples_exist(self):
+        required_paths = (
+            ROOT / "config" / "site.json",
+            ROOT / "config" / "site.example.json",
+            ROOT / "config" / "tag-rules.json",
+            ROOT / "config" / "tag-rules.example.json",
+        )
+        self.assertEqual([str(path.relative_to(ROOT)) for path in required_paths if not path.is_file()], [])
+
+        site = json.loads((ROOT / "config" / "site.json").read_text(encoding="utf-8"))
+        site_example = json.loads((ROOT / "config" / "site.example.json").read_text(encoding="utf-8"))
+        tag_rules = json.loads((ROOT / "config" / "tag-rules.json").read_text(encoding="utf-8"))
+        tag_rules_example = json.loads(
+            (ROOT / "config" / "tag-rules.example.json").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(sorted(site), ["site", "twitch"])
+        self.assertEqual(sorted(site_example), ["site", "twitch"])
+        self.assertEqual(sorted(tag_rules), ["extra_tag_rules"])
+        self.assertEqual(sorted(tag_rules_example), ["extra_tag_rules"])
+        self.assertEqual(
+            tag_rules["extra_tag_rules"],
+            [{"tag": "つべ", "patterns": ["つべ"]}],
+        )
 
     def test_public_site_specification_is_canonical_and_complete(self):
         agents_path = ROOT / "AGENTS.md"

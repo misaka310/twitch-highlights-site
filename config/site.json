@@ -11,13 +11,5 @@
   "twitch": {
     "channel_login": "dotitao",
     "channel_id": "709803150"
-  },
-  "analysis": {
-    "extra_tag_rules": [
-      {
-        "tag": "つべ",
-        "patterns": ["つべ", "つべべのべい"]
-      }
-    ]
   }
 }
