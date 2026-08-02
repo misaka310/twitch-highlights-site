@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-03T02:38:03+09:00",
+  "updated_at": "2026-08-03T02:48:25+09:00",
   "next_update_at": "2026-08-03T00:00:00+00:00",
   "videos": [
     {
@@ -22,7 +22,7 @@
           "start_time": "08:23:50",
           "end_time": "08:27:10",
           "reason": "Chat activity spike around 8h23m50s (z-score=7.658).",
-          "headline": "意外な展開に驚く",
+          "headline": "8時間半で満足！深い没入",
           "tags": [
             "えっ",
             "つべ"
@@ -39,7 +39,7 @@
           "start_time": "07:41:30",
           "end_time": "07:43:10",
           "reason": "Chat activity spike around 7h41m30s (z-score=8.368).",
-          "headline": "歯磨き」と呼ぶ謎の木",
+          "headline": "未知の木に「歯磨き」と命名",
           "tags": [
             "好プレー",
             "ホラー"
@@ -56,7 +56,7 @@
           "start_time": "06:08:30",
           "end_time": "06:09:40",
           "reason": "Chat activity spike around 6h8m30s (z-score=6.948).",
-          "headline": "めっちゃ上手だった」と喜ぶ瞬間",
+          "headline": "手応え抜群の実力プレイ",
           "tags": [
             "好プレー",
             "えっ"
@@ -170,7 +170,7 @@
           "start_time": "02:32:40",
           "end_time": "02:35:00",
           "reason": "Chat activity spike around 2h32m40s (z-score=5.616).",
-          "headline": "味方復活中のデスループ",
+          "headline": "味方復活でデスループ発生",
           "tags": [
             "ww",
             "好プレー",
@@ -188,7 +188,7 @@
           "start_time": "01:23:00",
           "end_time": "01:24:00",
           "reason": "Chat activity spike around 1h23m0s (z-score=7.198).",
-          "headline": "毎回収益が低い理由",
+          "headline": "ソウルライクPVPVEの遠距離攻撃",
           "tags": [
             "ww"
           ],
@@ -204,7 +204,7 @@
           "start_time": "00:20:30",
           "end_time": "00:21:50",
           "reason": "Chat activity spike around 0h20m30s (z-score=6.407).",
-          "headline": "ハンマー、弱くなる",
+          "headline": "行くな」ハンマー、弱すぎと指摘",
           "tags": [
             "あ",
             "好プレー"
