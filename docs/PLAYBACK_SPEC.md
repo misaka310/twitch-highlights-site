@@ -37,6 +37,9 @@
 
 ## 実装メモ（仕様の主語ではない）
 
-- デスクトップでは表示枠を元の場所に残し、Twitch プレイヤー本体だけを body 直下へ配置して Twitch の可視性判定を満たす。
-- 通常の seek と VOD 切替は interactive player を使う。
-- E2E テストではブラウザの自動再生制限を無効化せず、実利用に近い条件で検証する。
+- 公開UIは`frontend/`のReactアプリを正本とする。
+- 表示枠はReactレイアウト内に残し、Twitchプレイヤー本体だけを`body`直下へ配置してTwitchの可視性判定を満たす。
+- 初期表示は`autoplay=false / muted=true`で準備し、ユーザー操作は`autoplay=true / muted=false`で要求する。
+- 同一VODのseekは既存Playerインスタンスを再利用し、別VODではPlayerを再生成する。
+- SDKを取得できない場合は同じ再生意図を持つiframeへフォールバックする。
+- E2EテストではSDK互換の偽プレイヤーを使い、外部通信なしで再生意図、last-click-wins、seek、VOD切替、rewindを固定する。

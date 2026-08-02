@@ -31,41 +31,17 @@ export function normalizeData(data) {
         anosaTimestampsStatus
       );
       const legacyTimestampsStatus = normalizeLegacyTimestampsStatus(video.timestamps_status);
-      const transcriptOffsetSec = normalizeTranscriptOffsetSec(
-        video.transcript_offset_sec,
-        video.timestamps_offset_sec,
-        video.timestamp_offset_sec
-      );
-      const transcriptOffsetMethod = normalizeTranscriptOffsetMethod(
-        video.transcript_offset_method,
-        video.timestamps_offset_method,
-        video.timestamp_offset_method
-      );
-      const transcriptOffsetAnchorCount = normalizeTranscriptOffsetAnchorCount(
-        video.transcript_offset_anchor_count,
-        video.timestamps_offset_anchor_count,
-        video.timestamp_offset_anchor_count
-      );
-      const transcriptSyncConfidence = normalizeSyncConfidence(
-        video.transcript_sync_confidence || video.sync_confidence
-      );
+
 
       return {
         id: vodId,
         url: vodUrl,
         title: video.title,
         published_at: video.published_at,
-        transcript_status: normalizeTranscriptStatus(video.transcript_status),
-        transcript_path: normalizeTranscriptPath(video.transcript_path),
         timestamps_status: legacyTimestampsStatus,
         timestamps_path: normalizeLegacyTimestampsPath(video.timestamps_path),
         anosa_timestamps_status: anosaTimestampsStatus,
         anosa_timestamps_path: anosaTimestampsPath,
-        sync_confidence: transcriptSyncConfidence,
-        transcript_offset_sec: transcriptOffsetSec,
-        transcript_offset_method: transcriptOffsetMethod,
-        transcript_offset_anchor_count: transcriptOffsetAnchorCount,
-        transcript_sync_confidence: transcriptSyncConfidence,
         count:
           Number.isFinite(Number(video.count)) && Number(video.count) >= 0
             ? Number(video.count)
@@ -262,39 +238,6 @@ function normalizeLegacyTimestampsStatus(value) {
   return "";
 }
 
-function normalizeSyncConfidence(value) {
-  const confidence = String(value || "").trim().toLowerCase();
-  if (confidence === "high" || confidence === "medium" || confidence === "low" || confidence === "failed") {
-    return confidence;
-  }
-  return "";
-}
-
-function normalizeTranscriptPath(value) {
-  let path = String(value || "").trim();
-  if (!path) {
-    return "";
-  }
-  if (path.startsWith("data/transcripts/")) {
-    path = `/${path}`;
-  }
-  if (!path.startsWith("/data/transcripts/")) {
-    return "";
-  }
-  if (!path.endsWith(".json")) {
-    return "";
-  }
-  return path;
-}
-
-function normalizeTranscriptStatus(value) {
-  const status = String(value || "").trim().toLowerCase();
-  if (status === "ok" || status === "pending" || status === "error") {
-    return status;
-  }
-  return "";
-}
-
 function normalizeAnosaTimestampsPath(value) {
   let path = String(value || "").trim();
   if (!path) {
@@ -327,60 +270,6 @@ function normalizeLegacyTimestampsPath(value) {
     return "";
   }
   return path;
-}
-
-function normalizeTranscriptOffsetSec(...values) {
-  for (const value of values) {
-    const parsed = Number(value);
-    if (!Number.isFinite(parsed)) {
-      continue;
-    }
-    const normalized = Math.trunc(parsed);
-    if (normalized < -86400 || normalized > 86400) {
-      continue;
-    }
-    return normalized;
-  }
-  return 0;
-}
-
-function normalizeTranscriptOffsetMethod(...values) {
-  const allowed = new Set([
-    "transcript_segments_single_anchor",
-    "transcript_segments_consensus",
-    "transcript_segments_relaxed_single_anchor",
-    "transcript_segments_relaxed_consensus",
-    "item_transcript_single_anchor",
-    "item_transcript_consensus",
-    "whisper_segment_median",
-    "anchor_median",
-    "duration_delta",
-    "none",
-    "transcript_window_consensus",
-    "source_text_consensus",
-  ]);
-  for (const value of values) {
-    const method = String(value || "").trim().toLowerCase();
-    if (allowed.has(method)) {
-      return method;
-    }
-  }
-  return "";
-}
-
-function normalizeTranscriptOffsetAnchorCount(...values) {
-  for (const value of values) {
-    const parsed = Number(value);
-    if (!Number.isFinite(parsed)) {
-      continue;
-    }
-    const normalized = Math.trunc(parsed);
-    if (normalized < 0) {
-      continue;
-    }
-    return normalized;
-  }
-  return 0;
 }
 
 function normalizeSelectionStartSec(value) {

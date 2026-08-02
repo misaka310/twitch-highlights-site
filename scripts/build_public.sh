@@ -15,6 +15,10 @@ if ! command -v node >/dev/null 2>&1; then
   echo "error: Node.js 20 or later is required for build_public.sh"
   exit 2
 fi
+if ! command -v npm >/dev/null 2>&1; then
+  echo "error: npm is required for build_public.sh"
+  exit 2
+fi
 
 copy_json_without_bom() {
   src_path="$1"
@@ -31,27 +35,23 @@ dst.write_text(text, encoding="utf-8")
 PY
 }
 
-rm -rf public
-mkdir -p public/data public/js
+if [ ! -d frontend/node_modules ]; then
+  npm ci --prefix frontend
+fi
+(
+  cd frontend
+  npx tsc -b
+  npx vite build
+)
 
-cp site/index.html public/
-cp site/styles.css public/
-cp site/favicon.svg public/
-if [ -f site/bg-desktop.png ]; then
-  cp site/bg-desktop.png public/
-fi
-if [ -f site/bg-mobile.png ]; then
-  cp site/bg-mobile.png public/
-fi
-if [ -d site/assets ]; then
-  mkdir -p public/assets
-  cp -R site/assets/. public/assets/
-fi
+rm -rf public
+mkdir -p public/data
+cp -R frontend/dist/. public/
+cp site/favicon.svg public/favicon.svg
 
 copy_json_without_bom data/vods.json public/data/vods.json
-if [ -f data/vod_index.json ]; then
-  copy_json_without_bom data/vod_index.json public/data/vod_index.json
-fi
+copy_json_without_bom data/vod_index.json public/data/vod_index.json
+
 if [ -d data/vods ]; then
   mkdir -p public/data/vods
   find data/vods -maxdepth 1 -type f -name "*.json" | while IFS= read -r src_json; do
@@ -59,13 +59,32 @@ if [ -d data/vods ]; then
     copy_json_without_bom "$src_json" "public/data/vods/$(basename "$src_json")"
   done
 fi
+
 if [ -d data/segment-thumbnails ]; then
   mkdir -p public/data/segment-thumbnails
   cp -R data/segment-thumbnails/. public/data/segment-thumbnails/
 fi
 
-for js_file in site/js/*.js; do
-  cp "$js_file" public/js/
-done
-
 node scripts/export-site-config.mjs public/site-config.json
+
+"${PYTHON_BIN}" - <<'PY'
+import json
+from pathlib import Path
+
+public = Path("public")
+config = json.loads((public / "site-config.json").read_text(encoding="utf-8"))
+base_url = str(config.get("site", {}).get("base_url", "")).strip().rstrip("/")
+robots = "User-agent: *\nAllow: /\n"
+if base_url:
+    robots += f"Sitemap: {base_url}/sitemap.xml\n"
+(public / "robots.txt").write_text(robots, encoding="utf-8")
+
+if base_url:
+    sitemap = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"  <url><loc>{base_url}/</loc></url>\n"
+        "</urlset>\n"
+    )
+    (public / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+PY

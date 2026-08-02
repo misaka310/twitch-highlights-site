@@ -1,4 +1,4 @@
-﻿import { SCHEDULE_TEXT, SITE_BUILD_LABEL } from "./config.js";
+import { SCHEDULE_TEXT, SITE_BUILD_LABEL } from "./config.js";
 import {
   formatDate,
   formatDateOnly,
@@ -16,43 +16,9 @@ const JAPAN_DATE_BUTTON_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
 });
 const UNSET_TEXT = "―";
 
-export function normalizeTranscriptSyncConfidence(value) {
-  const confidence = String(value || "").trim().toLowerCase();
-  if (confidence === "high" || confidence === "medium" || confidence === "low" || confidence === "failed") {
-    return confidence;
-  }
-  return "";
-}
-
-export function isTranscriptDisplayReadyForVod(vod) {
-  if (!isTranscriptDataAvailableForVod(vod)) {
-    return false;
-  }
-  const confidence = normalizeTranscriptSyncConfidence(vod?.transcript_sync_confidence ?? vod?.sync_confidence);
-  if (confidence !== "high" && confidence !== "medium" && confidence !== "low") {
-    return false;
-  }
-  const offsetSec = resolveTranscriptOffsetSecFromVodMetadata(vod);
-  return Number.isFinite(offsetSec);
-}
-
-function normalizeTimestampOffsetSec(value) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) {
-    return 0;
-  }
-  return Math.trunc(parsed);
-}
-
 export function createVodListView({ state, elements, renderActivityMap, requestPlayback, renderEmptyState }) {
   const vodTabState = {
     activeVodId: null,
-  };
-  const transcriptState = {
-    cuesByPath: new Map(),
-    loadingByPath: new Map(),
-    offsetByVodId: new Map(),
-    pendingRender: null,
   };
 
   bindPlayerFrameSummarySync();
@@ -102,7 +68,6 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
 
     const observer = new MutationObserver(() => {
       renderStreamSummary(resolveActiveVodId());
-      renderTranscriptPanel();
     });
 
     observer.observe(elements.playerFrame, {
@@ -238,10 +203,6 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
     syncPlaybackAssistLayout();
     requestPlayback(vod.id, playbackStartSec, options);
     renderStreamSummary(resolveActiveVodId());
-    ensureTranscriptLoaded(vod);
-    ensureTranscriptOffsetReady(vod);
-    setPendingTranscriptRender(String(vod.id), playbackStartSec);
-    renderTranscriptPanel(String(vod.id), playbackStartSec);
     elements.statusMessage.hidden = true;
   }
 
@@ -316,7 +277,6 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
       tab.type = "button";
       tab.className = "vod-tab mobile-vod-tab";
       tab.dataset.vodId = vodId;
-      tab.dataset.syncConfidence = String(vod.sync_confidence || "");
       tab.id = `vod-tab-${vodId}`;
       tab.setAttribute("role", "tab");
       tab.setAttribute("aria-controls", `vod-card-${vodId}`);
@@ -369,13 +329,6 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
     renderStreamSummary(activeVodId);
     renderActivityMap(activeVod);
     syncPlaybackAssistLayout();
-    ensureTranscriptLoaded(activeVod);
-    ensureTranscriptOffsetReady(activeVod);
-    const selectedStartSec = Number(getSelectedSegment()?.segment?.start_sec);
-    const initialStartSec =
-      Number.isFinite(selectedStartSec) && selectedStartSec >= 0 ? Math.floor(selectedStartSec) : null;
-    setPendingTranscriptRender(activeVodId, initialStartSec);
-    renderTranscriptPanel(activeVodId, initialStartSec);
   }
 
   function ensureSegmentSelectionForVod(vod) {
@@ -414,236 +367,13 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
     setText(elements.summaryPlaybackPosition, formatPlaybackPosition(vod));
   }
 
-  function renderTranscriptPanel(activeVodId = "", forcedStartSec = null) {
-    const selection = getSelectedSegment();
-    if (!elements.transcriptPanel || !elements.transcriptCurrent || !elements.transcriptPrev || !elements.transcriptNext) {
-      return;
-    }
-
-    const playerFrameState = resolvePlayerFrameState();
-    const targetVodId = String(
-      playerFrameState.vodId ||
-        activeVodId ||
-        resolveActiveVodId() ||
-        selection?.vod?.id ||
-        ""
-    ).trim();
-    const vod = state.vods.find((entry) => String(entry.id) === targetVodId) || selection?.vod || state.vods[0] || null;
-    if (!vod) {
-      hideTranscriptPanel();
-      return;
-    }
-
-    const transcriptPath = String(vod.transcript_path || "").trim();
-    if (!transcriptPath || !isTranscriptDisplayReady(vod)) {
-      hideTranscriptPanel();
-      return;
-    }
-
-    ensureTranscriptLoaded(vod);
-    ensureTranscriptOffsetReady(vod);
-    const cues = transcriptState.cuesByPath.get(transcriptPath);
-    if (!Array.isArray(cues) || cues.length === 0) {
-      hideTranscriptPanel();
-      return;
-    }
-    const offsetSec = resolveTranscriptOffsetSec(vod);
-
-    const startSec =
-      Number.isFinite(forcedStartSec) && Number(forcedStartSec) >= 0
-        ? Math.floor(Number(forcedStartSec))
-        : Number.isFinite(playerFrameState.startSec) && Number(playerFrameState.startSec) >= 0
-          ? Math.floor(Number(playerFrameState.startSec))
-          : transcriptState.pendingRender &&
-              String(transcriptState.pendingRender.vodId || "") === String(vod.id) &&
-              Number.isFinite(transcriptState.pendingRender.startSec) &&
-              Number(transcriptState.pendingRender.startSec) >= 0
-            ? Math.floor(Number(transcriptState.pendingRender.startSec))
-          : Number.isFinite(Number(selection?.segment?.start_sec))
-            ? Math.floor(Number(selection.segment.start_sec))
-            : null;
-
-    const transcriptLookupSec = resolveTranscriptLookupSec(startSec, offsetSec);
-    const index = resolveCurrentCueIndex(cues, transcriptLookupSec);
-    if (index < 0) {
-      hideTranscriptPanel();
-      return;
-    }
-    elements.transcriptPanel.hidden = false;
-    elements.transcriptPrev.textContent = String(cues[index - 1]?.text || "").trim() || UNSET_TEXT;
-    elements.transcriptCurrent.textContent = String(cues[index]?.text || "").trim() || UNSET_TEXT;
-    elements.transcriptNext.textContent = String(cues[index + 1]?.text || "").trim() || UNSET_TEXT;
-    if (transcriptState.pendingRender && String(transcriptState.pendingRender.vodId || "") === String(vod.id)) {
-      transcriptState.pendingRender = null;
-    }
-    syncPlaybackAssistLayout();
-  }
-
-  function hideTranscriptPanel() {
-    if (!elements.transcriptPanel || !elements.transcriptPrev || !elements.transcriptCurrent || !elements.transcriptNext) {
-      return;
-    }
-    elements.transcriptPanel.hidden = true;
-    elements.transcriptPrev.textContent = UNSET_TEXT;
-    elements.transcriptCurrent.textContent = UNSET_TEXT;
-    elements.transcriptNext.textContent = UNSET_TEXT;
-    syncPlaybackAssistLayout();
-  }
-
-  function resolveCurrentCueIndex(cues, startSec) {
-    if (!Array.isArray(cues) || cues.length === 0) {
-      return -1;
-    }
-    if (!Number.isFinite(startSec) || Number(startSec) < 0) {
-      return 0;
-    }
-    const safeStartSec = Math.floor(Number(startSec));
-
-    let low = 0;
-    let high = cues.length - 1;
-    let directMatch = -1;
-    while (low <= high) {
-      const middle = Math.floor((low + high) / 2);
-      const cue = cues[middle];
-      const cueStart = Math.floor(Number(cue?.start_sec || 0));
-      const cueEnd = Math.max(cueStart + 1, Math.floor(Number(cue?.end_sec || cueStart + 1)));
-      if (cueStart <= safeStartSec && safeStartSec < cueEnd) {
-        directMatch = middle;
-        break;
-      }
-      if (cueStart <= safeStartSec) {
-        low = middle + 1;
-      } else {
-        high = middle - 1;
-      }
-    }
-    if (directMatch >= 0) {
-      return directMatch;
-    }
-
-    if (high >= 0) {
-      return high;
-    }
-    return 0;
-  }
-
-  function ensureTranscriptLoaded(vod) {
-    if (!isTranscriptDisplayReady(vod)) {
-      return;
-    }
-    const transcriptPath = String(vod?.transcript_path || "").trim();
-    if (!transcriptPath) {
-      return;
-    }
-    if (transcriptState.cuesByPath.has(transcriptPath)) {
-      return;
-    }
-    if (transcriptState.loadingByPath.has(transcriptPath)) {
-      return;
-    }
-    const fetchTask = fetchTranscriptCues(transcriptPath)
-      .then((cues) => {
-        transcriptState.cuesByPath.set(transcriptPath, cues);
-      })
-      .catch(() => {
-        transcriptState.cuesByPath.set(transcriptPath, []);
-      })
-      .finally(() => {
-        transcriptState.loadingByPath.delete(transcriptPath);
-        const pending = transcriptState.pendingRender;
-        const pendingStartSec =
-          pending && String(pending.vodId || "") === String(vod?.id || "") ? Number(pending.startSec) : null;
-        renderTranscriptPanel(String(vod?.id || ""), pendingStartSec);
-      });
-    transcriptState.loadingByPath.set(transcriptPath, fetchTask);
-  }
-
-  function ensureTranscriptOffsetReady(vod) {
-    const vodId = String(vod?.id || "").trim();
-    if (!vodId) {
-      return;
-    }
-    if (!isTranscriptDataAvailable(vod)) {
-      transcriptState.offsetByVodId.set(vodId, 0);
-      return;
-    }
-    transcriptState.offsetByVodId.set(vodId, resolveTranscriptOffsetFromVodMetadata(vod));
-  }
-
-  function resolveTranscriptOffsetSec(vod) {
-    const vodId = String(vod?.id || "").trim();
-    if (!vodId) {
-      return 0;
-    }
-    if (!transcriptState.offsetByVodId.has(vodId)) {
-      const resolved = resolveTranscriptOffsetFromVodMetadata(vod);
-      transcriptState.offsetByVodId.set(vodId, resolved);
-      return resolved;
-    }
-    return normalizeTimestampOffsetSec(transcriptState.offsetByVodId.get(vodId));
-  }
-
-  function resolveTranscriptLookupSec(twitchStartSec, offsetSec) {
-    if (!Number.isFinite(twitchStartSec) || Number(twitchStartSec) < 0) {
-      return twitchStartSec;
-    }
-    return Math.max(0, Math.floor(Number(twitchStartSec)) - normalizeTimestampOffsetSec(offsetSec));
-  }
-
-  function setPendingTranscriptRender(vodId, startSec) {
-    const normalizedVodId = String(vodId || "").trim();
-    if (!normalizedVodId) {
-      transcriptState.pendingRender = null;
-      return;
-    }
-    const normalizedStartSec =
-      Number.isFinite(Number(startSec)) && Number(startSec) >= 0 ? Math.floor(Number(startSec)) : null;
-    transcriptState.pendingRender = {
-      vodId: normalizedVodId,
-      startSec: normalizedStartSec,
-    };
-  }
-
   function syncPlaybackAssistLayout() {
-    if (!elements.playbackAssistPanel || !elements.activityMap || !elements.transcriptPanel) {
+    if (!elements.playbackAssistPanel || !elements.activityMap) {
       return;
     }
-    const transcriptHidden = elements.transcriptPanel.hidden;
     const heatmapHidden = elements.activityMap.hidden;
-    elements.playbackAssistPanel.classList.toggle("is-transcript-hidden", transcriptHidden);
+    elements.playbackAssistPanel.hidden = heatmapHidden;
     elements.playbackAssistPanel.classList.toggle("is-heatmap-hidden", heatmapHidden);
-  }
-
-  async function fetchTranscriptCues(transcriptPath) {
-    const normalizedPath = normalizeTranscriptFetchPath(transcriptPath);
-    if (!normalizedPath) {
-      return [];
-    }
-    const response = await fetch(normalizedPath, { cache: "no-store" });
-    if (!response.ok) {
-      return [];
-    }
-    const raw = await response.text();
-    const payload = JSON.parse(String(raw || "").replace(/^\uFEFF/, ""));
-    const cues = Array.isArray(payload?.cues) ? payload.cues : [];
-    return cues
-      .map((cue) => normalizeTranscriptCue(cue))
-      .filter(Boolean)
-      .sort((left, right) => left.start_sec - right.start_sec);
-  }
-
-  function normalizeTranscriptFetchPath(pathValue) {
-    const raw = String(pathValue || "").trim();
-    if (!raw) {
-      return "";
-    }
-    if (raw.startsWith("/data/transcripts/")) {
-      return raw;
-    }
-    if (raw.startsWith("data/transcripts/")) {
-      return `/${raw}`;
-    }
-    return "";
   }
 
   function resolveRequestedStartSec() {
@@ -652,37 +382,6 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
       return 0;
     }
     return Math.floor(parsed);
-  }
-
-  function isTranscriptDataAvailable(vod) {
-    return isTranscriptDataAvailableForVod(vod);
-  }
-
-  function isTranscriptDisplayReady(vod) {
-    return isTranscriptDisplayReadyForVod(vod);
-  }
-
-  function resolveTranscriptOffsetFromVodMetadata(vod) {
-    return resolveTranscriptOffsetSecFromVodMetadata(vod);
-  }
-
-  function normalizeTranscriptCue(cue) {
-    const startSec = Number(cue?.start_sec);
-    const endSec = Number(cue?.end_sec);
-    const text = String(cue?.text || "").trim();
-    if (!Number.isFinite(startSec) || startSec < 0) {
-      return null;
-    }
-    if (!text) {
-      return null;
-    }
-    const safeStartSec = Math.floor(startSec);
-    const safeEndSec = Number.isFinite(endSec) && endSec > safeStartSec ? Math.floor(endSec) : safeStartSec + 1;
-    return {
-      start_sec: safeStartSec,
-      end_sec: safeEndSec,
-      text,
-    };
   }
 
   function resolveVodDurationSec(vod) {
@@ -841,22 +540,4 @@ export function createVodListView({ state, elements, renderActivityMap, requestP
     formatUpdatedScheduleText,
     formatNextScheduleText,
   };
-}
-
-function isTranscriptDataAvailableForVod(vod) {
-  const transcriptPath = String(vod?.transcript_path || "").trim();
-  if (!transcriptPath) {
-    return false;
-  }
-  const status = String(vod?.transcript_status || "").trim().toLowerCase();
-  return status === "ok";
-}
-
-function resolveTranscriptOffsetSecFromVodMetadata(vod) {
-  return normalizeTimestampOffsetSec(
-    vod?.transcript_offset_sec ??
-      vod?.timestamps_offset_sec ??
-      vod?.timestamp_offset_sec ??
-      0
-  );
 }
