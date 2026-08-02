@@ -1,3 +1,4 @@
+import ast
 import json
 import unittest
 from pathlib import Path
@@ -110,19 +111,23 @@ class RepositoryArchitectureTests(unittest.TestCase):
         agents_path = ROOT / "AGENTS.md"
         spec_path = ROOT / "docs" / "PUBLIC_SITE_SPEC.md"
         architecture_path = ROOT / "docs" / "site-architecture.md"
+        operations_path = ROOT / "docs" / "OPERATIONS.md"
 
         self.assertTrue(agents_path.is_file())
         self.assertTrue(spec_path.is_file())
         self.assertTrue(architecture_path.is_file())
+        self.assertTrue(operations_path.is_file())
 
         agents = agents_path.read_text(encoding="utf-8")
         spec = spec_path.read_text(encoding="utf-8")
         architecture = architecture_path.read_text(encoding="utf-8")
+        operations = operations_path.read_text(encoding="utf-8")
 
         self.assertIn("docs/PUBLIC_SITE_SPEC.md", agents)
         self.assertIn("1792 x 864", agents)
         self.assertIn("縦スクロールを発生させない", agents)
         self.assertIn("公開UIの正本は `frontend/`", agents)
+        self.assertIn("docs/OPERATIONS.md", agents)
 
         required_spec_markers = (
             "この文書は `dotitao moments` 公開サイトの製品仕様の正本",
@@ -141,6 +146,31 @@ class RepositoryArchitectureTests(unittest.TestCase):
         self.assertIn("`frontend/`", architecture)
         self.assertIn("公開UIの正本", architecture)
         self.assertIn("`site/` を公開UIの正本へ戻さない", architecture)
+
+        required_operations_markers = (
+            "## 定期VOD更新",
+            "09:00 JST",
+            "workflow_dispatch",
+            "GITHUB_TOKEN",
+            "action_required",
+            "automation/update-vods",
+        )
+        for marker in required_operations_markers:
+            self.assertIn(marker, operations)
+
+    def test_vod_update_cron_matches_displayed_next_update_hour(self):
+        workflow = (ROOT / ".github" / "workflows" / "update-vods.yml").read_text(encoding="utf-8")
+        self.assertIn('cron: "0 0 * * *"', workflow)
+
+        module = ast.parse((ROOT / "scripts" / "update_vods.py").read_text(encoding="utf-8"))
+        update_hour = None
+        for node in module.body:
+            if not isinstance(node, ast.Assign):
+                continue
+            if any(isinstance(target, ast.Name) and target.id == "UPDATE_HOUR_LOCAL" for target in node.targets):
+                update_hour = ast.literal_eval(node.value)
+                break
+        self.assertEqual(update_hour, 9)
 
 
 if __name__ == "__main__":

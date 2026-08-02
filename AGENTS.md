@@ -5,6 +5,7 @@
 1. `docs/PUBLIC_SITE_SPEC.md`
 2. 再生に触れる場合は `docs/PLAYBACK_SPEC.md`
 3. データに触れる場合は `docs/data-contract.md`
+4. 公開、GitHub Actions、VOD更新に触れる場合は `docs/OPERATIONS.md`
 
 ## 作業原則
 
