@@ -17,6 +17,21 @@
 
 製品仕様の正本は `docs/PUBLIC_SITE_SPEC.md`、再生状態遷移は `docs/PLAYBACK_SPEC.md`、データ形式は `docs/data-contract.md` とする。
 
+## frontendの責務
+
+- `src/App.tsx`
+  - ページ、選択状態、プレイヤー公開API、主要表示領域を接続するcomposition root。
+- `src/components/`
+  - DOM契約と表示構造を保持する表示コンポーネント。
+- `src/domain/`
+  - 公開JSONに対応する型とページ単位のデータ型。
+- `src/hooks/`
+  - データ取得、metadata更新、media queryなどReactライフサイクルを伴う処理。
+- `src/lib/`
+  - React、`window`、`document`へ依存しない正規化、表示形式、盛り上がりマップ計算。
+- `src/twitch-player.tsx`
+  - 現時点ではプレイヤー公開APIと内部処理の正本。プレイヤー分割PRまで責務を移動しない。
+
 ## ローカル配信経路
 
 1. `npm start` は `frontend/` のVite開発サーバーを `localhost:4174` で起動する。
