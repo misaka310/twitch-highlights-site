@@ -11,6 +11,7 @@ concurrency:
 
 permissions:
   contents: read
+  statuses: write
 
 jobs:
   doctor:
@@ -19,6 +20,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Publish pending readiness status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: >-
+          curl --fail-with-body --silent --show-error --location
+          --request POST
+          --header "Accept: application/vnd.github+json"
+          --header "Authorization: Bearer ${GH_TOKEN}"
+          --header "X-GitHub-Api-Version: 2022-11-28"
+          "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}"
+          --data '{"state":"pending","context":"public-readiness","description":"Repo Launch Doctor is running"}'
+
       - name: Check out target repository
         uses: actions/checkout@v4
         with:
@@ -68,3 +82,16 @@ jobs:
           path: ${{ runner.temp }}/repo-launch-doctor
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Publish successful readiness status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: >-
+          curl --fail-with-body --silent --show-error --location
+          --request POST
+          --header "Accept: application/vnd.github+json"
+          --header "Authorization: Bearer ${GH_TOKEN}"
+          --header "X-GitHub-Api-Version: 2022-11-28"
+          "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}"
+          --data '{"state":"success","context":"public-readiness","description":"Repo Launch Doctor passed"}'
