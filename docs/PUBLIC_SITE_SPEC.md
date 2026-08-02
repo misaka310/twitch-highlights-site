@@ -228,9 +228,9 @@ VODは `published_at` の新しい順に表示する。入力JSONの配列順へ
 
 ## 11. ファビコンとメタ情報
 
-- ファビコンの正本は `site/favicon.svg`。
-- Vite開発サーバーは `/favicon.svg` で同ファイルを `image/svg+xml` として返す。
-- `scripts/build_public.sh` は同ファイルを `public/favicon.svg` へコピーする。
+- ファビコンの正本は `frontend/public/favicon.svg`。
+- Vite開発サーバーはpublic directoryから `/favicon.svg` を返す。
+- Vite buildは同ファイルを生成済みbundleへ含め、`scripts/build_public.sh` はbundle全体を `public/` へ配置する。
 - `frontend/index.html` は `/favicon.svg` を参照する。
 - ページタイトル、description、OGタイトル、OG descriptionはサイト設定へ追従する。
 - ローカル環境ではアクセス解析を送信しない。
