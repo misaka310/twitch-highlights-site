@@ -38,6 +38,15 @@
 - `src/twitch-player.tsx`
   - 公開component、imperative handle、DOM契約だけを担うfacade。
 
+## Python文字起こしパイプラインの責務
+
+- `scripts/transcription/config.py`
+  - 任意のmappingから環境設定を解釈する`PipelineSettings`の正本。module import時には`.env`やprocess environmentを読み込まない。
+- `scripts/transcription/cli.py`
+  - CLI引数の定義と`RunOptions`への変換。
+- `scripts/transcribe_segments.py`
+  - entry pointと既存処理の互換facade。`.env`読込、runtime設定適用、辞書・headline context再構築は`main()`開始後だけ行う。
+
 ## ローカル配信経路
 
 1. `npm start` は `frontend/` のVite開発サーバーを `localhost:4174` で起動する。
