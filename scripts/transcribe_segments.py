@@ -29,6 +29,7 @@ from transcription import screenshot as tx_screenshot
 from transcription import segment_persistence as tx_persistence
 from transcription import target_selection as tx_targets
 from transcription import whisper_runner as tx_whisper
+from transcription.orchestration import PipelineSteps, run_pipeline
 from transcription.cli import RunOptions, build_run_options, parse_cli_args
 from transcription.config import PipelineSettings
 
@@ -539,53 +540,22 @@ class WhisperTranscriber:
 
 
 def main(argv: list[str] | None = None) -> None:
-    options, headline_source_config = _setup_execution(argv)
-    collected = _collect_targets_and_check_preconditions(options=options)
-    if collected is None:
-        return
-    videos, headline_generator, targets = collected
-
-    _print_run_options(options)
-    if _print_dry_run_targets(targets, options=options):
-        return
-
-    (
-        transcriber,
-        transcript_prereq_error,
-        first_pass_config,
-        second_pass_config,
-        retranscribe_config,
-    ) = _setup_transcription_components(targets, options=options)
-    summary = RunSummary()
-
-    first_pass_results = _run_first_pass_transcription_loop(
-        targets,
-        transcriber=transcriber,
-        transcript_prereq_error=transcript_prereq_error,
-        first_pass_config=first_pass_config,
-        headline_source_config=headline_source_config,
-        options=options,
-        summary=summary,
+    run_pipeline(
+        argv,
+        steps=PipelineSteps(
+            setup_execution=_setup_execution,
+            collect_targets=_collect_targets_and_check_preconditions,
+            print_run_options=_print_run_options,
+            print_dry_run_targets=_print_dry_run_targets,
+            setup_transcription_components=_setup_transcription_components,
+            create_summary=RunSummary,
+            run_first_pass=_run_first_pass_transcription_loop,
+            run_second_pass=_run_second_pass_retranscription_loop,
+            run_headlines=_run_headline_generation_loop,
+            finalize_outputs=_finalize_and_save_outputs,
+            print_summary=_print_summary,
+        ),
     )
-    first_pass_results = _run_second_pass_retranscription_loop(
-        targets,
-        first_pass_results=first_pass_results,
-        transcriber=transcriber,
-        second_pass_config=second_pass_config,
-        retranscribe_config=retranscribe_config,
-        headline_source_config=headline_source_config,
-        options=options,
-    )
-    _run_headline_generation_loop(
-        targets,
-        first_pass_results=first_pass_results,
-        headline_generator=headline_generator,
-        headline_source_config=headline_source_config,
-        options=options,
-        summary=summary,
-    )
-    _finalize_and_save_outputs(videos, targets)
-    _print_summary(summary)
 
 
 def _setup_execution(argv: list[str] | None = None) -> tuple[RunOptions, dict[str, Any]]:
