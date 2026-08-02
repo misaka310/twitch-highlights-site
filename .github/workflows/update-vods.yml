@@ -17,7 +17,8 @@ on:
       - "scripts/transcription/**"
       - "scripts/verify_public_enrichment.py"
   schedule:
-    - cron: "7 21 * * *"
+    # 09:00 JST. GitHub Actions cron is evaluated in UTC.
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       force_refresh_transcripts:
