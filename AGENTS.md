@@ -38,11 +38,22 @@
 
 ## 標準検証
 
+依存関係の初回準備またはlockfile更新後だけ、リポジトリルートで次を実行する。
+
 ```text
-cd frontend
-npx tsc -b --pretty false
-npx eslint .
-npx playwright test --project=desktop
+npm run setup
 ```
 
-公開生成物へ影響する場合は、追加で `bash scripts/build_public.sh` を実行する。
+通常の変更は、リポジトリルートから次の一つを製品必須ゲートとして実行する。
+
+```text
+npm run verify
+```
+
+`verify` はfrontendのtypecheck、lint、Node環境の単体テスト、Pythonテスト、frontend E2E、legacy回帰テスト、`public/`生成・内容検証・再現性検証、生成物E2E、repository hygieneを順に実行する。検証中に依存関係を自動インストールしない。
+
+Twitch実サービスまたはデプロイ済みRenderへ影響する変更は、通常ゲート成功後とデプロイ完了後に独立して次を実行する。
+
+```text
+npm run verify:live
+```

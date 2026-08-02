@@ -1,24 +1,20 @@
 const { defineConfig, devices } = require("@playwright/test");
 
-const TEST_PORT = 18076;
+const TEST_PORT = 18078;
 const TEST_BASE_URL = `http://localhost:${TEST_PORT}`;
 
 module.exports = defineConfig({
   testDir: "./tests",
-  testMatch: /.*\.spec\.js$/,
-  testIgnore: [
-    /production-mobile-playback\.spec\.js$/,
-    /public-build\.spec\.js$/,
-    /real-twitch\.spec\.js$/,
-  ],
+  testMatch: /real-twitch\.spec\.js$/,
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  timeout: 30_000,
+  timeout: 60_000,
   reporter: [["list"]],
   use: {
     baseURL: TEST_BASE_URL,
-    trace: "off",
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
   },
   webServer: {
     command: "node scripts/dev-server.mjs",
@@ -33,13 +29,6 @@ module.exports = defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1440, height: 1200 },
-      },
-    },
-    {
-      name: "mobile",
-      use: {
-        ...devices["Pixel 5"],
-        viewport: { width: 430, height: 932 },
       },
     },
   ],
