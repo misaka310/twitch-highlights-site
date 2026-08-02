@@ -9,7 +9,7 @@
 
 ## 作業原則
 
-- 公開UIの正本は `frontend/`。`site/` は移行前UIと互換仕様の参照元。
+- 公開UIの唯一の正本は `frontend/`。旧UI資産や別実装を追加しない。
 - 部品単体ではなく、ヘッダー、プレイヤー、盛り上がりマップ、右カラム、ページャーを一画面として評価する。
 - ユーザーが指定した完了条件を満たさない変更を成功扱いにしない。
 - 既存仕様を変更する必要がある場合は、実装前に理由と影響を確認する。
@@ -50,7 +50,7 @@ npm run setup
 npm run verify
 ```
 
-`verify` はfrontendのtypecheck、lint、Node環境の単体テスト、Pythonテスト、frontend E2E、legacy回帰テスト、`public/`生成・内容検証・再現性検証、生成物E2E、repository hygieneを順に実行する。検証中に依存関係を自動インストールしない。
+`verify` はfrontendのtypecheck、lint、Node環境の単体テスト、Pythonテスト、frontend E2E、`public/`生成・内容検証・再現性検証、生成物E2E、repository hygieneを順に実行する。検証中に依存関係を自動インストールしない。
 
 Twitch実サービスまたはデプロイ済みRenderへ影響する変更は、通常ゲート成功後とデプロイ完了後に独立して次を実行する。
 

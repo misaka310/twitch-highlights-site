@@ -5,7 +5,6 @@
 この文書は `dotitao moments` 公開サイトの製品仕様の正本である。
 
 - 公開UIの実装正本: `frontend/`
-- 移行前UI・互換挙動の参照元: `site/`
 - 再生挙動の詳細: `docs/PLAYBACK_SPEC.md`
 - 公開データの詳細: `docs/data-contract.md`
 - 配信用生成物: `public/`
@@ -38,7 +37,7 @@ Twitch VODのコメント量から抽出した見どころを、利用者が短�
 
 ローカルURLは `http://localhost:4174/` とする。
 
-`frontend/` が公開UIの唯一の正本であり、`site/` を直接公開UIとして修正しない。`site/` は、旧UIとの表示内容・並び順・再生挙動の比較に使う。
+`frontend/` が公開UIの唯一の正本であり、表示内容・並び順・再生挙動の実装と検証はfrontendのコードとテストへ集約する。
 
 ## 4. ページ構成
 

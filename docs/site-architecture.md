@@ -4,8 +4,6 @@
 
 - `frontend/`
   - React + TypeScript + Vite + Cloudflare Kumoによる公開UIの正本。
-- `site/`
-  - 移行前UIと互換挙動の参照元。公開UIの直接修正先ではない。
 - `public/`
   - `scripts/build_public.sh` が生成する配信用出力。
 - `data/`
@@ -102,5 +100,5 @@
 ## 注意点
 
 - `public/` は生成物であり、直接修正しない。
-- `site/` を公開UIの正本へ戻さない。
+- 公開UIの別実装や同期経路を追加せず、`frontend/`へ集約する。
 - UI変更時は `AGENTS.md` と `docs/PUBLIC_SITE_SPEC.md` を先に確認する。
