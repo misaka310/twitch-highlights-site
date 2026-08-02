@@ -16,7 +16,7 @@ module.exports = defineConfig({
     trace: "off",
   },
   webServer: {
-    command: "npm start",
+    command: "node scripts/dev-server.mjs",
     url: TEST_BASE_URL,
     reuseExistingServer: true,
     timeout: 30_000,

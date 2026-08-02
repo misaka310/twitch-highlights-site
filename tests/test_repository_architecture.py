@@ -106,6 +106,42 @@ class RepositoryArchitectureTests(unittest.TestCase):
         example = json.loads((ROOT / "config" / "site.example.json").read_text(encoding="utf-8"))
         self.assertEqual(sorted(example), ["analysis", "site", "twitch"])
 
+    def test_public_site_specification_is_canonical_and_complete(self):
+        agents_path = ROOT / "AGENTS.md"
+        spec_path = ROOT / "docs" / "PUBLIC_SITE_SPEC.md"
+        architecture_path = ROOT / "docs" / "site-architecture.md"
+
+        self.assertTrue(agents_path.is_file())
+        self.assertTrue(spec_path.is_file())
+        self.assertTrue(architecture_path.is_file())
+
+        agents = agents_path.read_text(encoding="utf-8")
+        spec = spec_path.read_text(encoding="utf-8")
+        architecture = architecture_path.read_text(encoding="utf-8")
+
+        self.assertIn("docs/PUBLIC_SITE_SPEC.md", agents)
+        self.assertIn("1792 x 864", agents)
+        self.assertIn("縦スクロールを発生させない", agents)
+        self.assertIn("公開UIの正本は `frontend/`", agents)
+
+        required_spec_markers = (
+            "この文書は `dotitao moments` 公開サイトの製品仕様の正本",
+            "## 5. PCレイアウトの受入条件",
+            "## 7. VOD・見どころ表示仕様",
+            "## 9. 盛り上がりマップ",
+            "## 10. 再生仕様",
+            "## 12. データとプライバシー",
+            "## 13. ビルド仕様",
+            "## 14. 変更禁止事項",
+            "## 15. 検証仕様",
+        )
+        for marker in required_spec_markers:
+            self.assertIn(marker, spec)
+
+        self.assertIn("`frontend/`", architecture)
+        self.assertIn("公開UIの正本", architecture)
+        self.assertIn("`site/` を公開UIの正本へ戻さない", architecture)
+
 
 if __name__ == "__main__":
     unittest.main()
