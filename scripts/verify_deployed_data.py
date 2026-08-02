@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASE_URL = "https://dotitao-moments.onrender.com"
 
 
 def fetch_json_bytes(url: str) -> tuple[bytes, Any]:
@@ -23,11 +22,19 @@ def fetch_json_bytes(url: str) -> tuple[bytes, Any]:
     return raw, json.loads(raw)
 
 
+def configured_base_url() -> str:
+    payload = json.loads((ROOT / "config" / "site.json").read_text(encoding="utf-8"))
+    configured = str(payload.get("site", {}).get("base_url") or "").strip()
+    overridden = str(os.environ.get("LIVE_BASE_URL") or configured).strip().rstrip("/")
+    if not overridden:
+        raise SystemExit("LIVE_BASE_URL or config/site.json site.base_url is required")
+    return overridden
+
+
 def main() -> None:
     expected_bytes = (ROOT / "data" / "vods.json").read_bytes()
     expected = json.loads(expected_bytes.decode("utf-8-sig"))
-    base_url = os.environ.get("LIVE_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
-    url = f"{base_url}/data/vods.json"
+    url = f"{configured_base_url()}/data/vods.json"
     timeout_sec = max(1, int(os.environ.get("LIVE_VERIFY_TIMEOUT_SEC", "600")))
     deadline = time.monotonic() + timeout_sec
     last_observation = "no response"
