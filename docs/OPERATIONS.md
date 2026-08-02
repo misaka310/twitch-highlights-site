@@ -2,15 +2,37 @@
 
 この文書は、公開、VOD更新、保護ブランチとGitHub Actionsの運用仕様の正本である。画面仕様は `PUBLIC_SITE_SPEC.md`、再生仕様は `PLAYBACK_SPEC.md` を参照する。
 
+## 標準検証
+
+依存関係は検証と分離し、初回またはlockfile更新時だけ次を実行する。
+
+```text
+npm run setup
+```
+
+ローカルとPull Request CIの製品必須ゲートは、リポジトリルートの次のコマンドを正本とする。
+
+```text
+npm run verify
+```
+
+このゲートはfrontendのtypecheck、lint、単体テスト、Pythonテスト、frontend E2E、再現可能なlegacy回帰、`public/`生成・内容検証・同一環境での再生成一致、生成済み`public/`の静的配信E2E、repository hygieneを含む。本物のTwitchとデプロイ済みRenderへ依存する検証は含めない。
+
+Twitchプレイヤーまたは公開経路へ影響する変更は、通常ゲート成功後かつデプロイ完了後に次を独立実行する。
+
+```text
+npm run verify:live
+```
+
 ## 公開フロー
 
 1. `main` から `release/**` ブランチを作る。
-2. 必須検証を通し、意図したファイルだけをコミットしてpushする。
+2. `npm run verify` を通し、意図したファイルだけをコミットしてpushする。
 3. `.github/workflows/publish-release.yml` が同一リポジトリ内のPRを作成する。
 4. `public-readiness`、`Frontend CI`、`Repository hygiene`、`Repo Launch Doctor` を対象SHAで確認する。
 5. `action_required` のrunは、差分とworkflow変更を確認したうえでActions write権限により承認する。
 6. 必須runがすべて成功してからsquash mergeし、releaseブランチを削除する。
-7. Render上のHTML、公開データ、PC・スマホ表示を確認する。
+7. Render上のHTML、公開データ、PC・スマホ表示を確認し、必要な変更では `npm run verify:live` を通す。
 
 PR番号、run ID、コミットSHAをworkflowへ固定値として残さない。実行時に対象ブランチとhead SHAから解決し、マージ直前にもPR headが変わっていないことを確認する。
 
@@ -43,6 +65,7 @@ workflow badgeやブランチ更新だけで成功判定しない。対象runを
 
 - mainとorigin/mainが一致している。
 - 作業ツリー、stash、一時releaseブランチが残っていない。
+- `npm run verify` が成功している。
 - 公開URLがKumo版の静的バンドルを返す。
 - 公開データの `updated_at` と最新3件がmainと一致する。
 - 次回の定期更新が09:00 JSTとして表示される。

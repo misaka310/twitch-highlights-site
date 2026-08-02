@@ -2,12 +2,14 @@
 =/
 node_modules/
 public/
+frontend/.unit-test-dist/
 artifacts/
 test-results/
 out/
 .cache/
 __pycache__/
 *.py[cod]
+production-verification.json
 headline-generation.log
 headline-diagnostics*.txt
 

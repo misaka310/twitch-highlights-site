@@ -19,6 +19,10 @@ if ! command -v npm >/dev/null 2>&1; then
   echo "error: npm is required for build_public.sh"
   exit 2
 fi
+if [ ! -d node_modules ] || [ ! -d frontend/node_modules ]; then
+  echo "error: dependencies are not installed; run npm run setup first"
+  exit 2
+fi
 
 copy_json_without_bom() {
   src_path="$1"
@@ -35,14 +39,7 @@ dst.write_text(text, encoding="utf-8")
 PY
 }
 
-if [ ! -d frontend/node_modules ]; then
-  npm ci --prefix frontend
-fi
-(
-  cd frontend
-  npx tsc -b
-  npx vite build
-)
+npm run build --prefix frontend
 
 rm -rf public
 mkdir -p public/data

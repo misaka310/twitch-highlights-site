@@ -7,13 +7,17 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: frontend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
-  frontend-tests:
+  verification:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Check out repository
@@ -24,30 +28,45 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      - name: Run JavaScript unit tests
-        run: node --test tests/*.test.mjs
+      - name: Install repository dependencies
+        run: npm run setup
 
-      - name: Build production publish directory
-        run: bash scripts/build_public.sh
-
-      - name: Run publication and Python tests
-        run: python -m unittest discover -s tests -p "test_*.py"
-
-      - name: Install Playwright Chromium
+      - name: Install root Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run desktop and mobile browser tests
-        run: npx playwright test --project=desktop --project=mobile
+      - name: Install frontend Playwright Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run canonical verification
+        run: npm run verify
+
+      - name: Upload verification failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-failure
+          path: |
+            test-results/
+            playwright-report/
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
 
   production-mobile-playback:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
-    needs: frontend-tests
+    needs: verification
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     permissions:
       contents: write
     env:
@@ -62,75 +81,26 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      - name: Build production publish directory
-        run: bash scripts/build_public.sh
+      - name: Install repository dependencies
+        run: npm run setup
 
-      - name: Install Playwright Chromium
+      - name: Install root Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Verify real production mobile playback
-        run: npx playwright test --config=playwright.live.config.js
+      - name: Build production publish directory
+        run: npm run build:public
 
-      - name: Verify deployed VOD data and build evidence
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import hashlib
-          import json
-          import os
-          import time
-          import urllib.request
-          from datetime import datetime, timezone
-          from pathlib import Path
-
-          expected_bytes = Path("data/vods.json").read_bytes()
-          expected = json.loads(expected_bytes)
-          url = os.environ["LIVE_BASE_URL"].rstrip("/") + "/data/vods.json"
-          deadline = time.monotonic() + 600
-          last_observation = "no response"
-
-          while time.monotonic() < deadline:
-              try:
-                  request = urllib.request.Request(
-                      f"{url}?deployment-check={int(time.time())}",
-                      headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
-                  )
-                  with urllib.request.urlopen(request, timeout=30) as response:
-                      live_bytes = response.read()
-                  live = json.loads(live_bytes)
-                  if live == expected:
-                      break
-                  last_observation = (
-                      f"expected updated_at={expected.get('updated_at')} latest={expected.get('videos', [{}])[0].get('vod_id')}; "
-                      f"live updated_at={live.get('updated_at')} latest={live.get('videos', [{}])[0].get('vod_id')}"
-                  )
-              except Exception as exc:
-                  last_observation = f"{type(exc).__name__}: {exc}"
-              print(f"Deployment data not ready: {last_observation}")
-              time.sleep(10)
-          else:
-              raise SystemExit(f"Production VOD data did not match main within 10 minutes: {last_observation}")
-
-          marker = {
-              "verified": True,
-              "verified_at": datetime.now(timezone.utc).isoformat(),
-              "main_sha": os.environ["GITHUB_SHA"],
-              "updated_at": expected.get("updated_at"),
-              "latest_vod_id": expected.get("videos", [{}])[0].get("vod_id"),
-              "expected_sha256": hashlib.sha256(expected_bytes).hexdigest(),
-              "live_sha256": hashlib.sha256(live_bytes).hexdigest(),
-          }
-          Path("production-verification.json").write_text(
-              json.dumps(marker, ensure_ascii=False, indent=2) + "\n",
-              encoding="utf-8",
-          )
-          print(json.dumps(marker, ensure_ascii=False))
-          PY
+      - name: Verify real Twitch and deployed production
+        run: npm run verify:live
 
       - name: Record successful production verification
         shell: bash
