@@ -1,0 +1,213 @@
+import { expect, test } from "@playwright/test";
+import { mkdirSync } from "node:fs";
+import { resolve } from "node:path";
+import { getFakeTwitchLog, installFakeTwitch } from "./fake-twitch";
+
+const artifactsDirectory = resolve(process.cwd(), "artifacts");
+
+test.beforeAll(() => {
+  mkdirSync(artifactsDirectory, { recursive: true });
+});
+
+test.beforeEach(async ({ page }) => {
+  await installFakeTwitch(page);
+});
+
+test("renders production layout and preserves same-VOD playback behavior", async ({ page }, testInfo) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => consoleErrors.push(error.message));
+
+  await page.goto("/");
+  const faviconResponse = await page.request.get("/favicon.svg");
+  expect(faviconResponse.ok()).toBe(true);
+  expect(faviconResponse.headers()["content-type"]).toContain("image/svg+xml");
+  await expect(page.getByRole("heading", { name: "dotitao moments" })).toBeVisible();
+  await expect(page.getByText("非公式ファンサイト", { exact: false })).toBeVisible();
+  await expect(page.getByText("盛り上がりマップ", { exact: true })).toBeVisible();
+  await expect(page.getByText("この配信について", { exact: true })).toBeVisible();
+  await expect(page.getByText("長さ", { exact: true })).toBeVisible();
+  await expect(page.getByText("配信の長さ", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Kumo preview", { exact: true })).toHaveCount(0);
+  await expect(page.locator(".player-heading")).toHaveCount(0);
+  await expect(page.locator(".playback-surface > .player-frame + .activity-card")).toHaveCount(1);
+
+  const frame = page.locator(".player-frame");
+  await expect(frame).toHaveAttribute("data-player-mode", "interactive");
+  await expect(frame).toHaveAttribute("data-expected-autoplay", "false");
+  await expect(frame).toHaveAttribute("data-expected-muted", "true");
+
+  await expect(page.locator(".highlight-item")).toHaveCount(3);
+  await expect(page.locator(".highlight-item").first()).toHaveClass(/is-selected/);
+
+  const activityChart = page.locator(".activity-chart");
+  const activityPath = (await page.locator(".activity-area").getAttribute("d")) || "";
+  const drawPointCount = (activityPath.match(/ L /g) || []).length - 1;
+  expect(drawPointCount).toBeLessThanOrEqual(testInfo.project.name === "mobile" ? 120 : 320);
+  await expect(activityChart).toHaveCSS("height", testInfo.project.name === "mobile" ? "60px" : "88px");
+  await expect(page.locator(".activity-peak, .activity-grid-line, .activity-current-time")).toHaveCount(0);
+
+  const initialLog = await getFakeTwitchLog(page);
+  expect(initialLog.mounts).toHaveLength(1);
+  expect(initialLog.mounts[0]).toMatchObject({ autoplay: false, muted: true });
+
+  const second = page.locator(".highlight-item").nth(1);
+  await second.click();
+  await expect(second).toHaveClass(/is-selected/);
+  await expect(frame).toHaveAttribute("data-expected-autoplay", "true");
+  await expect(frame).toHaveAttribute("data-expected-muted", "false");
+
+  const selected = Number(await frame.getAttribute("data-current-start-sec"));
+  expect(selected).toBeGreaterThan(0);
+  const sameVodLog = await getFakeTwitchLog(page);
+  expect(sameVodLog.mounts).toHaveLength(1);
+  expect(sameVodLog.seeks).toContain(selected);
+  expect(sameVodLog.muted.at(-1)).toBe(false);
+  expect(sameVodLog.plays).toBeGreaterThan(0);
+
+  await page.getByRole("button", { name: "10秒戻る" }).click();
+  await expect(frame).toHaveAttribute("data-current-start-sec", String(Math.max(0, selected - 10)));
+  expect((await getFakeTwitchLog(page)).seeks).toContain(Math.max(0, selected - 10));
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+
+  await page.keyboard.press("Tab");
+  expect(await page.evaluate(() => document.activeElement?.tagName)).not.toBe("BODY");
+
+  const columns = await page.locator(".content-grid").evaluate((element) => getComputedStyle(element).gridTemplateColumns);
+  if (testInfo.project.name === "desktop") {
+    expect(columns.split(" ").length).toBeGreaterThanOrEqual(2);
+    const playerBox = await frame.boundingBox();
+    const railBox = await page.locator(".highlight-column").boundingBox();
+    expect(playerBox?.width || 0).toBeGreaterThanOrEqual(950);
+    expect(railBox?.width || 0).toBeGreaterThanOrEqual(380);
+    expect(railBox?.width || Infinity).toBeLessThanOrEqual(420);
+    const verticalOverflow = await page.evaluate(
+      () => document.documentElement.scrollHeight - document.documentElement.clientHeight,
+    );
+    expect(verticalOverflow).toBeLessThanOrEqual(1);
+  } else {
+    expect(columns.split(" ").length).toBe(1);
+    const order = await page.locator(".content-grid > *").evaluateAll((elements) =>
+      elements.map((element) => element.getBoundingClientRect().top),
+    );
+    expect(order[1]).toBeGreaterThan(order[0]);
+  }
+
+  await page.screenshot({
+    path: resolve(artifactsDirectory, `production-${testInfo.project.name}.png`),
+    fullPage: true,
+  });
+
+  expect(consoleErrors).toEqual([]);
+});
+
+test("latest click wins and a different VOD remounts with sound", async ({ page }) => {
+  await page.goto("/");
+  const frame = page.locator(".player-frame");
+  await expect(frame).toHaveAttribute("data-player-mode", "interactive");
+  const initialVodId = await frame.getAttribute("data-current-vod-id");
+
+  const highlights = page.locator(".highlight-item");
+  await highlights.nth(1).click();
+  await highlights.nth(2).click();
+  const lastSelectedStart = Number(await highlights.nth(2).locator(".time-chip").textContent().then((text) => {
+    const parts = String(text || "0").split(":").map(Number);
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return 0;
+  }));
+  await expect(frame).toHaveAttribute("data-current-start-sec", String(lastSelectedStart));
+  expect((await getFakeTwitchLog(page)).mounts).toHaveLength(1);
+
+  const tabs = page.getByRole("tab");
+  test.skip((await tabs.count()) < 2, "requires at least two VODs");
+  await tabs.nth(1).click();
+  await expect.poll(async () => frame.getAttribute("data-current-vod-id")).not.toBe(initialVodId);
+  await expect(frame).toHaveAttribute("data-expected-autoplay", "true");
+  await expect(frame).toHaveAttribute("data-expected-muted", "false");
+  await expect.poll(async () => (await getFakeTwitchLog(page)).mounts.length).toBeGreaterThan(1);
+  expect((await getFakeTwitchLog(page)).mounts.at(-1)).toMatchObject({ autoplay: true, muted: false });
+});
+
+test("keeps legacy ordering and missing metadata fallbacks", async ({ page }) => {
+  await page.route("**/data/vod_index.json", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        updated_at: "2026-08-02T00:00:00Z",
+        next_update_at: "2026-08-03T00:00:00Z",
+        videos: [
+          { vod_id: "older", detail_path: "data/vods/older.json", published_at: "2026-07-01T00:00:00Z" },
+          { vod_id: "newer", detail_path: "data/vods/newer.json", published_at: "2026-08-01T00:00:00Z" },
+        ],
+      }),
+    });
+  });
+  await page.route("**/data/vods/newer.json", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        vod_id: "newer",
+        title: "",
+        published_at: "2026-08-01T00:00:00Z",
+        chat_total: null,
+        comments_per_hour: null,
+        activity_map: { buckets: [1, 3, 2], last_comment_sec: 0 },
+        items: [
+          { id: "rank-3", rank: 3, start_sec: 60, end_sec: 90, headline: "3番目" },
+          { id: "rank-1", rank: 1, start_sec: 20, end_sec: 30, headline: "1番目" },
+          { id: "rank-2", rank: 2, start_sec: 40, end_sec: 50, reason: "Chat activity spike around 00:00:40 (z-score=4.2)." },
+        ],
+      }),
+    });
+  });
+  await page.route("**/data/vods/older.json", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        vod_id: "older",
+        title: "古い配信",
+        published_at: "2026-07-01T00:00:00Z",
+        duration_sec: 120,
+        chat_total: 10,
+        comments_per_hour: 5,
+        activity_map: { duration_sec: 120, buckets: [1, 1] },
+        items: [{ id: "old-1", rank: 1, start_sec: 10, end_sec: 20, headline: "古い見どころ" }],
+      }),
+    });
+  });
+
+  await page.goto("/");
+  const frame = page.locator(".player-frame");
+  await expect(frame).toHaveAttribute("data-current-vod-id", "newer");
+  await expect(frame).toHaveAttribute("data-current-start-sec", "20");
+  await expect(page.locator(".time-chip")).toHaveText(["00:00:20", "00:00:40", "00:01:00"]);
+  await expect(page.locator(".highlight-copy > strong")).toHaveText(["1番目", "コメントが集中した場面", "3番目"]);
+  await expect(page.locator(".stream-summary dd").nth(0)).toHaveText("―");
+  await expect(page.locator(".stream-summary dd").nth(2)).toHaveText("00:01:30");
+  await expect(page.locator(".stream-summary dd").nth(3)).toHaveText("―");
+  await expect(page.locator(".activity-unavailable")).toHaveAttribute("x", "0");
+  await expect(page.locator(".activity-unavailable")).toHaveAttribute("width", "1000");
+});
+
+test("page controls preserve the existing page query", async ({ page }, testInfo) => {
+  await page.goto("/");
+  const nextButton = page.getByRole("button", { name: /next|次/i }).last();
+  await expect(nextButton).toBeVisible();
+  await nextButton.click();
+  await expect(page).toHaveURL(/\?page=2$/);
+  await expect(page.locator(".highlight-item").first()).toBeVisible();
+  await expect(page.locator(".player-frame")).toHaveAttribute("data-expected-autoplay", "false");
+  await expect(page.locator(".player-frame")).toHaveAttribute("data-expected-muted", "true");
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+
+  await page.screenshot({
+    path: resolve(artifactsDirectory, `page-2-${testInfo.project.name}.png`),
+    fullPage: true,
+  });
+});

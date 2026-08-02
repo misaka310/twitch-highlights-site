@@ -158,21 +158,6 @@ function renderEmptyState(message) {
     elements.vodTabs.replaceChildren();
     elements.vodTabs.hidden = true;
   }
-  if (elements.transcriptCurrent) {
-    elements.transcriptCurrent.textContent = "表示データを確認してください";
-  }
-  if (elements.transcriptPrev) {
-    elements.transcriptPrev.textContent = "―";
-  }
-  if (elements.transcriptNext) {
-    elements.transcriptNext.textContent = "―";
-  }
-  if (elements.transcriptPanel) {
-    elements.transcriptPanel.hidden = true;
-  }
-  if (elements.playbackAssistPanel) {
-    elements.playbackAssistPanel.classList.add("is-transcript-hidden");
-  }
   [
     elements.summaryTitle,
     elements.summaryDate,

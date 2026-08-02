@@ -8,11 +8,12 @@ const LIVE_BASE_URL = process.env.LIVE_BASE_URL || "";
 const PUBLIC_ROOT = path.join(__dirname, "..", "public");
 const DEPLOYMENT_PATHS = [
   "index.html",
-  "styles.css",
+  "favicon.svg",
+  "site-config.json",
   ...fs
-    .readdirSync(path.join(PUBLIC_ROOT, "js"), { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))
-    .map((entry) => `js/${entry.name}`)
+    .readdirSync(path.join(PUBLIC_ROOT, "assets"), { withFileTypes: true })
+    .filter((entry) => entry.isFile() && (entry.name.endsWith(".js") || entry.name.endsWith(".css")))
+    .map((entry) => `assets/${entry.name}`)
     .sort(),
 ];
 
@@ -27,11 +28,11 @@ test("deployed mobile first cross-VOD click starts audible playback without over
     (await page.locator("#player-frame").getAttribute("data-current-vod-id")) || ""
   );
 
-  const tabs = page.locator(".vod-tab, .mobile-vod-tab");
+  const tabs = page.getByRole("tab");
   await expect(tabs.nth(1)).toBeVisible();
   await tabs.nth(1).click();
 
-  const button = page.locator(".vod-card:not([hidden]) .segment-button").first();
+  const button = page.locator(".highlight-item").first();
   await expect(button).toBeVisible();
   const targetVodId = String((await button.getAttribute("data-vod-id")) || "");
   const targetStartSec = Number((await button.getAttribute("data-start-sec")) || 0);
@@ -57,7 +58,7 @@ test("deployed mobile first cross-VOD click starts audible playback without over
     .toBeGreaterThan(startedAt + 1);
 
   const layout = await page.evaluate(() => {
-    const iframe = document.querySelector("#twitch-player iframe");
+    const iframe = document.querySelector(".player-embed--portal iframe");
     const frame = document.querySelector("#player-frame");
     const iframeRect = iframe?.getBoundingClientRect();
     const frameRect = frame?.getBoundingClientRect();
