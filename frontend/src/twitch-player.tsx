@@ -1,25 +1,11 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { decideMountContinuation, decidePlayback } from "./player/playback-decision.js";
+import { createPlaybackRequest } from "./player/playback-request.js";
+import type { PlaybackOptions, PlaybackRequest, PlaybackStatus } from "./player/playback-types.js";
+import { buildEmbedUrl, formatTwitchTime, getTwitchParents } from "./player/twitch-url.js";
 
 const TWITCH_PLAYER_SCRIPT_URL = "https://player.twitch.tv/js/embed/v1.js";
-const DEFAULT_PARENTS = ["localhost", "127.0.0.1"];
 const INTERACTIVE_SEEK_STABILIZE_MS = 2500;
-
-type PlaybackStatus = "idle" | "loading" | "ready" | "playing" | "blocked" | "error";
-
-type PlaybackRequest = {
-  requestId: number;
-  vodId: string;
-  startSec: number;
-  autoplay: boolean;
-  muted: boolean;
-  triggeredByUser: boolean;
-};
-
-type PlaybackOptions = {
-  autoplay?: boolean;
-  muted?: boolean;
-  triggeredByUser?: boolean;
-};
 
 type TwitchPlayerInstance = {
   addEventListener?: (eventName: string, callback: () => void) => void;
@@ -60,28 +46,6 @@ type TwitchPlayerProps = {
 };
 
 let playerScriptPromise: Promise<boolean> | null = null;
-
-function formatTwitchTime(totalSeconds: number): string {
-  const total = Math.max(0, Math.floor(Number(totalSeconds) || 0));
-  return `${Math.floor(total / 3600)}h${Math.floor((total % 3600) / 60)}m${total % 60}s`;
-}
-
-function getTwitchParents(): string[] {
-  const hostname = String(location.hostname || "").trim();
-  return Array.from(new Set([hostname, ...DEFAULT_PARENTS].filter(Boolean)));
-}
-
-function buildEmbedUrl(request: PlaybackRequest): string {
-  const url = new URL("https://player.twitch.tv/");
-  url.searchParams.set("video", request.vodId.replace(/^v/i, ""));
-  url.searchParams.set("autoplay", request.autoplay ? "true" : "false");
-  url.searchParams.set("muted", request.muted ? "true" : "false");
-  url.searchParams.set("playsinline", "true");
-  url.searchParams.set("seq", String(request.requestId));
-  url.searchParams.set("time", formatTwitchTime(request.startSec));
-  getTwitchParents().forEach((parent) => url.searchParams.append("parent", parent));
-  return url.toString();
-}
 
 function ensurePlayerScript(): Promise<boolean> {
   if (typeof window.Twitch?.Player === "function") return Promise.resolve(true);
@@ -259,7 +223,7 @@ export const TwitchPlayer = forwardRef<TwitchPlayerHandle, TwitchPlayerProps>(fu
     iframe.setAttribute("allowfullscreen", "");
     iframe.setAttribute("scrolling", "no");
     iframe.setAttribute("frameborder", "0");
-    iframe.src = buildEmbedUrl(request);
+    iframe.src = buildEmbedUrl(request, location.hostname);
     iframe.addEventListener("load", () => {
       if (desiredRef.current?.requestId !== request.requestId || playerReadyRef.current) return;
       setUiState(request.autoplay ? "playing" : "ready", request, request.autoplay ? "再生中" : "待機中", "iframe");
@@ -297,12 +261,13 @@ export const TwitchPlayer = forwardRef<TwitchPlayerHandle, TwitchPlayerProps>(fu
       if (latestAfterLoad) setUiState("ready", latestAfterLoad, "プレイヤー準備完了", "iframe");
       return;
     }
-    if (!latestAfterLoad) {
+    const continuation = decideMountContinuation(request, latestAfterLoad);
+    if (continuation === "stop") {
       mountInFlightRef.current = false;
       mountVodIdRef.current = "";
       return;
     }
-    if (latestAfterLoad.requestId !== request.requestId) {
+    if (continuation === "restart" && latestAfterLoad) {
       mountInFlightRef.current = false;
       mountVodIdRef.current = "";
       void mountInteractivePlayer(latestAfterLoad);
@@ -326,7 +291,7 @@ export const TwitchPlayer = forwardRef<TwitchPlayerHandle, TwitchPlayerProps>(fu
       width: "100%",
       height: "100%",
       video: request.vodId,
-      parent: getTwitchParents(),
+      parent: getTwitchParents(location.hostname),
       autoplay: request.autoplay,
       muted: request.muted,
       time: formatTwitchTime(request.startSec),
@@ -395,30 +360,27 @@ export const TwitchPlayer = forwardRef<TwitchPlayerHandle, TwitchPlayerProps>(fu
   };
 
   const requestPlayback = (vodId: string, startSec: number, options: PlaybackOptions = {}) => {
-    const normalizedVodId = String(vodId || "").replace(/^v/i, "");
-    if (!normalizedVodId) return;
-    const request: PlaybackRequest = {
-      requestId: ++requestSequenceRef.current,
-      vodId: normalizedVodId,
-      startSec: Math.max(0, Math.floor(Number(startSec) || 0)),
-      autoplay: options.autoplay !== false,
-      muted: options.muted !== false,
-      triggeredByUser: options.triggeredByUser === true,
-    };
+    const request = createPlaybackRequest(requestSequenceRef.current + 1, vodId, startSec, options);
+    if (!request) return;
+    requestSequenceRef.current = request.requestId;
 
     desiredRef.current = request;
     lastKnownPositionRef.current = request.startSec;
     onPositionChange(request.startSec);
     setUiState("loading", request, request.triggeredByUser ? "再生を開始中" : "プレイヤー読込中", playerReadyRef.current ? "interactive" : "iframe");
 
-    if (seekInteractivePlayer(request)) return;
-
-    const mountingSameVod = mountInFlightRef.current && mountVodIdRef.current === request.vodId;
-    if (!mountingSameVod) mountFallbackIframe(request);
-
-    if (mountInFlightRef.current) return;
-    if (playerRef.current) destroyInteractivePlayer();
-    void mountInteractivePlayer(request);
+    const decision = decidePlayback(request, {
+      playerReady: playerReadyRef.current,
+      playerVodId: playerVodIdRef.current,
+      mountInFlight: mountInFlightRef.current,
+      mountVodId: mountVodIdRef.current,
+      hasInteractivePlayer: playerRef.current != null,
+    });
+    if (decision.seekInteractive && seekInteractivePlayer(request)) return;
+    if (decision.mountFallback) mountFallbackIframe(request);
+    if (decision.waitForMount) return;
+    if (decision.destroyInteractive) destroyInteractivePlayer();
+    if (decision.mountInteractive) void mountInteractivePlayer(request);
   };
 
   useImperativeHandle(ref, () => ({ requestPlayback, getCurrentTime }));
