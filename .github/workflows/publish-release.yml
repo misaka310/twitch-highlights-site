@@ -98,8 +98,19 @@ jobs:
             exit 1
           fi
 
-          gh pr merge "$pr_number" \
-            --repo "$GITHUB_REPOSITORY" \
-            --squash \
-            --delete-branch \
-            --match-head-commit "$head_sha"
+          for merge_attempt in $(seq 1 12); do
+            if gh pr merge "$pr_number" \
+              --repo "$GITHUB_REPOSITORY" \
+              --squash \
+              --delete-branch \
+              --match-head-commit "$head_sha"; then
+              echo "Merged release PR #$pr_number."
+              exit 0
+            fi
+
+            echo "Merge attempt $merge_attempt was not accepted yet; waiting for rule propagation."
+            sleep 10
+          done
+
+          echo "Unable to merge release PR #$pr_number after public-readiness passed." >&2
+          exit 1
