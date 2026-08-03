@@ -30,6 +30,17 @@ class PublicBuildTests(unittest.TestCase):
         self.assertTrue((ROOT / "scripts" / "check_public_reproducibility.py").is_file())
         self.assertTrue((ROOT / "playwright.public.config.js").is_file())
 
+    def test_production_verification_fetches_existing_marker_parent(self):
+        workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        parent_lookup = 'parent_sha="$(git ls-remote origin "refs/heads/$verification_branch"'
+        parent_fetch = 'git fetch --no-tags --depth=1 origin "refs/heads/$verification_branch"'
+        parent_commit = 'git commit-tree "$tree_sha" -p "$parent_sha"'
+
+        self.assertIn(parent_lookup, workflow)
+        self.assertIn(parent_fetch, workflow)
+        self.assertIn(parent_commit, workflow)
+        self.assertLess(workflow.index(parent_fetch), workflow.index(parent_commit))
+
 
 if __name__ == "__main__":
     unittest.main()
