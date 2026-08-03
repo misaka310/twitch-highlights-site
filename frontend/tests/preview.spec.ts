@@ -224,3 +224,38 @@ test("page controls preserve the existing page query", async ({ page }, testInfo
     fullPage: true,
   });
 });
+
+test("clamps an out-of-range page to the last available page", async ({ page }) => {
+  await page.route("**/data/vod_index.json", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        videos: [
+          { vod_id: "4", detail_path: "data/vods/4.json", published_at: "2026-08-04T00:00:00Z" },
+          { vod_id: "3", detail_path: "data/vods/3.json", published_at: "2026-08-03T00:00:00Z" },
+          { vod_id: "2", detail_path: "data/vods/2.json", published_at: "2026-08-02T00:00:00Z" },
+          { vod_id: "1", detail_path: "data/vods/1.json", published_at: "2026-08-01T00:00:00Z" },
+        ],
+      }),
+    });
+  });
+  await page.route("**/data/vods/1.json", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        vod_id: "1",
+        title: "最終ページの配信",
+        published_at: "2026-08-01T00:00:00Z",
+        duration_sec: 120,
+        activity_map: { duration_sec: 120, buckets: [1, 2] },
+        items: [{ id: "1_10_20", rank: 1, start_sec: 10, end_sec: 20, headline: "最終ページの見どころ" }],
+      }),
+    });
+  });
+
+  await page.goto("/?page=999");
+
+  await expect(page).toHaveURL(/\?page=2$/);
+  await expect(page.getByText("最終ページの配信", { exact: true })).toBeVisible();
+  await expect(page.getByText("読み込み中...", { exact: true })).toHaveCount(0);
+});

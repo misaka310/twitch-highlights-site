@@ -328,11 +328,10 @@ npx playwright test --project=desktop
 bash scripts/build_public.sh
 ```
 
-必要に応じて次も実行する。
+公開生成物を含む標準検証は、個別コマンドではなく次の正本を実行する。
 
 ```text
-python -m pytest tests -q
-node --test tests/*.test.mjs
+npm run verify
 ```
 
 ## 16. 仕様変更の手順

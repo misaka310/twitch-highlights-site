@@ -19,151 +19,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
+      - name: Check out release branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+
       - name: Create checked pull request and merge
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-
-          branch="${GITHUB_REF_NAME}"
-          head_sha="${GITHUB_SHA}"
-          title="Publish Kumo frontend"
-          body="Publish the reviewed Kumo frontend through the required public-readiness check."
-
-          pr_number="$(
-            gh pr list \
-              --repo "$GITHUB_REPOSITORY" \
-              --head "$branch" \
-              --base main \
-              --state open \
-              --limit 1 \
-              --json number \
-              --jq '.[0].number // empty'
-          )"
-
-          if [[ -z "$pr_number" ]]; then
-            pr_url="$(
-              gh pr create \
-                --repo "$GITHUB_REPOSITORY" \
-                --base main \
-                --head "$branch" \
-                --title "$title" \
-                --body "$body"
-            )"
-            pr_number="${pr_url##*/}"
-          fi
-
-          gh workflow run repo-launch-doctor.yml \
-            --repo "$GITHUB_REPOSITORY" \
-            --ref "$branch"
-
-          readiness_run_id=""
-          for _ in $(seq 1 60); do
-            readiness_run_id="$(
-              gh run list \
-                --repo "$GITHUB_REPOSITORY" \
-                --workflow repo-launch-doctor.yml \
-                --branch "$branch" \
-                --event workflow_dispatch \
-                --commit "$head_sha" \
-                --limit 1 \
-                --json databaseId \
-                --jq '.[0].databaseId // empty'
-            )"
-            if [[ -n "$readiness_run_id" ]]; then
-              break
-            fi
-            sleep 5
-          done
-
-          if [[ -z "$readiness_run_id" ]]; then
-            echo "Timed out waiting for public-readiness to start for $head_sha." >&2
-            exit 1
-          fi
-
-          gh run watch "$readiness_run_id" \
-            --repo "$GITHUB_REPOSITORY" \
-            --compact \
-            --exit-status
-
-          checked_sha="$(
-            gh run view "$readiness_run_id" \
-              --repo "$GITHUB_REPOSITORY" \
-              --json headSha \
-              --jq '.headSha'
-          )"
-          if [[ "$checked_sha" != "$head_sha" ]]; then
-            echo "public-readiness checked $checked_sha instead of $head_sha." >&2
-            exit 1
-          fi
-
-          required_pr_workflows=("Frontend CI" "Repository hygiene" "Repo Launch Doctor")
-          declare -A pr_run_ids=()
-          for _ in $(seq 1 60); do
-            runs_json="$(
-              gh run list \
-                --repo "$GITHUB_REPOSITORY" \
-                --commit "$head_sha" \
-                --event pull_request \
-                --limit 50 \
-                --json databaseId,workflowName,status,conclusion
-            )"
-
-            for workflow_name in "${required_pr_workflows[@]}"; do
-              run_id="$(
-                jq -r \
-                  --arg workflow_name "$workflow_name" \
-                  '[.[] | select(.workflowName == $workflow_name)] | sort_by(.databaseId) | last | .databaseId // empty' \
-                  <<<"$runs_json"
-              )"
-              if [[ -n "$run_id" ]]; then
-                pr_run_ids["$workflow_name"]="$run_id"
-              fi
-            done
-
-            if [[ "${#pr_run_ids[@]}" -eq "${#required_pr_workflows[@]}" ]]; then
-              break
-            fi
-            sleep 5
-          done
-
-          if [[ "${#pr_run_ids[@]}" -ne "${#required_pr_workflows[@]}" ]]; then
-            echo "Timed out waiting for pull-request checks for $head_sha." >&2
-            exit 1
-          fi
-
-          for workflow_name in "${required_pr_workflows[@]}"; do
-            run_id="${pr_run_ids[$workflow_name]}"
-            conclusion="$(gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --json conclusion --jq '.conclusion // ""')"
-            if [[ "$conclusion" == "action_required" ]]; then
-              gh api \
-                --method POST \
-                "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/approve"
-            fi
-          done
-
-          for workflow_name in "${required_pr_workflows[@]}"; do
-            run_id="${pr_run_ids[$workflow_name]}"
-            gh run watch "$run_id" \
-              --repo "$GITHUB_REPOSITORY" \
-              --compact \
-              --exit-status
-          done
-
-          for merge_attempt in $(seq 1 12); do
-            if gh pr merge "$pr_number" \
-              --repo "$GITHUB_REPOSITORY" \
-              --squash \
-              --delete-branch \
-              --match-head-commit "$head_sha"; then
-              echo "Merged release PR #$pr_number."
-              exit 0
-            fi
-
-            echo "Merge attempt $merge_attempt was not accepted yet; waiting for rule propagation."
-            sleep 10
-          done
-
-          echo "Unable to merge release PR #$pr_number after public-readiness passed." >&2
-          exit 1
+          python .github/scripts/checked_pr_merge.py \
+            --branch "$GITHUB_REF_NAME" \
+            --head-sha "$GITHUB_SHA" \
+            --title "Publish Kumo frontend" \
+            --body "Publish the reviewed Kumo frontend through the required public-readiness check." \
+            --merge-attempts 12

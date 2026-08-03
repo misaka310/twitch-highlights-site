@@ -18,7 +18,10 @@ export async function loadVodPage(page: number, fetcher: typeof fetch = fetch): 
   const siteConfig = configResponse.ok ? ((await configResponse.json()) as RuntimeSiteConfig) : {};
   const entries = Array.isArray(index.videos) ? [...index.videos] : [];
   entries.sort((a, b) => new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime());
-  const start = (page - 1) * VOD_PAGE_SIZE;
+  const pageCount = Math.max(1, Math.ceil(entries.length / VOD_PAGE_SIZE));
+  const requestedPage = Math.max(1, Math.floor(Number(page) || 1));
+  const resolvedPage = Math.min(requestedPage, pageCount);
+  const start = (resolvedPage - 1) * VOD_PAGE_SIZE;
   const pageEntries = entries.slice(start, start + VOD_PAGE_SIZE);
   const vods = await Promise.all(
     pageEntries.map(async (entry) => {
@@ -29,6 +32,8 @@ export async function loadVodPage(page: number, fetcher: typeof fetch = fetch): 
     }),
   );
   return {
+    requestedPage,
+    page: resolvedPage,
     updatedAt: index.updated_at || "",
     nextUpdateAt: index.next_update_at || "",
     vods,

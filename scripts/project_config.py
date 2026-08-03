@@ -89,7 +89,7 @@ def load_project_config(
 ) -> ProjectConfig:
     config_path = path or DEFAULT_CONFIG_PATH
     source = _read_config(config_path)
-    environment = env or os.environ
+    environment = os.environ if env is None else env
 
     site = _mapping(source.get("site"))
     analytics = _mapping(site.get("analytics"))

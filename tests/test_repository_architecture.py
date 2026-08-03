@@ -99,6 +99,20 @@ class RepositoryArchitectureTests(unittest.TestCase):
                         matches.append(f"{path.relative_to(ROOT)}:{marker}")
         self.assertEqual(matches, [])
 
+    def test_frontend_fallbacks_are_instance_neutral(self):
+        paths = (
+            ROOT / "frontend" / "index.html",
+            ROOT / "frontend" / "package.json",
+            ROOT / "frontend" / "src" / "App.tsx",
+            ROOT / "frontend" / "src" / "hooks" / "use-site-metadata.ts",
+        )
+        matches = [
+            str(path.relative_to(ROOT))
+            for path in paths
+            if "dotitao" in path.read_text(encoding="utf-8").lower()
+        ]
+        self.assertEqual(matches, [])
+
     def test_instance_configuration_and_examples_exist(self):
         required_paths = (
             ROOT / "config" / "site.json",
@@ -211,6 +225,74 @@ class RepositoryArchitectureTests(unittest.TestCase):
         )
         for marker in required_operations_markers:
             self.assertIn(marker, operations)
+
+    def test_headline_source_selection_is_separate_from_transcription_entrypoint(self):
+        entrypoint_path = ROOT / "scripts" / "transcribe_segments.py"
+        source_selection_path = ROOT / "scripts" / "headline_source_selection.py"
+        candidate_selection_path = ROOT / "scripts" / "headline_candidate_selection.py"
+
+        self.assertTrue(source_selection_path.is_file())
+        self.assertTrue(candidate_selection_path.is_file())
+        self.assertLess(len(source_selection_path.read_text(encoding="utf-8").splitlines()), 1800)
+        self.assertLess(len(candidate_selection_path.read_text(encoding="utf-8").splitlines()), 1800)
+        self.assertLess(len(entrypoint_path.read_text(encoding="utf-8").splitlines()), 2000)
+
+        module = ast.parse(entrypoint_path.read_text(encoding="utf-8"))
+        locally_defined = {
+            node.name
+            for node in module.body
+            if isinstance(node, (ast.FunctionDef, ast.ClassDef))
+        }
+        self.assertNotIn("_score_source_sentence_candidate", locally_defined)
+        self.assertNotIn("_select_source_sentences", locally_defined)
+        self.assertNotIn("build_headline_source_text", locally_defined)
+
+    def test_twitch_sources_are_separate_from_vod_update_orchestration(self):
+        update_path = ROOT / "scripts" / "update_vods.py"
+        sources_path = ROOT / "scripts" / "vod_sources.py"
+
+        self.assertTrue(sources_path.is_file())
+        self.assertLess(len(update_path.read_text(encoding="utf-8").splitlines()), 900)
+
+        module = ast.parse(update_path.read_text(encoding="utf-8"))
+        locally_defined = {
+            node.name
+            for node in module.body
+            if isinstance(node, (ast.FunctionDef, ast.ClassDef))
+        }
+        self.assertNotIn("fetch_latest_videos", locally_defined)
+        self.assertNotIn("fetch_chat_data", locally_defined)
+        self.assertNotIn("post_gql", locally_defined)
+
+    def test_vod_highlight_analysis_is_separate_from_update_orchestration(self):
+        update_path = ROOT / "scripts" / "update_vods.py"
+        highlight_path = ROOT / "scripts" / "vod_highlights.py"
+
+        self.assertTrue(highlight_path.is_file())
+        self.assertLess(len(update_path.read_text(encoding="utf-8").splitlines()), 1500)
+
+        module = ast.parse(update_path.read_text(encoding="utf-8"))
+        locally_defined = {
+            node.name
+            for node in module.body
+            if isinstance(node, (ast.FunctionDef, ast.ClassDef))
+        }
+        self.assertNotIn("detect_items", locally_defined)
+        self.assertNotIn("rank_segments", locally_defined)
+        self.assertNotIn("classify_segment_tags", locally_defined)
+
+    def test_public_docs_match_supported_commands_and_data_processing(self):
+        contributing = (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+        spec = (ROOT / "docs" / "PUBLIC_SITE_SPEC.md").read_text(encoding="utf-8")
+        docs_index = (ROOT / "docs" / "README.md").read_text(encoding="utf-8")
+        privacy = (ROOT / "PRIVACY.md").read_text(encoding="utf-8")
+
+        for document in (contributing, spec):
+            self.assertNotIn("node --test tests/*.test.mjs", document)
+        self.assertIn("npm run verify", contributing)
+        self.assertIn("Whisper", docs_index)
+        self.assertIn("GoatCounter", privacy)
+        self.assertTrue((ROOT / ".env.example").is_file())
 
     def test_vod_update_cron_matches_displayed_next_update_hour(self):
         workflow = (ROOT / ".github" / "workflows" / "update-vods.yml").read_text(encoding="utf-8")

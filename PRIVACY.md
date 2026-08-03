@@ -29,3 +29,6 @@
 - 日次Actionsのコミット対象を集計済みVODデータとサムネイルに限定
 - 保存処理をホワイトリスト方式にし、未定義フィールドを引き継がない
 - テストで個人情報、raw chat、廃止済みデータの混入を検査
+## アクセス解析
+
+`config/site.json`または`GOATCOUNTER_CODE`でGoatCounterを設定した公開サイトは、ページ表示時に`https://gc.zgo.at/count.js`を読み込みます。アクセス解析を使用しないインスタンスでは`goatcounter_code`を空にしてください。GoatCounterによるデータ処理は同サービスのポリシーに従い、このリポジトリへ訪問ログを保存しません。

@@ -35,6 +35,7 @@ npm run verify:live
 7. Render上のHTML、公開データ、PC・スマホ表示を確認し、必要な変更では `npm run verify:live` を通す。
 
 PR番号、run ID、コミットSHAをworkflowへ固定値として残さない。実行時に対象ブランチとhead SHAから解決し、マージ直前にもPR headが変わっていないことを確認する。
+PR作成、public-readiness起動、必須PR workflow待機、`action_required`承認、head SHA確認、squash mergeは`.github/scripts/checked_pr_merge.py`を共通経路とする。release更新とVOD自動更新へ同じ処理を重複実装しない。
 
 ## 定期VOD更新
 

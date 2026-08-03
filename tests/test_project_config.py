@@ -1,9 +1,15 @@
 import json
 import tempfile
+import sys
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
-from scripts.project_config import load_project_config
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from scripts.project_config import load_project_config  # noqa: E402
+import update_vods  # noqa: E402
 
 
 class ProjectConfigTests(unittest.TestCase):
@@ -49,6 +55,13 @@ class ProjectConfigTests(unittest.TestCase):
         self.assertEqual(config.extra_tag_rules, (("custom", ("pattern-a", "pattern-b")),))
         self.assertNotIn("youtube", config.public_dict())
 
+    def test_explicit_empty_environment_ignores_process_environment(self):
+        with tempfile.TemporaryDirectory() as tmp_raw:
+            site_path, tag_rules_path = self._write_configs(Path(tmp_raw))
+            with patch.dict("os.environ", {"TWITCH_CHANNEL": "process_override"}, clear=False):
+                config = load_project_config(site_path, env={}, tag_rules_path=tag_rules_path)
+        self.assertEqual(config.twitch_channel_login, "sample_channel")
+
     def test_environment_overrides_instance_configuration(self):
         with tempfile.TemporaryDirectory() as tmp_raw:
             site_path, tag_rules_path = self._write_configs(Path(tmp_raw))
@@ -64,6 +77,22 @@ class ProjectConfigTests(unittest.TestCase):
         self.assertEqual(config.site_name, "Override Site")
         self.assertEqual(config.twitch_channel_login, "other_channel")
         self.assertEqual(config.twitch_channel_id, "456")
+
+    def test_update_runtime_configuration_is_explicit(self):
+        source = (Path(__file__).resolve().parents[1] / "scripts" / "update_vods.py").read_text(encoding="utf-8")
+        self.assertNotIn("load_local_env(ENV_PATH)" + chr(10) + "PROJECT_CONFIG", source)
+        try:
+            update_vods.configure_runtime_environment(
+                {
+                    "TWITCH_CHANNEL": "runtime_channel",
+                    "TWITCH_CLIENT_ID": "client-id",
+                    "TWITCH_CLIENT_SECRET": "client-secret",
+                }
+            )
+            self.assertEqual(update_vods.CHANNEL, "runtime_channel")
+            self.assertEqual(update_vods.TWITCH_API_CLIENT_ID, "client-id")
+        finally:
+            update_vods.configure_runtime_environment({})
 
     def test_invalid_channel_login_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp_raw:

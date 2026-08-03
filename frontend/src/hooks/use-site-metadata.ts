@@ -4,14 +4,18 @@ import type { RuntimeSiteConfig } from "../domain/vod.js";
 export function useSiteMetadata(siteConfig?: RuntimeSiteConfig): void {
   useEffect(() => {
     const site = siteConfig?.site;
-    const siteName = String(site?.name || "dotitao moments").trim();
+    const siteName = String(site?.name || "Twitch Highlights").trim();
     const description = String(
       site?.description || "Twitch配信の見どころをすぐ再生できる非公式ファンサイトです。",
     ).trim();
+    const language = String(site?.language || "ja").trim() || "ja";
+    const baseUrl = String(site?.base_url || "").trim().replace(/\/+$/, "");
+    document.documentElement.lang = language;
     document.title = siteName;
     document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", description);
     document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", siteName);
     document.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.setAttribute("content", description);
+    document.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.setAttribute("content", baseUrl);
 
     const analyticsCode = String(site?.analytics?.goatcounter_code || "").trim();
     const isLocal = ["localhost", "127.0.0.1"].includes(location.hostname);

@@ -54,13 +54,13 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: main
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.11"
 
@@ -69,7 +69,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .tmp-tools/twitchdownloader
-          curl -L "https://github.com/lay295/TwitchDownloader/releases/download/1.56.4/TwitchDownloaderCLI-1.56.4-Linux-x64.zip" -o .tmp-tools/twitchdownloader/td.zip
+          curl --fail --location --retry 3 --retry-all-errors \
+            "https://github.com/lay295/TwitchDownloader/releases/download/1.56.4/TwitchDownloaderCLI-1.56.4-Linux-x64.zip" \
+            --output .tmp-tools/twitchdownloader/td.zip
+          echo '5b52964764e6e6c704f9d3b5aaaeb02f78c7c91a57b1bf9b2636738da293af89  .tmp-tools/twitchdownloader/td.zip' | sha256sum --check --strict
           unzip -o .tmp-tools/twitchdownloader/td.zip -d .tmp-tools/twitchdownloader
           chmod +x .tmp-tools/twitchdownloader/TwitchDownloaderCLI
           echo "TWITCHDOWNLOADER_BIN=$GITHUB_WORKSPACE/.tmp-tools/twitchdownloader/TwitchDownloaderCLI" >> "$GITHUB_ENV"
@@ -80,7 +83,7 @@ jobs:
       - name: Install ffmpeg
         if: ${{ github.event.inputs.skip_segment_transcription != 'true' }}
         timeout-minutes: 5
-        uses: AnimMouse/setup-ffmpeg@v1
+        uses: AnimMouse/setup-ffmpeg@2afa535ca6e6bc550066c82457d987656876d248
 
       - name: Install transcription dependencies
         if: ${{ github.event.inputs.skip_segment_transcription != 'true' }}
@@ -154,7 +157,7 @@ jobs:
 
       - name: Upload headline diagnostics
         if: ${{ always() && github.event.inputs.skip_segment_transcription != 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: headline-diagnostics-${{ github.run_id }}
           path: headline-diagnostics.txt
@@ -180,6 +183,7 @@ jobs:
           diff_targets=(data/processed_vods.json data/vods.json data/vod_index.json data/vods data/segment-thumbnails)
           automation_branch="automation/update-vods"
           pr_title="Update Twitch VOD data"
+          pr_body="Automated VOD data refresh. The update is merged only after the required public-readiness check passes."
 
           if git diff --quiet -- "${diff_targets[@]}"; then
             echo "No data changes to publish."
@@ -199,140 +203,25 @@ jobs:
             fi
 
             head_sha="$(git rev-parse HEAD)"
+            expected_main_sha="$(git rev-parse origin/main)"
             git push --force origin "HEAD:refs/heads/$automation_branch"
 
-            pr_number="$(
-              gh pr list \
-                --head "$automation_branch" \
-                --base main \
-                --state open \
-                --limit 1 \
-                --json number \
-                --jq '.[0].number // empty'
-            )"
-
-            if [[ -z "$pr_number" ]]; then
-              pr_url="$(
-                gh pr create \
-                  --base main \
-                  --head "$automation_branch" \
-                  --title "$pr_title" \
-                  --body "Automated VOD data refresh. The update is merged only after the required public-readiness check passes."
-              )"
-              pr_number="${pr_url##*/}"
+            if python .github/scripts/checked_pr_merge.py \
+              --branch "$automation_branch" \
+              --head-sha "$head_sha" \
+              --title "$pr_title" \
+              --body "$pr_body" \
+              --expected-base-sha "$expected_main_sha" \
+              --merge-attempts 6; then
+              exit 0
+            else
+              status=$?
             fi
 
-            gh workflow run repo-launch-doctor.yml --ref "$automation_branch"
-
-            readiness_run_id=""
-            for _ in $(seq 1 60); do
-              readiness_run_id="$(
-                gh run list \
-                  --workflow repo-launch-doctor.yml \
-                  --branch "$automation_branch" \
-                  --event workflow_dispatch \
-                  --commit "$head_sha" \
-                  --limit 1 \
-                  --json databaseId \
-                  --jq '.[0].databaseId // empty'
-              )"
-              if [[ -n "$readiness_run_id" ]]; then
-                break
-              fi
-              sleep 5
-            done
-
-            if [[ -z "$readiness_run_id" ]]; then
-              echo "Timed out waiting for public-readiness to start for $head_sha." >&2
-              exit 1
+            if [[ "$status" -ne 75 ]]; then
+              exit "$status"
             fi
-
-            gh run watch "$readiness_run_id" --compact --exit-status
-
-            checked_sha="$(gh run view "$readiness_run_id" --json headSha --jq '.headSha')"
-            if [[ "$checked_sha" != "$head_sha" ]]; then
-              echo "public-readiness checked $checked_sha instead of $head_sha." >&2
-              exit 1
-            fi
-
-            required_pr_workflows=("Frontend CI" "Repository hygiene" "Repo Launch Doctor")
-            declare -A pr_run_ids=()
-            for _ in $(seq 1 60); do
-              runs_json="$(
-                gh run list \
-                  --repo "$GITHUB_REPOSITORY" \
-                  --commit "$head_sha" \
-                  --event pull_request \
-                  --limit 50 \
-                  --json databaseId,workflowName,status,conclusion
-              )"
-
-              for workflow_name in "${required_pr_workflows[@]}"; do
-                run_id="$(
-                  jq -r \
-                    --arg workflow_name "$workflow_name" \
-                    '[.[] | select(.workflowName == $workflow_name)] | sort_by(.databaseId) | last | .databaseId // empty' \
-                    <<<"$runs_json"
-                )"
-                if [[ -n "$run_id" ]]; then
-                  pr_run_ids["$workflow_name"]="$run_id"
-                fi
-              done
-
-              if [[ "${#pr_run_ids[@]}" -eq "${#required_pr_workflows[@]}" ]]; then
-                break
-              fi
-              sleep 5
-            done
-
-            if [[ "${#pr_run_ids[@]}" -ne "${#required_pr_workflows[@]}" ]]; then
-              echo "Timed out waiting for pull-request checks for $head_sha." >&2
-              exit 1
-            fi
-
-            for workflow_name in "${required_pr_workflows[@]}"; do
-              run_id="${pr_run_ids[$workflow_name]}"
-              conclusion="$(gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --json conclusion --jq '.conclusion // ""')"
-              if [[ "$conclusion" == "action_required" ]]; then
-                gh api \
-                  --method POST \
-                  "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/approve"
-              fi
-            done
-
-            for workflow_name in "${required_pr_workflows[@]}"; do
-              run_id="${pr_run_ids[$workflow_name]}"
-              gh run watch "$run_id" \
-                --repo "$GITHUB_REPOSITORY" \
-                --compact \
-                --exit-status
-            done
-
-            current_pr_sha="$(gh pr view "$pr_number" --json headRefOid --jq '.headRefOid')"
-            if [[ "$current_pr_sha" != "$head_sha" ]]; then
-              echo "Pull request head moved from $head_sha to $current_pr_sha; retrying." >&2
-              continue
-            fi
-
-            expected_main_sha="$(git rev-parse HEAD^)"
-
-            for merge_attempt in 1 2 3 4 5 6; do
-              current_main_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
-              if [[ "$current_main_sha" != "$expected_main_sha" ]]; then
-                echo "main advanced from $expected_main_sha to $current_main_sha; rebasing and rechecking."
-                break
-              fi
-
-              if gh pr merge "$pr_number" --squash --delete-branch --match-head-commit "$head_sha"; then
-                echo "Merged automated VOD update PR #$pr_number."
-                exit 0
-              fi
-
-              echo "Merge attempt $merge_attempt for PR #$pr_number was not accepted yet; retrying."
-              sleep 10
-            done
-
-            echo "Publish attempt $publish_attempt did not merge; retrying from current main."
+            echo "Publish attempt $publish_attempt needs a rebase; retrying from current main."
           done
 
           echo "Unable to merge the automated VOD update after 3 checked attempts." >&2

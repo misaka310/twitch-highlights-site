@@ -15,10 +15,6 @@ if ! command -v node >/dev/null 2>&1; then
   echo "error: Node.js 20 or later is required for build_public.sh"
   exit 2
 fi
-if ! command -v npm >/dev/null 2>&1; then
-  echo "error: npm is required for build_public.sh"
-  exit 2
-fi
 if [ ! -d node_modules ] || [ ! -d frontend/node_modules ]; then
   echo "error: dependencies are not installed; run npm run setup first"
   exit 2
@@ -39,7 +35,11 @@ dst.write_text(text, encoding="utf-8")
 PY
 }
 
-npm run build --prefix frontend
+(
+  cd frontend
+  node node_modules/typescript/bin/tsc -b
+  node node_modules/vite/bin/vite.js build
+)
 
 rm -rf public
 mkdir -p public/data
@@ -62,6 +62,7 @@ if [ -d data/segment-thumbnails ]; then
 fi
 
 node scripts/export-site-config.mjs public/site-config.json
+"${PYTHON_BIN}" scripts/apply_site_metadata.py public/index.html public/site-config.json
 
 "${PYTHON_BIN}" - <<'PY'
 import json

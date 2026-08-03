@@ -33,6 +33,12 @@ export default function App() {
   }, [data]);
 
   useEffect(() => {
+    if (!data || data.requestedPage !== page || data.page === page) return;
+    history.replaceState({}, "", pageUrl(location.href, data.page));
+    setPageState(data.page);
+  }, [data, page]);
+
+  useEffect(() => {
     const firstVod = data?.vods[0];
     const firstSegment = firstVod?.items?.[0];
     if (!firstVod || !playerRef.current) return;
@@ -114,11 +120,19 @@ export default function App() {
     );
   }
 
-  if (!data || !activeVod) {
+  if (!data) {
     return <main className="loading-state">読み込み中...</main>;
   }
 
-  const siteName = String(data.siteConfig.site?.name || "dotitao moments").trim();
+  if (!activeVod) {
+    return (
+      <main className="preview-shell preview-shell--empty">
+        <Empty title="表示データがありません" description="公開中のVODデータがまだありません。" />
+      </main>
+    );
+  }
+
+  const siteName = String(data.siteConfig.site?.name || "Twitch Highlights").trim();
 
   return (
     <div className="preview-shell">

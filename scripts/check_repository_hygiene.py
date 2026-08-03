@@ -3,6 +3,7 @@ from __future__ import annotations
 import fnmatch
 import subprocess
 import sys
+from pathlib import Path
 
 
 FORBIDDEN_EXACT = {
@@ -29,6 +30,21 @@ FORBIDDEN_GLOBS = (
 )
 
 
+FORBIDDEN_LOCAL_PATHS = (
+    Path("="),
+    Path("frontend") / "=",
+)
+
+
+def find_local_output_violations(root: Path = Path(".")) -> list[str]:
+    violations: list[str] = []
+    for relative_path in FORBIDDEN_LOCAL_PATHS:
+        if (root / relative_path).exists():
+            normalized = relative_path.as_posix()
+            violations.append(f"{normalized}: accidental npm cache argument directory must be removed")
+    return violations
+
+
 def tracked_paths() -> list[str]:
     result = subprocess.run(
         ["git", "ls-files", "-z"],
@@ -39,7 +55,7 @@ def tracked_paths() -> list[str]:
 
 
 def main() -> int:
-    violations: list[str] = []
+    violations = find_local_output_violations()
     for path in tracked_paths():
         normalized = path.replace("\\", "/")
         if normalized in FORBIDDEN_EXACT:
