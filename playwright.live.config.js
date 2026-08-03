@@ -1,6 +1,12 @@
 const { defineConfig, devices } = require("@playwright/test");
+const fs = require("fs");
+const path = require("path");
 
-const LIVE_BASE_URL = process.env.LIVE_BASE_URL || "https://dotitao-moments.onrender.com";
+const siteConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "config/site.json"), "utf8"));
+const LIVE_BASE_URL = process.env.LIVE_BASE_URL || String(siteConfig.site?.base_url || "").trim();
+if (!LIVE_BASE_URL) {
+  throw new Error("LIVE_BASE_URL or config/site.json site.base_url is required");
+}
 
 module.exports = defineConfig({
   testDir: "./tests",

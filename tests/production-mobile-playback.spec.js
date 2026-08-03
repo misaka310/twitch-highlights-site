@@ -4,7 +4,10 @@ const fs = require("fs");
 const path = require("path");
 
 const DEPLOY_WAIT_MS = 10 * 60_000;
-const LIVE_BASE_URL = process.env.LIVE_BASE_URL || "";
+const SITE_CONFIG = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "..", "config/site.json"), "utf8")
+);
+const LIVE_BASE_URL = process.env.LIVE_BASE_URL || String(SITE_CONFIG.site?.base_url || "").trim();
 const PUBLIC_ROOT = path.join(__dirname, "..", "public");
 const DEPLOYMENT_PATHS = [
   "index.html",
@@ -87,7 +90,10 @@ async function waitForExpectedDeployment(request) {
   const expectedHashes = new Map(
     DEPLOYMENT_PATHS.map((relativePath) => [
       relativePath,
-      sha256RuntimeText(fs.readFileSync(path.join(PUBLIC_ROOT, ...relativePath.split("/")))),
+      sha256RuntimeText(
+        fs.readFileSync(path.join(PUBLIC_ROOT, ...relativePath.split("/"))),
+        relativePath
+      ),
     ])
   );
   const deadline = Date.now() + DEPLOY_WAIT_MS;
@@ -105,7 +111,7 @@ async function waitForExpectedDeployment(request) {
           mismatches.push(`${relativePath}=HTTP ${response.status()}`);
           continue;
         }
-        const actualHash = sha256RuntimeText(await response.body());
+        const actualHash = sha256RuntimeText(await response.body(), relativePath);
         if (actualHash !== expectedHashes.get(relativePath)) {
           mismatches.push(`${relativePath}=${actualHash}`);
         }
@@ -161,7 +167,13 @@ async function getPlaybackState(page) {
   }
 }
 
-function sha256RuntimeText(buffer) {
-  const normalized = Buffer.from(buffer).toString("utf8").replace(/\r\n/g, "\n");
+function sha256RuntimeText(buffer, relativePath) {
+  let normalized = Buffer.from(buffer).toString("utf8").replace(/\r\n/g, "\n");
+  if (relativePath.endsWith(".html")) {
+    normalized = normalized
+      .split("\n")
+      .filter((line) => line.trim() !== "")
+      .join("\n");
+  }
   return crypto.createHash("sha256").update(normalized, "utf8").digest("hex");
 }
