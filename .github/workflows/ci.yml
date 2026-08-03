@@ -115,6 +115,7 @@ jobs:
           parent_sha="$(git ls-remote origin "refs/heads/$verification_branch" | awk '{print $1}')"
 
           if [[ -n "$parent_sha" ]]; then
+            git fetch --no-tags --depth=1 origin "refs/heads/$verification_branch"
             marker_commit="$(printf 'Record successful production verification for %s\n' "$GITHUB_SHA" | git commit-tree "$tree_sha" -p "$parent_sha")"
           else
             marker_commit="$(printf 'Record successful production verification for %s\n' "$GITHUB_SHA" | git commit-tree "$tree_sha")"
