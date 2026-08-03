@@ -10,6 +10,11 @@ from collections.abc import Iterable, Mapping, Sequence
 
 
 REQUIRED_PR_WORKFLOWS = ("Frontend CI", "Repository hygiene", "Repo Launch Doctor")
+REQUIRED_DISPATCH_WORKFLOWS = (
+    ("Frontend CI", "ci.yml"),
+    ("Repository hygiene", "repository-hygiene.yml"),
+    ("Repo Launch Doctor", "repo-launch-doctor.yml"),
+)
 RETRY_EXIT_CODE = 75
 
 
@@ -134,6 +139,66 @@ def _wait_for_readiness(repo: str, branch: str, head_sha: str, attempts: int, in
         raise RuntimeError(f"public-readiness checked {checked_sha} instead of {head_sha}")
 
 
+def _list_dispatched_run_ids(repo: str, branch: str, head_sha: str, workflow_file: str) -> set[int]:
+    runs = _json(
+        [
+            "gh",
+            "run",
+            "list",
+            "--repo",
+            repo,
+            "--workflow",
+            workflow_file,
+            "--branch",
+            branch,
+            "--event",
+            "workflow_dispatch",
+            "--commit",
+            head_sha,
+            "--limit",
+            "20",
+            "--json",
+            "databaseId",
+        ]
+    )
+    if not isinstance(runs, list):
+        return set()
+    return {int(run["databaseId"]) for run in runs if isinstance(run, Mapping) and run.get("databaseId") is not None}
+
+
+def _wait_for_dispatched_workflows(
+    repo: str,
+    branch: str,
+    head_sha: str,
+    attempts: int,
+    interval_sec: float,
+) -> None:
+    run_ids: dict[str, int] = {}
+    for workflow_name, workflow_file in REQUIRED_DISPATCH_WORKFLOWS:
+        existing_ids = _list_dispatched_run_ids(repo, branch, head_sha, workflow_file)
+        _run(["gh", "workflow", "run", workflow_file, "--repo", repo, "--ref", branch])
+
+        def find_new_run_id() -> int | None:
+            new_ids = _list_dispatched_run_ids(repo, branch, head_sha, workflow_file) - existing_ids
+            return max(new_ids) if new_ids else None
+
+        run_ids[workflow_name] = _wait_for_value(
+            f"dispatched {workflow_name} workflow for {head_sha}",
+            find_new_run_id,
+            attempts=attempts,
+            interval_sec=interval_sec,
+        )
+
+    for workflow_name, _workflow_file in REQUIRED_DISPATCH_WORKFLOWS:
+        run_id = run_ids[workflow_name]
+        _run(["gh", "run", "watch", str(run_id), "--repo", repo, "--compact", "--exit-status"])
+        checked_sha = _stdout(
+            ["gh", "run", "view", str(run_id), "--repo", repo, "--json", "headSha", "--jq", ".headSha"]
+        )
+        if checked_sha != head_sha:
+            raise RuntimeError(f"{workflow_name} checked {checked_sha} instead of {head_sha}")
+
+
 def _wait_for_required_pr_workflows(repo: str, head_sha: str, attempts: int, interval_sec: float) -> None:
     def find_runs() -> dict[str, int] | None:
         runs = _json(
@@ -209,8 +274,17 @@ def publish_checked_pull_request(args: argparse.Namespace) -> int:
         raise RuntimeError("repository is required through --repo or GITHUB_REPOSITORY")
 
     pr_number = _ensure_pull_request(repo, args.branch, args.base, args.title, args.body)
-    _wait_for_readiness(repo, args.branch, args.head_sha, args.wait_attempts, args.poll_interval_sec)
-    _wait_for_required_pr_workflows(repo, args.head_sha, args.wait_attempts, args.poll_interval_sec)
+    if args.workflow_mode == "trusted-dispatch":
+        _wait_for_dispatched_workflows(
+            repo,
+            args.branch,
+            args.head_sha,
+            args.wait_attempts,
+            args.poll_interval_sec,
+        )
+    else:
+        _wait_for_readiness(repo, args.branch, args.head_sha, args.wait_attempts, args.poll_interval_sec)
+        _wait_for_required_pr_workflows(repo, args.head_sha, args.wait_attempts, args.poll_interval_sec)
 
     current_pr_sha = _stdout(
         ["gh", "pr", "view", str(pr_number), "--repo", repo, "--json", "headRefOid", "--jq", ".headRefOid"]
@@ -259,6 +333,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--title", required=True)
     parser.add_argument("--body", required=True)
     parser.add_argument("--expected-base-sha", default="")
+    parser.add_argument(
+        "--workflow-mode",
+        choices=("pull-request", "trusted-dispatch"),
+        default="pull-request",
+    )
     parser.add_argument("--wait-attempts", type=int, default=60)
     parser.add_argument("--poll-interval-sec", type=float, default=5.0)
     parser.add_argument("--merge-attempts", type=int, default=12)
