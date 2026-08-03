@@ -212,6 +212,7 @@ jobs:
               --title "$pr_title" \
               --body "$pr_body" \
               --expected-base-sha "$expected_main_sha" \
+              --workflow-mode trusted-dispatch \
               --merge-attempts 6; then
               exit 0
             else

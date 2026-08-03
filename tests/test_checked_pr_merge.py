@@ -6,7 +6,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / ".github" / "scripts"))
 
-from checked_pr_merge import REQUIRED_PR_WORKFLOWS, select_latest_workflow_run_ids  # noqa: E402
+from checked_pr_merge import (  # noqa: E402
+    REQUIRED_DISPATCH_WORKFLOWS,
+    REQUIRED_PR_WORKFLOWS,
+    build_parser,
+    select_latest_workflow_run_ids,
+)
 
 
 class CheckedPullRequestMergeTests(unittest.TestCase):
@@ -30,6 +35,41 @@ class CheckedPullRequestMergeTests(unittest.TestCase):
             },
         )
         self.assertEqual(tuple(selected), REQUIRED_PR_WORKFLOWS)
+
+    def test_trusted_dispatch_mode_has_explicit_workflow_files(self):
+        self.assertEqual(
+            REQUIRED_DISPATCH_WORKFLOWS,
+            (
+                ("Frontend CI", "ci.yml"),
+                ("Repository hygiene", "repository-hygiene.yml"),
+                ("Repo Launch Doctor", "repo-launch-doctor.yml"),
+            ),
+        )
+        parsed = build_parser().parse_args(
+            [
+                "--branch",
+                "automation/update-vods",
+                "--head-sha",
+                "abc",
+                "--title",
+                "title",
+                "--body",
+                "body",
+                "--workflow-mode",
+                "trusted-dispatch",
+            ]
+        )
+        self.assertEqual(parsed.workflow_mode, "trusted-dispatch")
+
+    def test_trusted_automation_workflows_are_dispatchable_without_live_checks(self):
+        ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        hygiene = (ROOT / ".github" / "workflows" / "repository-hygiene.yml").read_text(encoding="utf-8")
+        update = (ROOT / ".github" / "workflows" / "update-vods.yml").read_text(encoding="utf-8")
+
+        self.assertIn("run_live:", ci)
+        self.assertIn("inputs.run_live == true", ci)
+        self.assertIn("workflow_dispatch:", hygiene)
+        self.assertIn("--workflow-mode trusted-dispatch", update)
 
     def test_release_and_update_workflows_delegate_checked_merge(self):
         script_reference = "python .github/scripts/checked_pr_merge.py"
