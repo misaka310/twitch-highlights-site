@@ -101,7 +101,7 @@ npm run setup
 npm run verify
 ```
 
-Twitch実サービスとデプロイ済みRenderを確認する場合は、通常ゲート成功後に`npm run verify:live`を実行します。
+Twitch実サービスとデプロイ済みRenderを確認する場合は、通常ゲート成功後に`npm run verify:live`を実行します。対象URLは`config/site.json`の`site.base_url`を正本とし、別環境を確認する場合だけ`LIVE_BASE_URL`で上書きします。
 
 フロントE2EはTwitch SDK互換の偽プレイヤーを使い、初期再生方針、音声付きクリック再生、同一VODのseek、別VOD切替、last-click-wins、10秒戻る、PC・スマホ表示を外部通信なしで検証します。
 
