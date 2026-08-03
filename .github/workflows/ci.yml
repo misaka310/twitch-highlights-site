@@ -6,6 +6,12 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+    inputs:
+      run_live:
+        description: Run real Twitch and deployed production verification
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: frontend-ci-${{ github.workflow }}-${{ github.ref }}
@@ -63,7 +69,7 @@ jobs:
           if-no-files-found: ignore
 
   production-mobile-playback:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_live == true)
     needs: verification
     runs-on: ubuntu-latest
     timeout-minutes: 30
