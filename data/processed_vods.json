@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-03T12:03:10+09:00",
+  "updated_at": "2026-08-03T12:25:58+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -41,7 +41,7 @@
           "start_time": "07:41:30",
           "end_time": "07:43:10",
           "reason": "Chat activity spike around 7h41m30s (z-score=8.368).",
-          "headline": "謎の樹を「歯磨き」と呼ぶ",
+          "headline": "歯磨き」と呼ぶ謎の木",
           "tags": [
             "好プレー",
             "ホラー"
@@ -58,7 +58,7 @@
           "start_time": "06:08:30",
           "end_time": "06:09:40",
           "reason": "Chat activity spike around 6h8m30s (z-score=6.948).",
-          "headline": "めっちゃ上手だったと称賛",
+          "headline": "メッチャ上手だったね",
           "tags": [
             "好プレー",
             "えっ"
@@ -175,7 +175,7 @@
           "start_time": "02:32:40",
           "end_time": "02:35:00",
           "reason": "Chat activity spike around 2h32m40s (z-score=5.616).",
-          "headline": "味方が復活してデスループ中",
+          "headline": "味方が復活、デスループ状態",
           "tags": [
             "ww",
             "好プレー",
@@ -193,7 +193,7 @@
           "start_time": "01:23:00",
           "end_time": "01:24:00",
           "reason": "Chat activity spike around 1h23m0s (z-score=7.198).",
-          "headline": "遠距離戦で苦戦する模様",
+          "headline": "遠距離戦で激アツの事態",
           "tags": [
             "ww"
           ],
@@ -209,7 +209,7 @@
           "start_time": "00:20:30",
           "end_time": "00:21:50",
           "reason": "Chat activity spike around 0h20m30s (z-score=6.407).",
-          "headline": "ハンマー弱く、やられるのは一瞬",
+          "headline": "ハンマーが弱いと指摘",
           "tags": [
             "あ",
             "好プレー"
