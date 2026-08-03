@@ -13,7 +13,7 @@ export default defineConfig({
     trace: "off",
   },
   webServer: {
-    command: "npm run dev",
+    command: "node node_modules/vite/bin/vite.js --host localhost --port 4174 --strictPort",
     url: "http://localhost:4174",
     reuseExistingServer: true,
     timeout: 30_000,

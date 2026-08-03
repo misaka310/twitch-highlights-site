@@ -1,5 +1,4 @@
 # Dependencies and generated output
-=/
 node_modules/
 public/
 frontend/.unit-test-dist/

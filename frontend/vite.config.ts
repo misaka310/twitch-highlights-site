@@ -78,6 +78,16 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/@cloudflare/kumo")) return "kumo";
+          if (id.includes("node_modules/@phosphor-icons")) return "icons";
+          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) return "react-vendor";
+          return undefined;
+        },
+      },
+    },
   },
   server: {
     host: "localhost",

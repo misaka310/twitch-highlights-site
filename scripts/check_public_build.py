@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import json
 from pathlib import Path
 from typing import Any
@@ -97,6 +98,35 @@ def check_site_config() -> None:
             fail(f"site-config.json exposes an internal key: {key_path}")
 
 
+def check_static_metadata() -> None:
+    index_html = (PUBLIC / "index.html").read_text(encoding="utf-8")
+    site_config = read_json(PUBLIC / "site-config.json")
+    site = site_config.get("site") if isinstance(site_config, dict) else {}
+    site = site if isinstance(site, dict) else {}
+
+    if "__SITE_" in index_html:
+        fail("index.html still contains unresolved site metadata placeholders")
+
+    name = html.escape(str(site.get("name") or "Twitch Highlights").strip(), quote=True)
+    description = html.escape(
+        str(site.get("description") or "Twitch VODのコメント量から見どころを表示する非公式サイトです。").strip(),
+        quote=True,
+    )
+    language = html.escape(str(site.get("language") or "ja").strip(), quote=True)
+    base_url = html.escape(str(site.get("base_url") or "").strip().rstrip("/"), quote=True)
+    required_fragments = (
+        f'<html lang="{language}"',
+        f'<title>{name}</title>',
+        f'<meta name="description" content="{description}"',
+        f'<meta property="og:title" content="{name}"',
+        f'<meta property="og:description" content="{description}"',
+        f'<meta property="og:url" content="{base_url}"',
+    )
+    missing = [fragment for fragment in required_fragments if fragment not in index_html]
+    if missing:
+        fail(f"index.html metadata does not match site-config.json: {missing}")
+
+
 def check_thumbnail_references() -> None:
     details_dir = PUBLIC / "data" / "vods"
     if not details_dir.is_dir():
@@ -128,6 +158,7 @@ def main() -> None:
     check_required_files()
     check_public_json_matches_sources()
     check_site_config()
+    check_static_metadata()
     check_thumbnail_references()
     check_render_target()
     print("public build check passed")

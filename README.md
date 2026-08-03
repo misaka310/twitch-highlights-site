@@ -28,7 +28,7 @@ Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい�
 
 ```text
 frontend/                    React + TypeScript + Vite + Cloudflare Kumoの公開UI
-scripts/                     VOD更新、集計、見出し生成、公開ビルド
+scripts/                     VOD更新、集計、見出し生成、公開ビルド（責務別moduleを含む）
 data/                        公開可能な集計データとサムネイル
 config/site.json             現在の公開インスタンスのサイト基本設定
 config/tag-rules.json        現在のチャンネル固有の追加タグ規則
@@ -74,6 +74,17 @@ npm start
 ```
 
 `http://localhost:4174/`を開きます。開発サーバーはリポジトリの`data/`を`/data/`として読み取り専用で配信します。
+
+## VOD更新・文字起こしのローカル準備
+
+公開画面だけを確認する場合、この追加準備は不要です。VOD更新、Whisper文字起こし、Groq見出し生成、場面サムネイル生成をローカルで実行する場合は、Python 3.11、FFmpeg、TwitchDownloaderCLI 1.56.4を用意し、次を実行します。
+
+```powershell
+python -m pip install -r requirements-transcribe.txt
+Copy-Item .env.example .env
+```
+
+`.env`へTwitch API資格情報を設定します。Groqを使う場合だけ`GROQ_API_KEY`も設定します。依存バージョンとGitHub Actions上のTwitchDownloaderCLIアーカイブは固定・検証されています。
 
 ## 公開ビルド
 
