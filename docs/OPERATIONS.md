@@ -24,6 +24,8 @@ Twitchプレイヤーまたは公開経路へ影響する変更は、通常ゲ�
 npm run verify:live
 ```
 
+本番URLは`config/site.json`の`site.base_url`から解決し、`LIVE_BASE_URL`が指定された場合だけ上書きする。HTMLは配信基盤が除去する空行を無視して照合し、JavaScript・CSS・設定ファイルは内容hashを一致させる。検証対象URLが空の場合はskipせず設定エラーとして失敗させる。
+
 ## 公開フロー
 
 1. `main` から `release/**` ブランチを作る。

@@ -138,6 +138,18 @@ class RepositoryArchitectureTests(unittest.TestCase):
             [{"tag": "つべ", "patterns": ["つべ"]}],
         )
 
+    def test_live_production_verification_uses_instance_config_and_html_tolerant_hashing(self):
+        spec = (ROOT / "tests" / "production-mobile-playback.spec.js").read_text(encoding="utf-8")
+        config = (ROOT / "playwright.live.config.js").read_text(encoding="utf-8")
+
+        self.assertIn("config/site.json", spec)
+        self.assertIn("SITE_CONFIG.site?.base_url", spec)
+        self.assertNotIn('process.env.LIVE_BASE_URL || ""', spec)
+        self.assertIn('relativePath.endsWith(".html")', spec)
+        self.assertIn('filter((line) => line.trim() !== "")', spec)
+        self.assertIn("config/site.json", config)
+        self.assertNotIn("dotitao-moments.onrender.com", config)
+
     def test_production_frontend_has_no_legacy_site_dependency(self):
         production_paths = (
             ROOT / "frontend" / "vite.config.ts",
