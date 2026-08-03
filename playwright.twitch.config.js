@@ -17,7 +17,7 @@ module.exports = defineConfig({
     screenshot: "only-on-failure",
   },
   webServer: {
-    command: "node frontend/node_modules/vite/bin/vite.js --host localhost --port 18078",
+    command: "node frontend/node_modules/vite/bin/vite.js frontend --host localhost --port 18078 --strictPort",
     url: TEST_BASE_URL,
     reuseExistingServer: true,
     timeout: 30_000,
