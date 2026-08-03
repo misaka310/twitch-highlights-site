@@ -47,6 +47,7 @@ export type RuntimeSiteConfig = {
     name?: string;
     description?: string;
     base_url?: string;
+    language?: string;
     analytics?: {
       goatcounter_code?: string;
     };
@@ -57,6 +58,8 @@ export type RuntimeSiteConfig = {
 };
 
 export type VodPageData = {
+  requestedPage: number;
+  page: number;
   updatedAt: string;
   nextUpdateAt: string;
   vods: VodData[];

@@ -9,7 +9,9 @@ class PublicBuildTests(unittest.TestCase):
     def test_build_script_uses_installed_react_frontend_and_whitelists_public_data(self):
         script = (ROOT / "scripts" / "build_public.sh").read_text(encoding="utf-8")
         self.assertIn("run npm run setup first", script)
-        self.assertIn("npm run build --prefix frontend", script)
+        self.assertIn("node node_modules/typescript/bin/tsc -b", script)
+        self.assertIn("node node_modules/vite/bin/vite.js build", script)
+        self.assertNotIn("npm run build --prefix frontend", script)
         self.assertNotIn("npm ci --prefix frontend", script)
         self.assertIn("cp -R frontend/dist/. public/", script)
         self.assertNotIn("site/favicon.svg", script)

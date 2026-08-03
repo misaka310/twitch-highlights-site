@@ -45,7 +45,11 @@
 - `scripts/transcription/orchestration.py`
   - 対象収集、dry-run停止、first pass、second pass、見出し生成、保存、summaryの実行順序。外部処理は`PipelineSteps`境界から呼ぶ。
 - `scripts/transcribe_segments.py`
-  - entry pointと既存処理の互換facade。`.env`読込、runtime設定適用、辞書・headline context再構築を行い、各処理をorchestratorへ接続する。
+  - entry pointと互換facade。実行開始時だけ`.env`を読み、runtime設定を適用して各処理をorchestratorへ接続する。import時にはprocess environmentを変更しない。
+- `scripts/headline_source_selection.py`
+  - source文の正規化、辞書語照合、文候補の評価・選定の正本。
+- `scripts/headline_candidate_selection.py`
+  - 見出し候補の検証、比較、順位付け、決定的fallbackの正本。provider通信やpipeline順序を持たない。
 - `scripts/headline_pipeline.py`
   - source品質penalty、generation strategy、skip判断を含む純粋な見出し品質判断。
 - `scripts/headline_scoring.py`
@@ -67,12 +71,20 @@
 1. `scripts/build_public.sh` が `frontend/` をTypeScript・Viteでビルドする。
 2. `public/` を再作成し、Viteバンドルを配置する。
 3. 公開可能な `data/vod_index.json`、`data/vods.json`、個別VOD JSON、見どころサムネイルをコピーする。
-4. `config/site.json` から `public/site-config.json` を生成する。
-5. Vite bundleに含まれる `frontend/public/favicon.svg` をそのまま配信生成物へ含める。
-6. robots.txtとsitemap.xmlを生成する。
-7. Renderは `public/` を静的配信する。
+4. `config/site.json` と環境変数から `public/site-config.json` を生成する。
+5. `scripts/apply_site_metadata.py` が同じ設定からtitle、description、OG、language、公開URLを`public/index.html`へ埋め込む。
+6. Vite bundleに含まれる `frontend/public/favicon.svg` をそのまま配信生成物へ含める。
+7. robots.txtとsitemap.xmlを生成する。
+8. Renderは `public/` を静的配信する。
 
-`config/tag-rules.json`はコメント解析時だけ読み込み、公開用`site-config.json`には含めない。`scripts/update_vods.py`はコード内の共通タグ規則と、専用ローダーが返すチャンネル固有の追加規則を結合する。
+`config/tag-rules.json`はコメント解析時だけ読み込み、公開用`site-config.json`には含めない。VOD更新は次の責務へ分ける。
+
+- `scripts/update_vods.py`: CLI、通常更新・backfillの実行順序、取得・解析・保存の接続。`.env`は実行開始時だけ読む。
+- `scripts/vod_sources.py`: Twitch Helix/GQL/TwitchMetrics、TwitchDownloaderCLIの取得境界とfallback。
+- `scripts/vod_highlights.py`: コメント量集計、z-score区間検出、ランキング、タグ分類、活動マップ。
+- `scripts/vod_serialization.py`: 公開フィールドのwhitelist、JSON整形、保持期間、サムネイル整合性。
+
+共通タグ規則と`config/tag-rules.json`のチャンネル固有規則は`vod_highlights.py`で結合する。
 
 ## データ読込
 
