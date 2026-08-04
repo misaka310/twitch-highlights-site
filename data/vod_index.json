@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-03T12:25:58+09:00",
-  "next_update_at": "2026-08-04T00:00:00+00:00",
+  "updated_at": "2026-08-04T11:03:49+09:00",
+  "next_update_at": "2026-08-05T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "2834998317",
@@ -553,18 +553,6 @@
       "chat_total": 9536,
       "comments_per_hour": 987.533,
       "detail_path": "/data/vods/2789203859.json"
-    },
-    {
-      "vod_id": "2788405822",
-      "vod_url": "https://www.twitch.tv/videos/2788405822",
-      "title": "弾き欲からは逃れられない【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-06-04T22:17:13+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/2eef80f5a22b87ea8f21_dotitao_316048502131_1780579028//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2201,
-      "comments_per_hour": 668.884,
-      "detail_path": "/data/vods/2788405822.json"
     }
   ]
 }
