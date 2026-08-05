@@ -11,6 +11,12 @@ Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい�
 
 このリポジトリに含まれる`config/site.json`は、現在の公開サイト`dotitao moments`用のサイト基本設定です。`config/tag-rules.json`は、現在のチャンネルにだけ追加するタグ規則です。汎用ロジック自体は特定の配信者名を前提にしません。
 
+<p align="center">
+  <img src="docs/images/system-overview.png" alt="Twitch Highlights Siteの処理フロー概要" width="100%">
+</p>
+
+VODのコメント量から見どころを抽出し、閲覧用の静的サイトとして公開するまでの流れを示しています。
+
 ## 主な機能
 
 - Twitch VOD一覧の取得
