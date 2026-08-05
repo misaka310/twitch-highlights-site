@@ -1,0 +1,11 @@
+Create an extremely clear technical workflow diagram for a GitHub README, exactly 1536x1024, 3:2 landscape, white background, dark navy text, restrained purple, blue, and teal accents, very large rounded cards, large Japanese labels, no logos, no watermark, no decorative clutter. Title: 「Twitch Highlights Site のしくみ」. Use one main horizontal pipeline and one compact optional-enrichment row. No crossed arrows, no arrows aimed at section borders, no tiny text.
+
+MAIN PIPELINE, solid arrows, left to right:
+「Twitch VOD一覧」 → 「コメント数を時系列で集計」 → 「変化が大きい区間を抽出」 → 「見どころデータ」 → 「React 静的サイト」 → 「Render で公開」.
+
+Inside the large 「React 静的サイト」 card, include exactly three large feature labels on separate lines: 「見どころを1クリック再生」, 「盛り上がりマップ」, 「VOD内をseek」. Do not draw these features as outputs from Render. Render only receives one solid arrow from the React site.
+
+OPTIONAL ENRICHMENT ROW, dashed arrows into the single card 「見どころデータ」:
+Three separate cards, each with its own dashed arrow: 「Groqで見出し生成（任意）」, 「Whisperで文字起こし（任意）」, 「サムネイル生成（任意）」. Do not combine Whisper and thumbnail generation into one card.
+
+Add one prominent privacy note card below the comment aggregation stage: 「コメント原文は保存・公開しない　公開するのは集計済みデータだけ」. Do not include GitHub Actions or any other automation lane. All labels must remain comfortably readable at 750px display width. Use no additional nodes or explanatory text.
