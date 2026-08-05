@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-04T11:03:49+09:00",
-  "next_update_at": "2026-08-05T00:00:00+00:00",
+  "updated_at": "2026-08-05T11:02:38+09:00",
+  "next_update_at": "2026-08-06T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2836977922",
+      "vod_url": "https://www.twitch.tv/videos/2836977922",
+      "title": "【本日発売】弾き欲、それは三大欲求の頂点にあり【Beast of Reincarnation】※ネタバレあり",
+      "published_at": "2026-08-04T21:57:01+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/139dea3942fcdef898fb_dotitao_316270168306_1785848216//thumb/thumb0-320x180.jpg",
+      "duration_sec": 14884,
+      "count": 3,
+      "chat_total": 2482,
+      "comments_per_hour": 600.322,
+      "detail_path": "/data/vods/2836977922.json"
+    },
     {
       "vod_id": "2834998317",
       "vod_url": "https://www.twitch.tv/videos/2834998317",
@@ -32,7 +44,7 @@
       "title": "【朝活】爽やかな朝の擬人化のようだとよく言われる女の朝雑",
       "published_at": "2026-07-31T08:20:18+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/9f8beab908b55d3d4dfe_dotitao_316249856498_1785453613//thumb/thumb0-320x180.jpg",
-      "duration_sec": 8153,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1009,
       "comments_per_hour": 445.529,
@@ -541,18 +553,6 @@
       "chat_total": 4695,
       "comments_per_hour": 1098.531,
       "detail_path": "/data/vods/2790922051.json"
-    },
-    {
-      "vod_id": "2789203859",
-      "vod_url": "https://www.twitch.tv/videos/2789203859",
-      "title": "朝まで弾いて弾いて弾いて参ります【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-06-05T22:25:58+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/21f39a4b81d93865e91f_dotitao_315989713777_1780665953//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 9536,
-      "comments_per_hour": 987.533,
-      "detail_path": "/data/vods/2789203859.json"
     }
   ]
 }
