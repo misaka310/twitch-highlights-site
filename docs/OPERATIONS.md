@@ -41,9 +41,9 @@ PR作成、対象SHAの検証、head SHA確認、squash mergeは`.github/scripts
 
 ## 定期VOD更新
 
-- `.github/workflows/update-vods.yml` を毎日 **09:00 JST** に実行する。
-- GitHub ActionsのcronはUTCなので、正本は `0 0 * * *` とする。
-- GitHub側の混雑により実際の開始が遅れることはあるが、画面の「次回更新予定」は09:00 JSTを表示する。
+- `.github/workflows/update-vods.yml` は毎日 **06:07 JST** に処理を開始し、**09:00 JSTまでの公開反映**を目標とする。
+- GitHub ActionsのcronはUTCなので、正本は `7 21 * * *` とする。毎時0分を避けて開始遅延を抑える。
+- GitHub側の混雑により実際の開始・完了が遅れることはある。画面の「次回更新予定」は処理開始時刻ではなく、公開反映目標の09:00 JSTを表示する。
 - 手動更新は `workflow_dispatch` で `main` を指定する。
 - `data/vods.json` は公開トップ用の最新3件、`data/vod_index.json` は保持期間内の一覧を持つ。
 - 更新データは `automation/update-vods` ブランチとPRを経由し、公開準備チェック成功後にmainへマージする。
