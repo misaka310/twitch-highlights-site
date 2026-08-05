@@ -57,3 +57,10 @@ Twitch実サービスまたはデプロイ済みRenderへ影響する変更は�
 ```text
 npm run verify:live
 ```
+
+## 仕様の正本
+
+- 仕様の正本: `docs/PUBLIC_SITE_SPEC.md`
+- Specification source: `docs/PUBLIC_SITE_SPEC.md`
+- 実装前に意図する仕様を正本へ反映し、仕様変更時は同じ変更で正本と検証を更新する。
+- Specification changes require the source to be updated before implementation and in the same change.

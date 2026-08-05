@@ -306,12 +306,13 @@ class RepositoryArchitectureTests(unittest.TestCase):
         self.assertIn("GoatCounter", privacy)
         self.assertTrue((ROOT / ".env.example").is_file())
 
-    def test_vod_update_cron_matches_displayed_next_update_hour(self):
+    def test_vod_update_starts_before_displayed_update_time(self):
         workflow = (ROOT / ".github" / "workflows" / "update-vods.yml").read_text(encoding="utf-8")
-        self.assertIn('cron: "0 0 * * *"', workflow)
+        self.assertIn('cron: "7 21 * * *"', workflow)
 
         module = ast.parse((ROOT / "scripts" / "update_vods.py").read_text(encoding="utf-8"))
         update_hour = None
+
         for node in module.body:
             if not isinstance(node, ast.Assign):
                 continue
@@ -319,6 +320,7 @@ class RepositoryArchitectureTests(unittest.TestCase):
                 update_hour = ast.literal_eval(node.value)
                 break
         self.assertEqual(update_hour, 9)
+
 
 
 if __name__ == "__main__":

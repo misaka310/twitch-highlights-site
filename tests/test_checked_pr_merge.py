@@ -77,6 +77,7 @@ class CheckedPullRequestMergeTests(unittest.TestCase):
         update = (ROOT / ".github" / "workflows" / "update-vods.yml").read_text(encoding="utf-8")
 
         self.assertIn(script_reference, release)
+        self.assertIn("--workflow-mode trusted-dispatch", release)
         self.assertIn(script_reference, update)
         for workflow in (release, update):
             self.assertNotIn('required_pr_workflows=("Frontend CI"', workflow)
