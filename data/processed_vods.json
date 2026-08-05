@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-05T11:02:38+09:00",
+  "updated_at": "2026-08-06T07:22:07+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -24,7 +24,7 @@
           "start_time": "00:11:10",
           "end_time": "00:12:50",
           "reason": "Chat activity spike around 0h11m10s (z-score=9.355).",
-          "headline": "字幕を大きくして確認",
+          "headline": "字幕拡大ではずきルー_peで观看",
           "tags": [
             "ww",
             "えっ",
@@ -42,7 +42,7 @@
           "start_time": "02:00:10",
           "end_time": "02:01:00",
           "reason": "Chat activity spike around 2h0m10s (z-score=5.783).",
-          "headline": "上から降りて攻撃",
+          "headline": "上空からの攻撃でピザにする",
           "tags": [
             "ww",
             "好プレー"
@@ -59,7 +59,7 @@
           "start_time": "03:05:30",
           "end_time": "03:06:20",
           "reason": "Chat activity spike around 3h5m30s (z-score=4.763).",
-          "headline": "刺してる方向を押すplay",
+          "headline": "刺す方向での押し操作",
           "tags": [
             "ww",
             "ホラー",
