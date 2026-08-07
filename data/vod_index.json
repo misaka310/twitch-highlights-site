@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-07T10:08:20+09:00",
+  "updated_at": "2026-08-08T06:55:09+09:00",
   "next_update_at": "2026-08-08T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2839653459",
+      "vod_url": "https://www.twitch.tv/videos/2839653459",
+      "title": "2000時間プレイヤー魂の深度5到達※明日ダスブラ当落のためホルモンが乱れております【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-07T22:12:12+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/5f794f5defb2953d8c15_dotitao_316283227762_1786108327//thumb/thumb0-320x180.jpg",
+      "duration_sec": 18132,
+      "count": 3,
+      "chat_total": 10049,
+      "comments_per_hour": 1995.169,
+      "detail_path": "/data/vods/2839653459.json"
+    },
     {
       "vod_id": "2838655883",
       "vod_url": "https://www.twitch.tv/videos/2838655883",
@@ -32,7 +44,7 @@
       "title": "2000時間プレイヤー魂の深度4到達【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-08-02T11:49:20+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/51e9ef0322afc12611b6_dotitao_316259382514_1785638955//thumb/thumb0-320x180.jpg",
-      "duration_sec": 30495,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 3700,
       "comments_per_hour": 436.793,
@@ -541,18 +553,6 @@
       "chat_total": 9335,
       "comments_per_hour": 1540.923,
       "detail_path": "/data/vods/2792369378.json"
-    },
-    {
-      "vod_id": "2791670758",
-      "vod_url": "https://www.twitch.tv/videos/2791670758",
-      "title": "【初見】ソウルライクの最高傑作と名高い！ダーク童話アクションRPG【Lies of P/偽りのP】",
-      "published_at": "2026-06-08T22:01:45+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/659cd257f897599552cd_dotitao_316012917746_1780923700//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2398,
-      "comments_per_hour": 601.631,
-      "detail_path": "/data/vods/2791670758.json"
     }
   ]
 }
