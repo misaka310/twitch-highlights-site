@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-06T07:22:07+09:00",
-  "next_update_at": "2026-08-06T00:00:00+00:00",
+  "updated_at": "2026-08-07T10:08:20+09:00",
+  "next_update_at": "2026-08-08T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2838655883",
+      "vod_url": "https://www.twitch.tv/videos/2838655883",
+      "title": "2000時間プレイヤー魂の深度5到達※明日ダスブラ当落のためホルモンが乱れております【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-06T18:24:25+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/1ce87683e65c79740f41_dotitao_316277851762_1786008260//thumb/thumb0-320x180.jpg",
+      "duration_sec": 20697,
+      "count": 3,
+      "chat_total": 3175,
+      "comments_per_hour": 552.254,
+      "detail_path": "/data/vods/2838655883.json"
+    },
     {
       "vod_id": "2836977922",
       "vod_url": "https://www.twitch.tv/videos/2836977922",
@@ -32,7 +44,7 @@
       "title": "【指示歓迎】新作！注目のソウルライクPVPVEに殴り込み【Mistfall Hunter】",
       "published_at": "2026-07-31T21:35:48+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d0cfc9822abcf5126eeb_dotitao_316243768305_1785501343//thumb/thumb0-320x180.jpg",
-      "duration_sec": 19009,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1717,
       "comments_per_hour": 325.172,
@@ -541,18 +553,6 @@
       "chat_total": 2398,
       "comments_per_hour": 601.631,
       "detail_path": "/data/vods/2791670758.json"
-    },
-    {
-      "vod_id": "2790922051",
-      "vod_url": "https://www.twitch.tv/videos/2790922051",
-      "title": "こんな夜更けにどうしたんだい？弾きたそうな顔して【ナイトレイン/ELDEN RING NIGHTREIGN】→Xbox Games Showcase 6月8日（月）午前2時",
-      "published_at": "2026-06-07T23:00:25+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/231ec02f62ce6b8abd46_dotitao_316008658034_1780840819//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 4695,
-      "comments_per_hour": 1098.531,
-      "detail_path": "/data/vods/2790922051.json"
     }
   ]
 }
