@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-08T06:55:09+09:00",
-  "next_update_at": "2026-08-08T00:00:00+00:00",
+  "updated_at": "2026-08-09T06:49:06+09:00",
+  "next_update_at": "2026-08-09T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2840556740",
+      "vod_url": "https://www.twitch.tv/videos/2840556740",
+      "title": "今日のフロムオタ活レポ【SEKIROお祭りとブラボポップアップ】",
+      "published_at": "2026-08-08T21:51:01+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/7a92ec4119d00c68f766_dotitao_316344597491_1786193456//thumb/thumb0-320x180.jpg",
+      "duration_sec": 7227,
+      "count": 3,
+      "chat_total": 1296,
+      "comments_per_hour": 645.579,
+      "detail_path": "/data/vods/2840556740.json"
+    },
     {
       "vod_id": "2839653459",
       "vod_url": "https://www.twitch.tv/videos/2839653459",
@@ -32,7 +44,7 @@
       "title": "【本日発売】弾き欲、それは三大欲求の頂点にあり【Beast of Reincarnation】※ネタバレあり",
       "published_at": "2026-08-04T21:57:01+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/139dea3942fcdef898fb_dotitao_316270168306_1785848216//thumb/thumb0-320x180.jpg",
-      "duration_sec": 14884,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2482,
       "comments_per_hour": 600.322,
@@ -541,18 +553,6 @@
       "chat_total": 2915,
       "comments_per_hour": 641.051,
       "detail_path": "/data/vods/2794013261.json"
-    },
-    {
-      "vod_id": "2792369378",
-      "vod_url": "https://www.twitch.tv/videos/2792369378",
-      "title": "【初見】ソウルライクの最高傑作と名高い！ダーク童話アクションRPG【Lies of P/偽りのP】",
-      "published_at": "2026-06-09T18:44:04+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/ba74e7537882d57f993c_dotitao_316070862963_1780998239//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 9335,
-      "comments_per_hour": 1540.923,
-      "detail_path": "/data/vods/2792369378.json"
     }
   ]
 }
