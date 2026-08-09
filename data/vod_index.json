@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-09T06:49:06+09:00",
-  "next_update_at": "2026-08-09T00:00:00+00:00",
+  "updated_at": "2026-08-10T06:50:24+09:00",
+  "next_update_at": "2026-08-10T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2841236874",
+      "vod_url": "https://www.twitch.tv/videos/2841236874",
+      "title": "癒しのグッドランチタイムナイトレイン【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-09T13:09:01+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d7970f0734f9723102fe_dotitao_316347363827_1786248536//thumb/thumb0-320x180.jpg",
+      "duration_sec": 28627,
+      "count": 3,
+      "chat_total": 2923,
+      "comments_per_hour": 367.583,
+      "detail_path": "/data/vods/2841236874.json"
+    },
     {
       "vod_id": "2840556740",
       "vod_url": "https://www.twitch.tv/videos/2840556740",
@@ -32,7 +44,7 @@
       "title": "2000時間プレイヤー魂の深度5到達※明日ダスブラ当落のためホルモンが乱れております【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-08-06T18:24:25+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/1ce87683e65c79740f41_dotitao_316277851762_1786008260//thumb/thumb0-320x180.jpg",
-      "duration_sec": 20697,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 3175,
       "comments_per_hour": 552.254,
