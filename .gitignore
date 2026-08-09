@@ -43,3 +43,6 @@ logs_job/
 *.dmp
 .DS_Store
 Thumbs.db
+
+# Local agent/tool residue
+=/
