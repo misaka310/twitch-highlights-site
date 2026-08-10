@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-10T06:50:24+09:00",
+  "updated_at": "2026-08-11T06:58:16+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -24,7 +24,7 @@
           "start_time": "00:00:20",
           "end_time": "00:01:40",
           "reason": "Chat activity spike around 0h0m20s (z-score=8.458).",
-          "headline": "言ったらやる、その事実",
+          "headline": "やる女』宣言のナイトレイン",
           "tags": [
             "は"
           ],
@@ -40,7 +40,7 @@
           "start_time": "00:13:10",
           "end_time": "00:15:50",
           "reason": "Chat activity spike around 0h13m10s (z-score=3.836).",
-          "headline": "変なビルドで来てほしい",
+          "headline": "プレステ勢がPC版を完走した話を紹介",
           "tags": [
             "あ",
             "えっ",
@@ -58,7 +58,7 @@
           "start_time": "06:33:20",
           "end_time": "06:34:50",
           "reason": "Chat activity spike around 6h33m20s (z-score=6.147).",
-          "headline": "ピンポンが鳴った瞬間",
+          "headline": "ピンポンに来たキズアーマーのおだめ撃ち",
           "tags": [
             "ww",
             "あ",
