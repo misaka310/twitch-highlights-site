@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-11T06:58:16+09:00",
-  "next_update_at": "2026-08-11T00:00:00+00:00",
+  "updated_at": "2026-08-12T07:04:01+09:00",
+  "next_update_at": "2026-08-12T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2842954346",
+      "vod_url": "https://www.twitch.tv/videos/2842954346",
+      "title": "【ハード】アプデきた！字幕が見えるようになったし今日クリアする【Beast of Reincarnation】",
+      "published_at": "2026-08-11T11:34:30+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b469175421bc262de4f9_dotitao_316290935665_1786415665//thumb/thumb0-320x180.jpg",
+      "duration_sec": 53962,
+      "count": 3,
+      "chat_total": 5073,
+      "comments_per_hour": 338.438,
+      "detail_path": "/data/vods/2842954346.json"
+    },
     {
       "vod_id": "2841236874",
       "vod_url": "https://www.twitch.tv/videos/2841236874",
@@ -32,7 +44,7 @@
       "title": "2000時間プレイヤー魂の深度5到達※明日ダスブラ当落のためホルモンが乱れております【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-08-07T22:12:12+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/5f794f5defb2953d8c15_dotitao_316283227762_1786108327//thumb/thumb0-320x180.jpg",
-      "duration_sec": 18132,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 10049,
       "comments_per_hour": 1995.169,
@@ -541,18 +553,6 @@
       "chat_total": 1424,
       "comments_per_hour": 499.308,
       "detail_path": "/data/vods/2795678497.json"
-    },
-    {
-      "vod_id": "2794846866",
-      "vod_url": "https://www.twitch.tv/videos/2794846866",
-      "title": "ナイトレインをする自分を見る→ナイトレインをしたくなる→以下ループ【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-06-12T22:15:37+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/dd0b656800476eee5186_dotitao_316021963249_1781270132//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 3038,
-      "comments_per_hour": 774.561,
-      "detail_path": "/data/vods/2794846866.json"
     }
   ]
 }
