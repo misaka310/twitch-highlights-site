@@ -1,7 +1,31 @@
 {
-  "updated_at": "2026-08-12T07:04:01+09:00",
-  "next_update_at": "2026-08-12T00:00:00+00:00",
+  "updated_at": "2026-08-13T07:05:11+09:00",
+  "next_update_at": "2026-08-13T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2844129219",
+      "vod_url": "https://www.twitch.tv/videos/2844129219",
+      "title": "果たしてあなたはこの深き夜に参加できるのか【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-12T21:35:42+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/3d1b8fdc77890b76fe2d_dotitao_316363319027_1786538137//thumb/thumb0-320x180.jpg",
+      "duration_sec": 12470,
+      "count": 3,
+      "chat_total": 1637,
+      "comments_per_hour": 472.59,
+      "detail_path": "/data/vods/2844129219.json"
+    },
+    {
+      "vod_id": "2843934206",
+      "vod_url": "https://www.twitch.tv/videos/2843934206",
+      "title": "最終回【ハード】いよいよ物語の核心に迫る…よな！？【Beast of Reincarnation】※メタバレあり",
+      "published_at": "2026-08-12T13:40:42+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b591753933082b015201_dotitao_316305046002_1786509637//thumb/thumb0-320x180.jpg",
+      "duration_sec": 20121,
+      "count": 3,
+      "chat_total": 2542,
+      "comments_per_hour": 454.808,
+      "detail_path": "/data/vods/2843934206.json"
+    },
     {
       "vod_id": "2842954346",
       "vod_url": "https://www.twitch.tv/videos/2842954346",
@@ -20,7 +44,7 @@
       "title": "癒しのグッドランチタイムナイトレイン【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-08-09T13:09:01+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d7970f0734f9723102fe_dotitao_316347363827_1786248536//thumb/thumb0-320x180.jpg",
-      "duration_sec": 28627,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2923,
       "comments_per_hour": 367.583,
@@ -32,7 +56,7 @@
       "title": "今日のフロムオタ活レポ【SEKIROお祭りとブラボポップアップ】",
       "published_at": "2026-08-08T21:51:01+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/7a92ec4119d00c68f766_dotitao_316344597491_1786193456//thumb/thumb0-320x180.jpg",
-      "duration_sec": 7227,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1296,
       "comments_per_hour": 645.579,
@@ -541,18 +565,6 @@
       "chat_total": 2564,
       "comments_per_hour": 463.141,
       "detail_path": "/data/vods/2796409698.json"
-    },
-    {
-      "vod_id": "2795678497",
-      "vod_url": "https://www.twitch.tv/videos/2795678497",
-      "title": "【初見】深夜なので弾きがいくら気持ちよくても大きな声を出さない【Lies of P/偽りのP】",
-      "published_at": "2026-06-13T22:35:24+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/8c600136888c1b6d8d42_dotitao_316036372594_1781357719//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 1424,
-      "comments_per_hour": 499.308,
-      "detail_path": "/data/vods/2795678497.json"
     }
   ]
 }
