@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-13T07:05:11+09:00",
-  "next_update_at": "2026-08-13T00:00:00+00:00",
+  "updated_at": "2026-08-14T07:08:58+09:00",
+  "next_update_at": "2026-08-14T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2845027398",
+      "vod_url": "https://www.twitch.tv/videos/2845027398",
+      "title": "【祈弾】明日セキロ試写会行く方はレポお願いします【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-13T21:29:14+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/bc42f8424835cec45f9f_dotitao_316302693489_1786624149//thumb/thumb0-320x180.jpg",
+      "duration_sec": 8271,
+      "count": 3,
+      "chat_total": 1371,
+      "comments_per_hour": 596.736,
+      "detail_path": "/data/vods/2845027398.json"
+    },
     {
       "vod_id": "2844129219",
       "vod_url": "https://www.twitch.tv/videos/2844129219",
@@ -32,7 +44,7 @@
       "title": "【ハード】アプデきた！字幕が見えるようになったし今日クリアする【Beast of Reincarnation】",
       "published_at": "2026-08-11T11:34:30+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b469175421bc262de4f9_dotitao_316290935665_1786415665//thumb/thumb0-320x180.jpg",
-      "duration_sec": 53962,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 5073,
       "comments_per_hour": 338.438,
@@ -553,18 +565,6 @@
       "chat_total": 5068,
       "comments_per_hour": 979.376,
       "detail_path": "/data/vods/2797953300.json"
-    },
-    {
-      "vod_id": "2796409698",
-      "vod_url": "https://www.twitch.tv/videos/2796409698",
-      "title": "【初見】ゲームで好きな展開全部やってくるこれがライP【Lies of P/偽りのP】",
-      "published_at": "2026-06-14T20:17:18+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/4ad5cc7053c827a81e14_dotitao_316031040497_1781435833//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2564,
-      "comments_per_hour": 463.141,
-      "detail_path": "/data/vods/2796409698.json"
     }
   ]
 }
