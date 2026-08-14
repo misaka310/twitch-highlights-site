@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-14T07:08:58+09:00",
-  "next_update_at": "2026-08-14T00:00:00+00:00",
+  "updated_at": "2026-08-15T06:43:20+09:00",
+  "next_update_at": "2026-08-15T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2845946684",
+      "vod_url": "https://www.twitch.tv/videos/2845946684",
+      "title": "【新情報】試写会現地レポ有！SEKIRO周りの新情報を全部追う！【SEKIRO: NO DEFEAT】",
+      "published_at": "2026-08-14T22:10:05+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/2e43778933b2ca292f67_dotitao_316316387826_1786713000//thumb/thumb0-320x180.jpg",
+      "duration_sec": 5267,
+      "count": 3,
+      "chat_total": 1016,
+      "comments_per_hour": 694.437,
+      "detail_path": "/data/vods/2845946684.json"
+    },
     {
       "vod_id": "2845027398",
       "vod_url": "https://www.twitch.tv/videos/2845027398",
@@ -32,7 +44,7 @@
       "title": "最終回【ハード】いよいよ物語の核心に迫る…よな！？【Beast of Reincarnation】※メタバレあり",
       "published_at": "2026-08-12T13:40:42+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b591753933082b015201_dotitao_316305046002_1786509637//thumb/thumb0-320x180.jpg",
-      "duration_sec": 20121,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2542,
       "comments_per_hour": 454.808,
