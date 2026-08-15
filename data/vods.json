@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-15T06:43:20+09:00",
-  "next_update_at": "2026-08-15T00:00:00+00:00",
+  "updated_at": "2026-08-16T06:35:36+09:00",
+  "next_update_at": "2026-08-16T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "2845946684",
@@ -22,7 +22,7 @@
           "start_time": "00:16:10",
           "end_time": "00:17:50",
           "reason": "Chat activity spike around 0h16m10s (z-score=3.384).",
-          "headline": "飛ばした方がいいんじゃないか",
+          "headline": "飛ばした方がいいんじゃない",
           "tags": [
             "は",
             "好プレー"
@@ -39,7 +39,7 @@
           "start_time": "01:13:40",
           "end_time": "01:14:30",
           "reason": "Chat activity spike around 1h13m40s (z-score=3.941).",
-          "headline": "ITスキルを生かそうとしていない",
+          "headline": "ITスキルを使うつもりはない",
           "tags": [
             "ホラー",
             "あ"
@@ -56,7 +56,7 @@
           "start_time": "00:40:40",
           "end_time": "00:41:30",
           "reason": "Chat activity spike around 0h40m40s (z-score=3.941).",
-          "headline": "若い一種」発言シーンは有る",
+          "headline": "若い一心との類似",
           "tags": [
             "おめ",
             "えっど",
