@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-15T06:43:20+09:00",
-  "next_update_at": "2026-08-15T00:00:00+00:00",
+  "updated_at": "2026-08-16T06:35:36+09:00",
+  "next_update_at": "2026-08-16T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "2845946684",
@@ -565,18 +565,6 @@
       "chat_total": 2740,
       "comments_per_hour": 658.258,
       "detail_path": "/data/vods/2799575345.json"
-    },
-    {
-      "vod_id": "2797953300",
-      "vod_url": "https://www.twitch.tv/videos/2797953300",
-      "title": "先生！ナイトレイン禁断症状の急患です【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-06-16T20:27:23+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/22a685146cb51f41342e_dotitao_316049665138_1781609238//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 5068,
-      "comments_per_hour": 979.376,
-      "detail_path": "/data/vods/2797953300.json"
     }
   ]
 }
