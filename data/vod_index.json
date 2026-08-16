@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-16T06:35:36+09:00",
-  "next_update_at": "2026-08-16T00:00:00+00:00",
+  "updated_at": "2026-08-17T06:33:50+09:00",
+  "next_update_at": "2026-08-17T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2847750818",
+      "vod_url": "https://www.twitch.tv/videos/2847750818",
+      "title": "【が、ま】カンストさん()本当にガチれば負けなかったのか？連勝チャレンジしてみる【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-16T20:15:36+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/bee0e2212e91a0cd8bcb_dotitao_316325331186_1786878931//thumb/thumb0-320x180.jpg",
+      "duration_sec": 20341,
+      "count": 3,
+      "chat_total": 5106,
+      "comments_per_hour": 903.672,
+      "detail_path": "/data/vods/2847750818.json"
+    },
     {
       "vod_id": "2845946684",
       "vod_url": "https://www.twitch.tv/videos/2845946684",
@@ -32,7 +44,7 @@
       "title": "果たしてあなたはこの深き夜に参加できるのか【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-08-12T21:35:42+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/3d1b8fdc77890b76fe2d_dotitao_316363319027_1786538137//thumb/thumb0-320x180.jpg",
-      "duration_sec": 12470,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1637,
       "comments_per_hour": 472.59,
