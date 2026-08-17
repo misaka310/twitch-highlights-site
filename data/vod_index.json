@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-17T06:33:50+09:00",
-  "next_update_at": "2026-08-17T00:00:00+00:00",
+  "updated_at": "2026-08-18T06:38:26+09:00",
+  "next_update_at": "2026-08-18T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "2847750818",
@@ -565,18 +565,6 @@
       "chat_total": 2545,
       "comments_per_hour": 558.863,
       "detail_path": "/data/vods/2800369129.json"
-    },
-    {
-      "vod_id": "2799575345",
-      "vod_url": "https://www.twitch.tv/videos/2799575345",
-      "title": "【初見】たぶん今が一番盛り上がるとこ【Lies of P/偽りのP】",
-      "published_at": "2026-06-18T21:57:44+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/64a32d404486fe4d5a3d_dotitao_316059240050_1781787459//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2740,
-      "comments_per_hour": 658.258,
-      "detail_path": "/data/vods/2799575345.json"
     }
   ]
 }
