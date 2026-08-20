@@ -1,7 +1,31 @@
 {
-  "updated_at": "2026-08-19T06:37:46+09:00",
-  "next_update_at": "2026-08-19T00:00:00+00:00",
+  "updated_at": "2026-08-21T06:44:23+09:00",
+  "next_update_at": "2026-08-21T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2851339526",
+      "vod_url": "https://www.twitch.tv/videos/2851339526",
+      "title": "【検証】カンストさん()本当にガチれば負けなかったのか？連勝チャレンジしてみる②【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-20T19:46:57+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/52ce640b02109089a19c_dotitao_316399733107_1787222812//thumb/thumb0-320x180.jpg",
+      "duration_sec": 27755,
+      "count": 3,
+      "chat_total": 7117,
+      "comments_per_hour": 923.12,
+      "detail_path": "/data/vods/2851339526.json"
+    },
+    {
+      "vod_id": "2850530878",
+      "vod_url": "https://www.twitch.tv/videos/2850530878",
+      "title": "【検証】カンストさん()本当にガチれば負けなかったのか？連勝チャレンジしてみる②【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-19T22:45:55+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/af9df7ece092d116d24b_dotitao_316339389170_1787147150//thumb/thumb0-320x180.jpg",
+      "duration_sec": 13242,
+      "count": 3,
+      "chat_total": 2059,
+      "comments_per_hour": 559.764,
+      "detail_path": "/data/vods/2850530878.json"
+    },
     {
       "vod_id": "2849578472",
       "vod_url": "https://www.twitch.tv/videos/2849578472",
@@ -20,7 +44,7 @@
       "title": "【が、ま】カンストさん()本当にガチれば負けなかったのか？連勝チャレンジしてみる【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-08-16T20:15:36+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/bee0e2212e91a0cd8bcb_dotitao_316325331186_1786878931//thumb/thumb0-320x180.jpg",
-      "duration_sec": 20341,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 5106,
       "comments_per_hour": 903.672,
@@ -32,7 +56,7 @@
       "title": "【新情報】試写会現地レポ有！SEKIRO周りの新情報を全部追う！【SEKIRO: NO DEFEAT】",
       "published_at": "2026-08-14T22:10:05+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/2e43778933b2ca292f67_dotitao_316316387826_1786713000//thumb/thumb0-320x180.jpg",
-      "duration_sec": 5267,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1016,
       "comments_per_hour": 694.437,
@@ -553,18 +577,6 @@
       "chat_total": 1325,
       "comments_per_hour": 648.627,
       "detail_path": "/data/vods/2802731056.json"
-    },
-    {
-      "vod_id": "2801777537",
-      "vod_url": "https://www.twitch.tv/videos/2801777537",
-      "title": "【初見】逆張りワールドカップ日本代表です、今日は最終回になると思います【Lies of P/偽りのP】",
-      "published_at": "2026-06-21T14:12:51+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/cc0936089dab3a40c556_dotitao_316071767282_1782018766//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 5586,
-      "comments_per_hour": 584.904,
-      "detail_path": "/data/vods/2801777537.json"
     }
   ]
 }
