@@ -1,7 +1,31 @@
 {
-  "updated_at": "2026-08-21T06:44:23+09:00",
-  "next_update_at": "2026-08-21T00:00:00+00:00",
+  "updated_at": "2026-08-22T06:43:52+09:00",
+  "next_update_at": "2026-08-22T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2852287210",
+      "vod_url": "https://www.twitch.tv/videos/2852287210",
+      "title": "【感想会】ダスクブラッドネットワークテストの興奮を共有する会１日目【The Duskbloods/ダスクブラッド】",
+      "published_at": "2026-08-21T21:09:22+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/79b34af5c99a1d387560_dotitao_316347709042_1787314157//thumb/thumb0-320x180.jpg",
+      "duration_sec": 4674,
+      "count": 3,
+      "chat_total": 1166,
+      "comments_per_hour": 898.074,
+      "detail_path": "/data/vods/2852287210.json"
+    },
+    {
+      "vod_id": "2852197797",
+      "vod_url": "https://www.twitch.tv/videos/2852197797",
+      "title": "【GRWM】ネットワークテストを完ぺきにこなすためルールを再確認いたします→行ってきます【The Duskbloods/ダスクブラッド】",
+      "published_at": "2026-08-21T17:24:49+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/56f20e1c0aae28537644_dotitao_316403648883_1787300684//thumb/thumb0-320x180.jpg",
+      "duration_sec": 4837,
+      "count": 3,
+      "chat_total": 1142,
+      "comments_per_hour": 849.948,
+      "detail_path": "/data/vods/2852197797.json"
+    },
     {
       "vod_id": "2851339526",
       "vod_url": "https://www.twitch.tv/videos/2851339526",
@@ -20,7 +44,7 @@
       "title": "【検証】カンストさん()本当にガチれば負けなかったのか？連勝チャレンジしてみる②【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-08-19T22:45:55+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/af9df7ece092d116d24b_dotitao_316339389170_1787147150//thumb/thumb0-320x180.jpg",
-      "duration_sec": 13242,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2059,
       "comments_per_hour": 559.764,
@@ -32,7 +56,7 @@
       "title": "【本日DL開始！】私の読みだと新情報そろそろ出てしまうのでテスト前に妄想出し尽くす会【The Duskbloods/ダスクブラッド】",
       "published_at": "2026-08-18T21:31:40+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/aa17ae54e980d195a225_dotitao_316334600434_1787056295//thumb/thumb0-320x180.jpg",
-      "duration_sec": 9370,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2424,
       "comments_per_hour": 931.313,
@@ -565,18 +589,6 @@
       "chat_total": 2276,
       "comments_per_hour": 696.143,
       "detail_path": "/data/vods/2803439266.json"
-    },
-    {
-      "vod_id": "2802731056",
-      "vod_url": "https://www.twitch.tv/videos/2802731056",
-      "title": "最終回【初見】弾いて弾いて自分を見つける。【Lies of P/偽りのP】",
-      "published_at": "2026-06-22T23:25:53+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/a7f3d4b7312e39191589_dotitao_316078549234_1782138347//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 1325,
-      "comments_per_hour": 648.627,
-      "detail_path": "/data/vods/2802731056.json"
     }
   ]
 }
