@@ -1,14 +1,50 @@
 {
-  "updated_at": "2026-08-22T06:43:52+09:00",
-  "next_update_at": "2026-08-22T00:00:00+00:00",
+  "updated_at": "2026-08-23T06:39:59+09:00",
+  "next_update_at": "2026-08-23T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2853211373",
+      "vod_url": "https://www.twitch.tv/videos/2853211373",
+      "title": "ダスブラ特番を正座で見る血族集会【The Duskbloods/ダスクブラッド】",
+      "published_at": "2026-08-22T19:54:06+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/4f9becc014cfe4ed50f3_dotitao_316352556274_1787396040//thumb/thumb0-320x180.jpg",
+      "duration_sec": 7240,
+      "count": 3,
+      "chat_total": 2123,
+      "comments_per_hour": 1055.635,
+      "detail_path": "/data/vods/2853211373.json"
+    },
+    {
+      "vod_id": "2853103844",
+      "vod_url": "https://www.twitch.tv/videos/2853103844",
+      "title": "【感想会】ダスクブラッドネットワークテストの興奮を共有する会2日目【The Duskbloods/ダスクブラッド】",
+      "published_at": "2026-08-22T15:15:15+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/43f6534c819529bf1821_dotitao_316351585010_1787379310//thumb/thumb0-320x180.jpg",
+      "duration_sec": 10234,
+      "count": 3,
+      "chat_total": 3342,
+      "comments_per_hour": 1175.611,
+      "detail_path": "/data/vods/2853103844.json"
+    },
+    {
+      "vod_id": "2852893744",
+      "vod_url": "https://www.twitch.tv/videos/2852893744",
+      "title": "【GRWM】ネットワークテストを完ぺきにこなすためルールを再確認いたします→行ってきます②【The Duskbloods/ダスクブラッド】",
+      "published_at": "2026-08-22T10:05:50+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/e06e14934c6b33a85b90_dotitao_316406958451_1787360745//thumb/thumb0-320x180.jpg",
+      "duration_sec": 2765,
+      "count": 3,
+      "chat_total": 489,
+      "comments_per_hour": 636.673,
+      "detail_path": "/data/vods/2852893744.json"
+    },
     {
       "vod_id": "2852287210",
       "vod_url": "https://www.twitch.tv/videos/2852287210",
       "title": "【感想会】ダスクブラッドネットワークテストの興奮を共有する会１日目【The Duskbloods/ダスクブラッド】",
       "published_at": "2026-08-21T21:09:22+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/79b34af5c99a1d387560_dotitao_316347709042_1787314157//thumb/thumb0-320x180.jpg",
-      "duration_sec": 4674,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1166,
       "comments_per_hour": 898.074,
@@ -20,7 +56,7 @@
       "title": "【GRWM】ネットワークテストを完ぺきにこなすためルールを再確認いたします→行ってきます【The Duskbloods/ダスクブラッド】",
       "published_at": "2026-08-21T17:24:49+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/56f20e1c0aae28537644_dotitao_316403648883_1787300684//thumb/thumb0-320x180.jpg",
-      "duration_sec": 4837,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 1142,
       "comments_per_hour": 849.948,
@@ -32,7 +68,7 @@
       "title": "【検証】カンストさん()本当にガチれば負けなかったのか？連勝チャレンジしてみる②【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
       "published_at": "2026-08-20T19:46:57+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/52ce640b02109089a19c_dotitao_316399733107_1787222812//thumb/thumb0-320x180.jpg",
-      "duration_sec": 27755,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 7117,
       "comments_per_hour": 923.12,
@@ -577,18 +613,6 @@
       "chat_total": 1952,
       "comments_per_hour": 527.014,
       "detail_path": "/data/vods/2804988305.json"
-    },
-    {
-      "vod_id": "2803439266",
-      "vod_url": "https://www.twitch.tv/videos/2803439266",
-      "title": "ガチ最終回【初見】またせてごめん、良いゲームでした【Lies of P/偽りのP】",
-      "published_at": "2026-06-23T21:26:24+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/07b59f7d0dc859d35025_dotitao_316082312818_1782217579//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2276,
-      "comments_per_hour": 696.143,
-      "detail_path": "/data/vods/2803439266.json"
     }
   ]
 }
