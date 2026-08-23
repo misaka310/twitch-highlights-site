@@ -1,0 +1,76 @@
+{
+  "vod_id": "2854118572",
+  "vod_url": "https://www.twitch.tv/videos/2854118572",
+  "title": "【GRWM】ネットワークテストを完ぺきにこなす準備→行ってきます④【The Duskbloods/ダスクブラッド】",
+  "published_at": "2026-08-23T18:10:34+09:00",
+  "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/0454e191e12e9701057b_dotitao_316413637619_1787476228//thumb/thumb0-320x180.jpg",
+  "duration_sec": 2492,
+  "count": 3,
+  "chat_total": 630,
+  "comments_per_hour": 910.112,
+  "items": [
+    {
+      "rank": 1,
+      "id": "2854118572_960_1090",
+      "start_sec": 960,
+      "end_sec": 1090,
+      "duration_sec": 130,
+      "start_time": "00:16:00",
+      "end_time": "00:18:10",
+      "reason": "Chat activity spike around 0h16m0s (z-score=3.726).",
+      "headline": "風呂に入る前に塩で体を清める",
+      "tags": [
+        "あ",
+        "好プレー",
+        "えっ"
+      ],
+      "watch_url": "https://www.twitch.tv/videos/2854118572?t=0h16m0s",
+      "screenshot_url": "/data/segment-thumbnails/2854118572/2854118572_960_1090.webp"
+    },
+    {
+      "rank": 2,
+      "id": "2854118572_1670_1720",
+      "start_sec": 1670,
+      "end_sec": 1720,
+      "duration_sec": 50,
+      "start_time": "00:27:50",
+      "end_time": "00:28:40",
+      "reason": "Chat activity spike around 0h27m50s (z-score=3.229).",
+      "headline": "調整が気に入る展開",
+      "tags": [],
+      "watch_url": "https://www.twitch.tv/videos/2854118572?t=0h27m50s",
+      "screenshot_url": "/data/segment-thumbnails/2854118572/2854118572_1670_1720.webp"
+    },
+    {
+      "rank": 3,
+      "id": "2854118572_2340_2390",
+      "start_sec": 2340,
+      "end_sec": 2390,
+      "duration_sec": 50,
+      "start_time": "00:39:00",
+      "end_time": "00:39:50",
+      "reason": "Chat activity spike around 0h39m0s (z-score=2.732).",
+      "headline": "不死身のマーロー」という内容でした",
+      "tags": [
+        "ww",
+        "えっ"
+      ],
+      "watch_url": "https://www.twitch.tv/videos/2854118572?t=0h39m0s",
+      "screenshot_url": "/data/segment-thumbnails/2854118572/2854118572_2340_2390.webp"
+    }
+  ],
+  "activity_map": {
+    "bucket_sec": 10,
+    "duration_sec": 2509,
+    "last_comment_sec": 2509,
+    "buckets": [
+      0, 1, 0, 2, 7, 2, 3, 4, 1, 5, 2, 2, 1, 2, 4, 3, 0, 2, 4, 1, 1, 3, 1, 1, 1, 2, 3, 3, 1, 1, 1, 2, 1, 2, 0, 1, 2, 0, 2, 3,
+      0, 4, 3, 1, 2, 6, 1, 0, 1, 0, 6, 2, 3, 1, 2, 2, 1, 3, 0, 1, 3, 3, 6, 2, 2, 0, 1, 2, 4, 4, 1, 2, 2, 2, 2, 3, 2, 2, 1, 3,
+      1, 2, 4, 3, 0, 2, 5, 3, 0, 2, 3, 1, 0, 5, 0, 1, 2, 6, 10, 5, 8, 7, 2, 2, 6, 1, 10, 3, 2, 2, 3, 5, 2, 2, 10, 4, 5, 3, 2, 1,
+      1, 4, 2, 6, 2, 4, 2, 5, 1, 2, 1, 6, 2, 0, 3, 2, 3, 3, 4, 2, 3, 1, 1, 1, 0, 1, 0, 0, 1, 3, 1, 5, 0, 5, 1, 2, 2, 2, 2, 3,
+      2, 0, 3, 2, 2, 5, 1, 0, 1, 9, 0, 1, 1, 1, 4, 1, 1, 2, 2, 3, 6, 4, 1, 1, 0, 2, 3, 3, 1, 2, 2, 3, 4, 4, 4, 6, 4, 1, 5, 2,
+      2, 2, 0, 3, 4, 0, 1, 0, 0, 5, 4, 1, 2, 2, 3, 2, 1, 4, 0, 4, 4, 2, 1, 3, 4, 4, 2, 1, 5, 1, 1, 1, 3, 3, 0, 2, 8, 6, 2, 2,
+      0, 4, 2, 4, 4, 9, 5, 4, 9, 5, 3, 0
+    ]
+  }
+}

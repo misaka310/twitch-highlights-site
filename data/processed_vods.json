@@ -1,16 +1,276 @@
 {
-  "updated_at": "2026-08-23T06:39:59+09:00",
+  "updated_at": "2026-08-24T06:42:33+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
   "videos": [
+    {
+      "vod_id": "2854285273",
+      "vod_url": "https://www.twitch.tv/videos/2854285273",
+      "title": "【感想会】ダスクブラッドネットワークテストの興奮を共有する会④【The Duskbloods/ダスクブラッド】",
+      "published_at": "2026-08-23T23:31:16+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d5e172a83af00a6bcba9_dotitao_316358451058_1787495471//thumb/thumb0-320x180.jpg",
+      "duration_sec": 6362,
+      "count": 3,
+      "chat_total": 2205,
+      "comments_per_hour": 1247.721,
+      "items": [
+        {
+          "rank": 1,
+          "id": "2854285273_260_360",
+          "start_sec": 260,
+          "end_sec": 360,
+          "duration_sec": 100,
+          "start_time": "00:04:20",
+          "end_time": "00:06:00",
+          "reason": "Chat activity spike around 0h4m20s (z-score=8.53).",
+          "headline": "テスト期間中、一度も勝利なし",
+          "tags": [
+            "好プレー",
+            "は",
+            "あ"
+          ],
+          "watch_url": "https://www.twitch.tv/videos/2854285273?t=0h4m20s",
+          "screenshot_url": "/data/segment-thumbnails/2854285273/2854285273_260_360.webp"
+        },
+        {
+          "rank": 2,
+          "id": "2854285273_970_1060",
+          "start_sec": 970,
+          "end_sec": 1060,
+          "duration_sec": 90,
+          "start_time": "00:16:10",
+          "end_time": "00:17:40",
+          "reason": "Chat activity spike around 0h16m10s (z-score=4.545).",
+          "headline": "片方が移動すればすぐ",
+          "tags": [
+            "ww",
+            "ホラー"
+          ],
+          "watch_url": "https://www.twitch.tv/videos/2854285273?t=0h16m10s",
+          "screenshot_url": "/data/segment-thumbnails/2854285273/2854285273_970_1060.webp"
+        },
+        {
+          "rank": 3,
+          "id": "2854285273_4240_4290",
+          "start_sec": 4240,
+          "end_sec": 4290,
+          "duration_sec": 50,
+          "start_time": "01:10:40",
+          "end_time": "01:11:30",
+          "reason": "Chat activity spike around 1h10m40s (z-score=3.458).",
+          "headline": "ミュートにしたくない」の強調",
+          "tags": [
+            "ww",
+            "ホラー",
+            "好プレー"
+          ],
+          "watch_url": "https://www.twitch.tv/videos/2854285273?t=1h10m40s",
+          "screenshot_url": "/data/segment-thumbnails/2854285273/2854285273_4240_4290.webp"
+        }
+      ],
+      "activity_map": {
+        "bucket_sec": 10,
+        "duration_sec": 6369,
+        "last_comment_sec": 6369,
+        "peak_count": 27,
+        "buckets": [
+          1, 3, 6, 4, 4, 4, 8, 2, 4, 6, 7, 2, 2, 9, 2, 3, 2, 1, 2, 7, 1, 4, 2, 7, 4, 6, 4, 6, 11, 11, 27, 7, 10, 11, 5, 8, 10, 8, 5, 5,
+          6, 1, 7, 7, 7, 3, 3, 5, 5, 3, 4, 6, 5, 3, 5, 6, 2, 6, 5, 4, 4, 5, 4, 7, 5, 3, 6, 3, 0, 4, 7, 5, 3, 1, 1, 4, 3, 1, 2, 2,
+          1, 5, 3, 3, 5, 7, 5, 4, 6, 0, 3, 1, 0, 5, 3, 1, 0, 3, 1, 16, 5, 5, 6, 11, 0, 1, 2, 0, 4, 3, 0, 2, 2, 1, 4, 5, 1, 2, 4, 6,
+          5, 7, 2, 1, 3, 2, 4, 2, 3, 3, 4, 2, 2, 3, 3, 6, 13, 12, 10, 4, 5, 7, 4, 10, 5, 4, 5, 3, 1, 3, 6, 1, 1, 1, 0, 1, 4, 10, 8, 4,
+          5, 2, 3, 3, 10, 7, 1, 0, 7, 4, 7, 7, 7, 5, 5, 1, 0, 2, 10, 10, 8, 8, 3, 3, 5, 7, 7, 3, 3, 3, 7, 3, 3, 5, 2, 2, 6, 2, 12, 8,
+          3, 8, 2, 1, 4, 2, 10, 1, 4, 3, 1, 6, 6, 3, 5, 3, 4, 2, 7, 6, 3, 8, 6, 8, 5, 3, 4, 2, 3, 1, 3, 4, 4, 7, 0, 2, 3, 3, 3, 4,
+          0, 7, 7, 4, 3, 2, 2, 4, 0, 2, 3, 1, 1, 1, 3, 2, 2, 4, 2, 6, 10, 4, 5, 4, 3, 5, 3, 2, 4, 1, 4, 3, 5, 2, 4, 4, 2, 1, 2, 0,
+          3, 3, 1, 7, 5, 2, 7, 1, 9, 5, 7, 4, 1, 0, 1, 6, 5, 1, 5, 2, 4, 5, 2, 4, 2, 5, 6, 4, 4, 7, 5, 2, 0, 3, 2, 0, 5, 0, 3, 0,
+          3, 12, 3, 4, 3, 1, 9, 6, 8, 4, 8, 2, 2, 2, 2, 1, 0, 2, 3, 3, 1, 3, 3, 4, 0, 2, 8, 8, 3, 2, 7, 3, 1, 1, 2, 1, 3, 4, 2, 2,
+          1, 1, 2, 2, 2, 0, 2, 2, 1, 1, 2, 2, 1, 3, 1, 3, 3, 1, 3, 3, 1, 1, 0, 2, 7, 2, 1, 2, 0, 2, 3, 1, 1, 1, 3, 2, 2, 1, 1, 2,
+          1, 0, 0, 0, 1, 0, 3, 6, 3, 7, 4, 4, 2, 2, 4, 1, 4, 2, 6, 2, 2, 3, 4, 4, 2, 5, 13, 6, 0, 2, 2, 2, 6, 2, 5, 5, 8, 1, 3, 4,
+          1, 1, 1, 5, 3, 5, 1, 2, 1, 6, 5, 0, 5, 2, 3, 1, 1, 4, 7, 0, 1, 0, 3, 2, 4, 9, 7, 10, 3, 6, 2, 3, 5, 11, 1, 0, 8, 3, 1, 0,
+          1, 5, 5, 0, 0, 2, 1, 5, 1, 6, 2, 1, 1, 1, 5, 2, 4, 1, 6, 2, 2, 6, 2, 3, 0, 7, 8, 5, 3, 0, 2, 1, 0, 6, 4, 7, 1, 1, 3, 2,
+          2, 4, 5, 5, 4, 3, 1, 5, 7, 4, 3, 3, 5, 4, 2, 2, 1, 0, 3, 2, 1, 2, 1, 0, 1, 2, 1, 1, 2, 2, 2, 2, 3, 0, 0, 1, 2, 5, 2, 0,
+          2, 1, 3, 2, 6, 3, 2, 0, 2, 0, 3, 4, 3, 5, 4, 2, 1, 5, 1, 0, 2, 2, 2, 1, 4, 3, 2, 1, 5, 3, 0, 0, 1, 3, 1, 1, 0, 2, 3, 3,
+          2, 1, 5, 6, 1, 4, 5, 4, 2, 5, 4, 0, 2, 2, 4, 1, 4, 2, 1, 3, 1, 2, 1, 1, 4, 5, 4, 2, 1, 0, 9, 1, 1, 7, 2, 11, 6, 0
+        ]
+      },
+      "analysis_version": "chat-zscore-v8",
+      "analyzed_at": "2026-08-24T06:29:47+09:00"
+    },
+    {
+      "vod_id": "2854118572",
+      "vod_url": "https://www.twitch.tv/videos/2854118572",
+      "title": "【GRWM】ネットワークテストを完ぺきにこなす準備→行ってきます④【The Duskbloods/ダスクブラッド】",
+      "published_at": "2026-08-23T18:10:34+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/0454e191e12e9701057b_dotitao_316413637619_1787476228//thumb/thumb0-320x180.jpg",
+      "duration_sec": 2492,
+      "count": 3,
+      "chat_total": 630,
+      "comments_per_hour": 910.112,
+      "items": [
+        {
+          "rank": 1,
+          "id": "2854118572_960_1090",
+          "start_sec": 960,
+          "end_sec": 1090,
+          "duration_sec": 130,
+          "start_time": "00:16:00",
+          "end_time": "00:18:10",
+          "reason": "Chat activity spike around 0h16m0s (z-score=3.726).",
+          "headline": "風呂に入る前に塩で体を清める",
+          "tags": [
+            "あ",
+            "好プレー",
+            "えっ"
+          ],
+          "watch_url": "https://www.twitch.tv/videos/2854118572?t=0h16m0s",
+          "screenshot_url": "/data/segment-thumbnails/2854118572/2854118572_960_1090.webp"
+        },
+        {
+          "rank": 2,
+          "id": "2854118572_1670_1720",
+          "start_sec": 1670,
+          "end_sec": 1720,
+          "duration_sec": 50,
+          "start_time": "00:27:50",
+          "end_time": "00:28:40",
+          "reason": "Chat activity spike around 0h27m50s (z-score=3.229).",
+          "headline": "調整が気に入る展開",
+          "tags": [],
+          "watch_url": "https://www.twitch.tv/videos/2854118572?t=0h27m50s",
+          "screenshot_url": "/data/segment-thumbnails/2854118572/2854118572_1670_1720.webp"
+        },
+        {
+          "rank": 3,
+          "id": "2854118572_2340_2390",
+          "start_sec": 2340,
+          "end_sec": 2390,
+          "duration_sec": 50,
+          "start_time": "00:39:00",
+          "end_time": "00:39:50",
+          "reason": "Chat activity spike around 0h39m0s (z-score=2.732).",
+          "headline": "不死身のマーロー」という内容でした",
+          "tags": [
+            "ww",
+            "えっ"
+          ],
+          "watch_url": "https://www.twitch.tv/videos/2854118572?t=0h39m0s",
+          "screenshot_url": "/data/segment-thumbnails/2854118572/2854118572_2340_2390.webp"
+        }
+      ],
+      "activity_map": {
+        "bucket_sec": 10,
+        "duration_sec": 2509,
+        "last_comment_sec": 2509,
+        "peak_count": 10,
+        "buckets": [
+          0, 1, 0, 2, 7, 2, 3, 4, 1, 5, 2, 2, 1, 2, 4, 3, 0, 2, 4, 1, 1, 3, 1, 1, 1, 2, 3, 3, 1, 1, 1, 2, 1, 2, 0, 1, 2, 0, 2, 3,
+          0, 4, 3, 1, 2, 6, 1, 0, 1, 0, 6, 2, 3, 1, 2, 2, 1, 3, 0, 1, 3, 3, 6, 2, 2, 0, 1, 2, 4, 4, 1, 2, 2, 2, 2, 3, 2, 2, 1, 3,
+          1, 2, 4, 3, 0, 2, 5, 3, 0, 2, 3, 1, 0, 5, 0, 1, 2, 6, 10, 5, 8, 7, 2, 2, 6, 1, 10, 3, 2, 2, 3, 5, 2, 2, 10, 4, 5, 3, 2, 1,
+          1, 4, 2, 6, 2, 4, 2, 5, 1, 2, 1, 6, 2, 0, 3, 2, 3, 3, 4, 2, 3, 1, 1, 1, 0, 1, 0, 0, 1, 3, 1, 5, 0, 5, 1, 2, 2, 2, 2, 3,
+          2, 0, 3, 2, 2, 5, 1, 0, 1, 9, 0, 1, 1, 1, 4, 1, 1, 2, 2, 3, 6, 4, 1, 1, 0, 2, 3, 3, 1, 2, 2, 3, 4, 4, 4, 6, 4, 1, 5, 2,
+          2, 2, 0, 3, 4, 0, 1, 0, 0, 5, 4, 1, 2, 2, 3, 2, 1, 4, 0, 4, 4, 2, 1, 3, 4, 4, 2, 1, 5, 1, 1, 1, 3, 3, 0, 2, 8, 6, 2, 2,
+          0, 4, 2, 4, 4, 9, 5, 4, 9, 5, 3, 0
+        ]
+      },
+      "analysis_version": "chat-zscore-v8",
+      "analyzed_at": "2026-08-24T06:29:47+09:00"
+    },
+    {
+      "vod_id": "2853712761",
+      "vod_url": "https://www.twitch.tv/videos/2853712761",
+      "title": "【感想会】ダスクブラッドネットワークテストの興奮を共有する会3日目【The Duskbloods/ダスクブラッド】",
+      "published_at": "2026-08-23T07:08:32+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/27d4f7463f013d9454ae_dotitao_316354886258_1787436507//thumb/thumb0-320x180.jpg",
+      "duration_sec": 5081,
+      "count": 3,
+      "chat_total": 1267,
+      "comments_per_hour": 897.697,
+      "items": [
+        {
+          "rank": 1,
+          "id": "2853712761_3100_3200",
+          "start_sec": 3100,
+          "end_sec": 3200,
+          "duration_sec": 100,
+          "start_time": "00:51:40",
+          "end_time": "00:53:20",
+          "reason": "Chat activity spike around 0h51m40s (z-score=3.392).",
+          "headline": "順位は私の方が上",
+          "tags": [
+            "あ",
+            "ホラー",
+            "は"
+          ],
+          "watch_url": "https://www.twitch.tv/videos/2853712761?t=0h51m40s",
+          "screenshot_url": "/data/segment-thumbnails/2853712761/2853712761_3100_3200.webp"
+        },
+        {
+          "rank": 2,
+          "id": "2853712761_3860_3910",
+          "start_sec": 3860,
+          "end_sec": 3910,
+          "duration_sec": 50,
+          "start_time": "01:04:20",
+          "end_time": "01:05:10",
+          "reason": "Chat activity spike around 1h4m20s (z-score=4.954).",
+          "headline": "１位が暴れ、２位は煽られる",
+          "tags": [
+            "おめ",
+            "好プレー",
+            "ww"
+          ],
+          "watch_url": "https://www.twitch.tv/videos/2853712761?t=1h4m20s",
+          "screenshot_url": "/data/segment-thumbnails/2853712761/2853712761_3860_3910.webp"
+        },
+        {
+          "rank": 3,
+          "id": "2853712761_1090_1140",
+          "start_sec": 1090,
+          "end_sec": 1140,
+          "duration_sec": 50,
+          "start_time": "00:18:10",
+          "end_time": "00:19:00",
+          "reason": "Chat activity spike around 0h18m10s (z-score=4.954).",
+          "headline": "ゲームの感想谈论中・チャンピオン話題例外",
+          "tags": [
+            "好プレー",
+            "おめ",
+            "あ"
+          ],
+          "watch_url": "https://www.twitch.tv/videos/2853712761?t=0h18m10s",
+          "screenshot_url": "/data/segment-thumbnails/2853712761/2853712761_1090_1140.webp"
+        }
+      ],
+      "activity_map": {
+        "bucket_sec": 10,
+        "duration_sec": 5086,
+        "last_comment_sec": 5086,
+        "peak_count": 12,
+        "buckets": [
+          0, 1, 1, 4, 1, 5, 4, 2, 5, 6, 2, 4, 3, 3, 2, 4, 2, 3, 1, 4, 5, 3, 3, 2, 0, 5, 3, 1, 1, 1, 1, 5, 0, 4, 3, 2, 2, 2, 0, 1,
+          4, 1, 1, 2, 2, 1, 3, 6, 3, 5, 1, 0, 2, 2, 4, 3, 1, 2, 2, 4, 7, 6, 1, 1, 6, 3, 1, 3, 4, 0, 5, 3, 2, 3, 6, 2, 4, 2, 4, 2,
+          6, 3, 1, 2, 2, 1, 3, 5, 3, 3, 1, 1, 2, 2, 3, 3, 2, 2, 1, 10, 1, 1, 4, 2, 2, 1, 3, 4, 3, 3, 7, 12, 5, 3, 2, 4, 2, 4, 3, 4,
+          4, 3, 1, 2, 2, 4, 1, 3, 1, 0, 2, 2, 5, 3, 2, 3, 0, 4, 2, 2, 2, 2, 1, 0, 2, 0, 0, 3, 2, 2, 8, 4, 1, 7, 1, 2, 2, 7, 5, 0,
+          4, 1, 2, 7, 6, 5, 5, 3, 2, 3, 1, 4, 1, 3, 4, 2, 5, 3, 3, 2, 1, 1, 2, 1, 2, 1, 4, 3, 2, 0, 4, 3, 4, 3, 5, 2, 4, 3, 3, 4,
+          1, 2, 1, 1, 1, 4, 0, 3, 4, 1, 5, 4, 3, 0, 3, 4, 3, 3, 2, 4, 1, 1, 1, 4, 5, 1, 3, 3, 4, 3, 3, 2, 5, 5, 3, 3, 0, 2, 4, 2,
+          3, 4, 4, 3, 1, 4, 1, 1, 2, 4, 4, 4, 0, 0, 2, 1, 1, 1, 0, 1, 2, 4, 2, 4, 3, 2, 0, 2, 2, 3, 0, 2, 1, 3, 2, 1, 3, 8, 7, 10,
+          0, 2, 3, 1, 2, 3, 2, 1, 0, 2, 10, 7, 6, 1, 4, 1, 0, 0, 0, 1, 6, 3, 2, 3, 5, 5, 1, 0, 6, 0, 1, 5, 8, 3, 4, 6, 9, 8, 4, 3,
+          6, 3, 3, 1, 2, 2, 2, 2, 2, 4, 2, 4, 0, 4, 1, 3, 2, 0, 3, 3, 4, 1, 0, 4, 1, 1, 2, 2, 3, 4, 3, 1, 2, 3, 3, 2, 1, 2, 2, 0,
+          2, 2, 1, 2, 0, 3, 2, 4, 1, 4, 2, 0, 3, 1, 2, 3, 1, 3, 4, 1, 0, 0, 1, 0, 3, 3, 1, 3, 12, 2, 5, 4, 3, 4, 1, 4, 4, 0, 3, 2,
+          0, 1, 1, 1, 1, 0, 0, 2, 3, 4, 2, 1, 3, 3, 4, 2, 1, 1, 1, 2, 0, 1, 0, 2, 3, 7, 3, 4, 1, 3, 1, 3, 2, 0, 2, 1, 3, 1, 0, 0,
+          1, 2, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 3, 0, 1, 1, 0, 1, 0, 2, 0, 1, 3, 3, 2, 2, 3, 0, 3, 1, 0, 1, 1, 0, 1, 4,
+          3, 2, 2, 3, 1, 1, 4, 3, 0, 1, 2, 1, 4, 3, 7, 8, 3, 2, 3, 2, 1, 0, 4, 3, 1, 0, 7, 2, 1, 0
+        ]
+      },
+      "analysis_version": "chat-zscore-v8",
+      "analyzed_at": "2026-08-24T06:29:47+09:00"
+    },
     {
       "vod_id": "2853211373",
       "vod_url": "https://www.twitch.tv/videos/2853211373",
       "title": "ダスブラ特番を正座で見る血族集会【The Duskbloods/ダスクブラッド】",
       "published_at": "2026-08-22T19:54:06+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/4f9becc014cfe4ed50f3_dotitao_316352556274_1787396040//thumb/thumb0-320x180.jpg",
-      "duration_sec": 7240,
       "count": 3,
       "chat_total": 2123,
       "comments_per_hour": 1055.635,
@@ -104,7 +364,6 @@
       "title": "【感想会】ダスクブラッドネットワークテストの興奮を共有する会2日目【The Duskbloods/ダスクブラッド】",
       "published_at": "2026-08-22T15:15:15+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/43f6534c819529bf1821_dotitao_316351585010_1787379310//thumb/thumb0-320x180.jpg",
-      "duration_sec": 10234,
       "count": 3,
       "chat_total": 3342,
       "comments_per_hour": 1175.611,
@@ -205,7 +464,6 @@
       "title": "【GRWM】ネットワークテストを完ぺきにこなすためルールを再確認いたします→行ってきます②【The Duskbloods/ダスクブラッド】",
       "published_at": "2026-08-22T10:05:50+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/e06e14934c6b33a85b90_dotitao_316406958451_1787360745//thumb/thumb0-320x180.jpg",
-      "duration_sec": 2765,
       "count": 3,
       "chat_total": 489,
       "comments_per_hour": 636.673,
