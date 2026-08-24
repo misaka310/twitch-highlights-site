@@ -18,7 +18,7 @@
       "start_time": "00:04:20",
       "end_time": "00:06:00",
       "reason": "Chat activity spike around 0h4m20s (z-score=8.53).",
-      "headline": "テスト期間中、一度も勝利なし",
+      "headline": "テスト始まりから優勝0回",
       "tags": [
         "好プレー",
         "は",
@@ -36,7 +36,7 @@
       "start_time": "00:16:10",
       "end_time": "00:17:40",
       "reason": "Chat activity spike around 0h16m10s (z-score=4.545).",
-      "headline": "片方が移動すればすぐ",
+      "headline": "片方が移動してくれればすぐ行ける",
       "tags": [
         "ww",
         "ホラー"
@@ -53,7 +53,7 @@
       "start_time": "01:10:40",
       "end_time": "01:11:30",
       "reason": "Chat activity spike around 1h10m40s (z-score=3.458).",
-      "headline": "ミュートにしたくない」の強調",
+      "headline": "ミュートしたくない」の理由",
       "tags": [
         "ww",
         "ホラー",
