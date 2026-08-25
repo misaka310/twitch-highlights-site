@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-25T06:49:27+09:00",
-  "next_update_at": "2026-08-25T00:00:00+00:00",
+  "updated_at": "2026-08-26T06:43:39+09:00",
+  "next_update_at": "2026-08-26T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2856012578",
+      "vod_url": "https://www.twitch.tv/videos/2856012578",
+      "title": "【検証】ダスブラの4日間でどの程度操作方法を忘れたのか？～2000時間夜を渡ったチンパン～【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
+      "published_at": "2026-08-25T22:05:42+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/ec7f311b6626756e7987_dotitao_316356736753_1787663137//thumb/thumb0-320x180.jpg",
+      "duration_sec": 25354,
+      "count": 3,
+      "chat_total": 4223,
+      "comments_per_hour": 599.621,
+      "detail_path": "/data/vods/2856012578.json"
+    },
     {
       "vod_id": "2855024751",
       "vod_url": "https://www.twitch.tv/videos/2855024751",
@@ -32,7 +44,7 @@
       "title": "【GRWM】ネットワークテストを完ぺきにこなす準備→行ってきます④【The Duskbloods/ダスクブラッド】",
       "published_at": "2026-08-23T18:10:34+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/0454e191e12e9701057b_dotitao_316413637619_1787476228//thumb/thumb0-320x180.jpg",
-      "duration_sec": 2492,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 630,
       "comments_per_hour": 910.112,
@@ -637,18 +649,6 @@
       "chat_total": 3266,
       "comments_per_hour": 674.639,
       "detail_path": "/data/vods/2806495122.json"
-    },
-    {
-      "vod_id": "2805704607",
-      "vod_url": "https://www.twitch.tv/videos/2805704607",
-      "title": "本日SEKIRO映画の予告編公開！を見て盛り上がるオタクの放課後",
-      "published_at": "2026-06-26T18:49:47+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/008252cc0c153e610bd8_dotitao_316086171633_1782467382//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 3817,
-      "comments_per_hour": 614.242,
-      "detail_path": "/data/vods/2805704607.json"
     }
   ]
 }
