@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-26T06:43:39+09:00",
-  "next_update_at": "2026-08-26T00:00:00+00:00",
+  "updated_at": "2026-08-27T09:44:50+09:00",
+  "next_update_at": "2026-08-28T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "2856012578",
@@ -637,18 +637,6 @@
       "chat_total": 7551,
       "comments_per_hour": 984.592,
       "detail_path": "/data/vods/2808778925.json"
-    },
-    {
-      "vod_id": "2806495122",
-      "vod_url": "https://www.twitch.tv/videos/2806495122",
-      "title": "この夜をもうしばし堪能したく、満足したらソロやりまする【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-06-27T18:38:21+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/fec2c592396003dd9c7b_dotitao_316091175409_1782553096//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 3266,
-      "comments_per_hour": 674.639,
-      "detail_path": "/data/vods/2806495122.json"
     }
   ]
 }
