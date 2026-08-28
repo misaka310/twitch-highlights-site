@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-27T09:44:50+09:00",
-  "next_update_at": "2026-08-28T00:00:00+00:00",
+  "updated_at": "2026-08-28T14:22:50+09:00",
+  "next_update_at": "2026-08-29T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2857899389",
+      "vod_url": "https://www.twitch.tv/videos/2857899389",
+      "title": "【本日発売】Switch2版エルデンで待ちに待った追加要素を堪能しよう【エルデンリング/ELDEN RING Tarnished Edition】",
+      "published_at": "2026-08-28T00:20:55+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/9dfea747eb3edc88ef02_dotitao_316366134513_1787844050//thumb/thumb0-320x180.jpg",
+      "duration_sec": 10079,
+      "count": 3,
+      "chat_total": 3600,
+      "comments_per_hour": 1285.842,
+      "detail_path": "/data/vods/2857899389.json"
+    },
     {
       "vod_id": "2856012578",
       "vod_url": "https://www.twitch.tv/videos/2856012578",
@@ -32,7 +44,7 @@
       "title": "【感想会】ダスクブラッドネットワークテストの興奮を共有する会④【The Duskbloods/ダスクブラッド】",
       "published_at": "2026-08-23T23:31:16+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d5e172a83af00a6bcba9_dotitao_316358451058_1787495471//thumb/thumb0-320x180.jpg",
-      "duration_sec": 6362,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2205,
       "comments_per_hour": 1247.721,
