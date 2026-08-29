@@ -1,0 +1,39 @@
+{
+  "vod_id": "2858710739",
+  "vod_url": "https://www.twitch.tv/videos/2858710739",
+  "title": "【本日発売】Switch2版エルデンで待ちに待った追加要素を堪能しよう【エルデンリング/ELDEN RING Tarnished Edition】",
+  "published_at": "2026-08-28T22:03:47+09:00",
+  "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/38af6428d41a44c2fd00_dotitao_316369932017_1787922222//thumb/thumb0-320x180.jpg",
+  "duration_sec": 211,
+  "count": 1,
+  "chat_total": 105,
+  "comments_per_hour": 1791.469,
+  "items": [
+    {
+      "rank": 1,
+      "id": "2858710739_60_110",
+      "start_sec": 60,
+      "end_sec": 110,
+      "duration_sec": 50,
+      "start_time": "00:01:00",
+      "end_time": "00:01:50",
+      "reason": "Chat activity spike around 0h1m0s (z-score=2.586).",
+      "headline": "喋りすぎていた事を告白",
+      "tags": [
+        "ホラー",
+        "ww",
+        "は"
+      ],
+      "watch_url": "https://www.twitch.tv/videos/2858710739?t=0h1m0s",
+      "screenshot_url": "/data/segment-thumbnails/2858710739/2858710739_60_110.webp"
+    }
+  ],
+  "activity_map": {
+    "bucket_sec": 10,
+    "duration_sec": 211,
+    "last_comment_sec": 210,
+    "buckets": [
+      0, 2, 2, 6, 4, 4, 3, 7, 12, 3, 8, 6, 4, 4, 10, 3, 6, 5, 7, 5, 3, 1, 0
+    ]
+  }
+}
