@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-29T12:15:22+09:00",
+  "updated_at": "2026-08-30T08:19:04+09:00",
   "next_update_at": "2026-08-30T00:00:00+00:00",
   "videos": [
     {
@@ -22,7 +22,7 @@
           "start_time": "00:11:10",
           "end_time": "00:14:10",
           "reason": "Chat activity spike around 0h11m10s (z-score=5.559).",
-          "headline": "苦いシールのありかを探索",
+          "headline": "苦いシール、シール部分から頂く",
           "tags": [
             "ww",
             "は",
@@ -40,7 +40,7 @@
           "start_time": "00:26:50",
           "end_time": "00:28:10",
           "reason": "Chat activity spike around 0h26m50s (z-score=8.66).",
-          "headline": "軽装ユーザーの重すぎ疑惑",
+          "headline": "軽装プレイで攻撃負荷重すぎた",
           "tags": [
             "は",
             "ww",
@@ -58,7 +58,7 @@
           "start_time": "00:57:40",
           "end_time": "00:59:30",
           "reason": "Chat activity spike around 0h57m40s (z-score=4.008).",
-          "headline": "ほらちょっと早く出る気がする",
+          "headline": "早く出ると感じた瞬間",
           "tags": [
             "ww",
             "好プレー",
@@ -135,7 +135,7 @@
           "start_time": "00:01:00",
           "end_time": "00:01:50",
           "reason": "Chat activity spike around 0h1m0s (z-score=2.586).",
-          "headline": "喋りすぎていた事を告白",
+          "headline": "ずっと喋りすぎて反省",
           "tags": [
             "ホラー",
             "ww",

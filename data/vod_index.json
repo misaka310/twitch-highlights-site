@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-29T12:15:22+09:00",
+  "updated_at": "2026-08-30T08:19:04+09:00",
   "next_update_at": "2026-08-30T00:00:00+00:00",
   "videos": [
     {
@@ -661,18 +661,6 @@
       "chat_total": 7463,
       "comments_per_hour": 1164.022,
       "detail_path": "/data/vods/2809579840.json"
-    },
-    {
-      "vod_id": "2808778925",
-      "vod_url": "https://www.twitch.tv/videos/2808778925",
-      "title": "どうも、ナイトレインコーチング教室美人講師のドチタオです。【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-06-30T18:09:03+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b79ef122164c54c6b7ac_dotitao_316113824882_1782810538//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 7551,
-      "comments_per_hour": 984.592,
-      "detail_path": "/data/vods/2808778925.json"
     }
   ]
 }
