@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-08-30T08:19:04+09:00",
-  "next_update_at": "2026-08-30T00:00:00+00:00",
+  "updated_at": "2026-08-31T08:28:29+09:00",
+  "next_update_at": "2026-08-31T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2860553472",
+      "vod_url": "https://www.twitch.tv/videos/2860553472",
+      "title": "Switch2版エルデンで待ちに待った追加要素を堪能しよう【エルデンリング/ELDEN RING Tarnished Edition】",
+      "published_at": "2026-08-30T19:54:45+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/2a1fb776e6f97df177c9_dotitao_316378855281_1788087280//thumb/thumb0-320x180.jpg",
+      "duration_sec": 25181,
+      "count": 3,
+      "chat_total": 4668,
+      "comments_per_hour": 667.36,
+      "detail_path": "/data/vods/2860553472.json"
+    },
     {
       "vod_id": "2858713480",
       "vod_url": "https://www.twitch.tv/videos/2858713480",
@@ -32,7 +44,7 @@
       "title": "【本日発売】Switch2版エルデンで待ちに待った追加要素を堪能しよう【エルデンリング/ELDEN RING Tarnished Edition】",
       "published_at": "2026-08-28T00:20:55+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/9dfea747eb3edc88ef02_dotitao_316366134513_1787844050//thumb/thumb0-320x180.jpg",
-      "duration_sec": 10079,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 3600,
       "comments_per_hour": 1285.842,
@@ -649,18 +661,6 @@
       "chat_total": 2062,
       "comments_per_hour": 789.031,
       "detail_path": "/data/vods/2810969479.json"
-    },
-    {
-      "vod_id": "2809579840",
-      "vod_url": "https://www.twitch.tv/videos/2809579840",
-      "title": "【新チャプター】カンスト学者によるソロ深度5を目指す地獄旅、スタート！【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-07-01T20:09:44+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/f9eee297aefafdac6e4c_dotitao_316118642930_1782904179//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 7463,
-      "comments_per_hour": 1164.022,
-      "detail_path": "/data/vods/2809579840.json"
     }
   ]
 }
