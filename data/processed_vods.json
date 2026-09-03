@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-03T10:20:06+09:00",
+  "updated_at": "2026-09-03T10:28:47+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -42,7 +42,7 @@
           "start_time": "01:25:20",
           "end_time": "01:27:20",
           "reason": "Chat activity spike around 1h25m20s (z-score=3.586).",
-          "headline": "ラダーン、ガチリスペクトしてると言われる",
+          "headline": "ラダーンへのリスペクト",
           "tags": [
             "は",
             "えっど"
@@ -59,7 +59,7 @@
           "start_time": "00:23:40",
           "end_time": "00:24:40",
           "reason": "Chat activity spike around 0h23m40s (z-score=5.43).",
-          "headline": "笑いが一気に広がる",
+          "headline": "今、蛇の巻きぐの考察",
           "tags": [
             "ww",
             "は"
@@ -144,7 +144,7 @@
           "start_time": "01:52:50",
           "end_time": "01:54:20",
           "reason": "Chat activity spike around 1h52m50s (z-score=9.024).",
-          "headline": "尻尾のツボで警戒しない",
+          "headline": "好プレーで盛り上がる",
           "tags": [
             "ww",
             "おめ",
@@ -162,7 +162,7 @@
           "start_time": "00:38:10",
           "end_time": "00:39:20",
           "reason": "Chat activity spike around 0h38m10s (z-score=7.231).",
-          "headline": "笑いが一気に広がる",
+          "headline": "パリに戻った…フランスにね",
           "tags": [
             "ww",
             "あ",
@@ -268,7 +268,7 @@
           "start_time": "00:18:30",
           "end_time": "00:20:10",
           "reason": "Chat activity spike around 0h18m30s (z-score=8.32).",
-          "headline": "エルデンリング：渡り方の一部始終",
+          "headline": "わざと渡ってエルデン挑戦",
           "tags": [
             "ww",
             "は"
@@ -285,7 +285,7 @@
           "start_time": "04:04:20",
           "end_time": "04:06:30",
           "reason": "Chat activity spike around 4h4m20s (z-score=4.515).",
-          "headline": "ントをしに来てくれた",
+          "headline": "エルデンリングのプレイ動画",
           "tags": [
             "えっ",
             "好プレー",
