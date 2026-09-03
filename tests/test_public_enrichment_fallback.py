@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 import tempfile
 import types
@@ -62,6 +63,67 @@ class PublicEnrichmentFallbackTests(unittest.TestCase):
             self.create_screenshot(root)
             failures = verifier.collect_public_enrichment_failures(self.build_payload(reason=""), root=root)
         self.assertEqual(["segment_id=123_3723_3783: display title source missing"], failures)
+
+    def test_runtime_loader_uses_detail_payload_referenced_by_index(self):
+        verifier = self.load_verifier()
+        loader = getattr(verifier, "load_runtime_public_videos", None)
+        self.assertIsNotNone(loader, "runtime public enrichment must load the same detail JSON used by the UI")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_dir = root / "data"
+            detail_dir = data_dir / "vods"
+            detail_dir.mkdir(parents=True)
+            (data_dir / "vod_index.json").write_text(
+                json.dumps(
+                    {
+                        "videos": [
+                            {
+                                "vod_id": "123",
+                                "detail_path": "/data/vods/123.json",
+                                "published_at": "2026-09-03T00:00:00+09:00",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (detail_dir / "123.json").write_text(
+                json.dumps(
+                    {
+                        "vod_id": "123",
+                        "items": [
+                            {
+                                "id": "123_3723_3783",
+                                "reason": "detail payload",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (data_dir / "vods.json").write_text(
+                json.dumps(
+                    {
+                        "videos": [
+                            {
+                                "vod_id": "123",
+                                "items": [
+                                    {
+                                        "id": "123_3723_3783",
+                                        "reason": "aggregate payload must not be the runtime source",
+                                    }
+                                ],
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            videos = loader(root)
+
+        self.assertEqual("detail payload", videos[0]["items"][0]["reason"])
 
 
 if __name__ == "__main__":
