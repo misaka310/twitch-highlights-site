@@ -47,6 +47,8 @@ PR作成、対象SHAの検証、head SHA確認、squash mergeは`.github/scripts
 - 手動更新は `workflow_dispatch` で `main` を指定する。
 - `data/vods.json` は公開トップ用の最新3件、`data/vod_index.json` は保持期間内の一覧を持つ。
 - 更新データは `automation/update-vods` ブランチとPRを経由し、公開準備チェック成功後にmainへマージする。
+- Whisperで文字起こしできない区間など、見出し生成だけが成立しない見どころは `headline` 欠損を許容し、既存の `reason` を公開UIの表示見出しフォールバックとして使用する。`headline` 欠損だけでVOD更新全体を停止しない。
+- 公開準備チェックは、生成済み `headline` の品質、表示用見出し源（`headline` または `reason`）の存在、見どころサムネイルの存在を検証する。表示用見出し源まで欠損する場合や、生成済み見出しが品質基準を満たさない場合は従来どおり失敗させる。
 
 ## GITHUB_TOKENと連鎖実行
 
