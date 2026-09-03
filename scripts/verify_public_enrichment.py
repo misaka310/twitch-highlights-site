@@ -14,7 +14,24 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from transcribe_segments import is_publishable_headline, validate_final_headline_japanese
 
 
-DATA_PATH = ROOT / "data" / "vods.json"
+VOD_INDEX_PATH = ROOT / "data" / "vod_index.json"
+
+
+def load_runtime_public_videos(root: Path = ROOT) -> list[dict[str, Any]]:
+    index_path = root / "data" / "vod_index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8-sig"))
+    entries = index.get("videos") or []
+    videos: list[dict[str, Any]] = []
+    for entry in entries[:3]:
+        vod_id = str(entry.get("vod_id") or "unknown")
+        detail_path = str(entry.get("detail_path") or "").strip()
+        if not detail_path:
+            raise RuntimeError(f"vod_id={vod_id}: detail_path missing")
+        detail_file = root / detail_path.lstrip("/")
+        if not detail_file.is_file():
+            raise RuntimeError(f"vod_id={vod_id}: detail payload missing")
+        videos.append(json.loads(detail_file.read_text(encoding="utf-8-sig")))
+    return videos
 
 
 def collect_public_enrichment_failures(payload: dict[str, Any], *, root: Path = ROOT) -> list[str]:
@@ -51,12 +68,11 @@ def collect_public_enrichment_failures(payload: dict[str, Any], *, root: Path = 
 
 
 def main() -> None:
-    payload = json.loads(DATA_PATH.read_text(encoding="utf-8-sig"))
-    videos = payload.get("videos") or []
+    videos = load_runtime_public_videos()
     if not videos:
         raise RuntimeError("public VOD payload is empty")
 
-    failures = collect_public_enrichment_failures(payload)
+    failures = collect_public_enrichment_failures({"videos": videos})
     if failures:
         raise RuntimeError("public enrichment incomplete: " + "; ".join(failures[:12]))
 
