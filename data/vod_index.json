@@ -1,14 +1,50 @@
 {
-  "updated_at": "2026-08-31T08:28:29+09:00",
-  "next_update_at": "2026-08-31T00:00:00+00:00",
+  "updated_at": "2026-09-03T10:20:06+09:00",
+  "next_update_at": "2026-09-04T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2863235495",
+      "vod_url": "https://www.twitch.tv/videos/2863235495",
+      "title": "【祭】既プレイを疑われている女のエルデン←どちらとも読める【エルデンリング/ELDEN RING Tarnished Edition】※投げ銭禁止",
+      "published_at": "2026-09-02T21:15:37+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/f4014156d516ea5ce88f_dotitao_316392120049_1788351332//thumb/thumb0-320x180.jpg",
+      "duration_sec": 17810,
+      "count": 3,
+      "chat_total": 3964,
+      "comments_per_hour": 801.258,
+      "detail_path": "/data/vods/2863235495.json"
+    },
+    {
+      "vod_id": "2862413918",
+      "vod_url": "https://www.twitch.tv/videos/2862413918",
+      "title": "既プレイを疑われている女のエルデン←どちらとも読める【エルデンリング/ELDEN RING Tarnished Edition】※投げ銭禁止",
+      "published_at": "2026-09-01T22:35:25+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/e826d02795740ba78ae7_dotitao_316398072818_1788269720//thumb/thumb0-320x180.jpg",
+      "duration_sec": 18561,
+      "count": 3,
+      "chat_total": 5275,
+      "comments_per_hour": 1023.113,
+      "detail_path": "/data/vods/2862413918.json"
+    },
+    {
+      "vod_id": "2861489085",
+      "vod_url": "https://www.twitch.tv/videos/2861489085",
+      "title": "Switch2版エルデンで待ちに待った追加要素を堪能しよう【エルデンリング/ELDEN RING Tarnished Edition】",
+      "published_at": "2026-08-31T20:51:00+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d0753d20dc137e23da87_dotitao_316383280625_1788177055//thumb/thumb0-320x180.jpg",
+      "duration_sec": 19687,
+      "count": 3,
+      "chat_total": 3339,
+      "comments_per_hour": 610.576,
+      "detail_path": "/data/vods/2861489085.json"
+    },
     {
       "vod_id": "2860553472",
       "vod_url": "https://www.twitch.tv/videos/2860553472",
       "title": "Switch2版エルデンで待ちに待った追加要素を堪能しよう【エルデンリング/ELDEN RING Tarnished Edition】",
       "published_at": "2026-08-30T19:54:45+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/2a1fb776e6f97df177c9_dotitao_316378855281_1788087280//thumb/thumb0-320x180.jpg",
-      "duration_sec": 25181,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 4668,
       "comments_per_hour": 667.36,
@@ -20,7 +56,7 @@
       "title": "【本日発売】Switch2版エルデンで待ちに待った追加要素を堪能しよう【エルデンリング/ELDEN RING Tarnished Edition】",
       "published_at": "2026-08-28T22:08:07+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/a6ef41a2c6cfc659d374_dotitao_316369959025_1787922482//thumb/thumb0-320x180.jpg",
-      "duration_sec": 15465,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 4121,
       "comments_per_hour": 959.302,
@@ -32,7 +68,7 @@
       "title": "【本日発売】Switch2版エルデンで待ちに待った追加要素を堪能しよう【エルデンリング/ELDEN RING Tarnished Edition】",
       "published_at": "2026-08-28T22:03:47+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/38af6428d41a44c2fd00_dotitao_316369932017_1787922222//thumb/thumb0-320x180.jpg",
-      "duration_sec": 211,
+      "duration_sec": null,
       "count": 1,
       "chat_total": 105,
       "comments_per_hour": 1791.469,
@@ -613,54 +649,6 @@
       "chat_total": 2705,
       "comments_per_hour": 1450.618,
       "detail_path": "/data/vods/2812689684.json"
-    },
-    {
-      "vod_id": "2811781308",
-      "vod_url": "https://www.twitch.tv/videos/2811781308",
-      "title": "最強ビルド見つけたし、学者ソロ深度5を目指す【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-07-04T13:40:40+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/38566a6b48caf0ec204d_dotitao_316185359475_1783140035//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 3474,
-      "comments_per_hour": 699.189,
-      "detail_path": "/data/vods/2811781308.json"
-    },
-    {
-      "vod_id": "2811744728",
-      "vod_url": "https://www.twitch.tv/videos/2811744728",
-      "title": "今回の件について、決着をつける【雑談】",
-      "published_at": "2026-07-04T12:33:29+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d3cdb0c16ed058ff4f7e_dotitao_316130785906_1783136004//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 2,
-      "chat_total": 1761,
-      "comments_per_hour": 2047.013,
-      "detail_path": "/data/vods/2811744728.json"
-    },
-    {
-      "vod_id": "2811171549",
-      "vod_url": "https://www.twitch.tv/videos/2811171549",
-      "title": "学者ソロ深度5を目指す地獄旅、スタート！【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-07-03T21:39:56+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/aea9d9f4b816f661c04c_dotitao_316182264435_1783082391//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2491,
-      "comments_per_hour": 709.574,
-      "detail_path": "/data/vods/2811171549.json"
-    },
-    {
-      "vod_id": "2810969479",
-      "vod_url": "https://www.twitch.tv/videos/2810969479",
-      "title": "【初見】ゲリラ昼リズム天国、社内ニートのリズムで乗りこなす【リズム天国 ミラクルスターズ】",
-      "published_at": "2026-07-03T12:38:12+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/80289553d67ad00343d5_dotitao_316180359411_1783049887//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2062,
-      "comments_per_hour": 789.031,
-      "detail_path": "/data/vods/2810969479.json"
     }
   ]
 }
