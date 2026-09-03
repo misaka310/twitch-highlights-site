@@ -23,7 +23,7 @@ export async function loadVodPage(page: number, fetcher: typeof fetch = fetch): 
   const resolvedPage = Math.min(requestedPage, pageCount);
   const start = (resolvedPage - 1) * VOD_PAGE_SIZE;
   const pageEntries = entries.slice(start, start + VOD_PAGE_SIZE);
-  const vods = await Promise.all(
+  const detailResults = await Promise.allSettled(
     pageEntries.map(async (entry) => {
       const response = await fetcher(normalizeDataPath(entry.detail_path), { cache: "no-store" });
       if (!response.ok) throw new Error(`VOD ${entry.vod_id} を読み込めませんでした。`);
@@ -31,6 +31,7 @@ export async function loadVodPage(page: number, fetcher: typeof fetch = fetch): 
       return { ...vod, items: orderSegments(vod.items) };
     }),
   );
+  const vods = detailResults.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
   return {
     requestedPage,
     page: resolvedPage,

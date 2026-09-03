@@ -72,6 +72,31 @@ test("clamps out-of-range VOD pages to the last available page", async () => {
   assert.equal(requestedPaths.includes("/data/vods/4.json"), false);
 });
 
+test("keeps the page usable when one VOD detail payload fails", async () => {
+  const fetcher = async (input: string | URL | Request): Promise<Response> => {
+    const path = String(input);
+    if (path === "/data/vod_index.json") {
+      return Response.json({
+        videos: [
+          { vod_id: "2", detail_path: "data/vods/2.json", published_at: "2026-08-02T00:00:00Z" },
+          { vod_id: "1", detail_path: "data/vods/1.json", published_at: "2026-08-01T00:00:00Z" },
+        ],
+      });
+    }
+    if (path === "/site-config.json") return Response.json({ site: { name: "Example" } });
+    if (path === "/data/vods/2.json") return new Response("not found", { status: 404 });
+    if (path === "/data/vods/1.json") {
+      return Response.json({ vod_id: "1", title: "healthy VOD", published_at: "2026-08-01T00:00:00Z" });
+    }
+    return new Response("not found", { status: 404 });
+  };
+
+  const result = await loadVodPage(1, fetcher as typeof fetch);
+
+  assert.deepEqual(result.vods.map((vod) => vod.vod_id), ["1"]);
+  assert.equal(result.totalCount, 2);
+});
+
 test("keeps display formatting and reason localization", () => {
   assert.equal(formatClock(3661.9), "01:01:01");
   assert.equal(localizeReason("Chat activity spike around 00:00:40 (z-score=4.2)."), "コメントが集中した場面");
