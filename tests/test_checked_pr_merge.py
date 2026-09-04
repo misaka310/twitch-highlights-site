@@ -1,11 +1,13 @@
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / ".github" / "scripts"))
 
+import checked_pr_merge  # noqa: E402
 from checked_pr_merge import (  # noqa: E402
     REQUIRED_DISPATCH_WORKFLOWS,
     REQUIRED_PR_WORKFLOWS,
@@ -70,6 +72,27 @@ class CheckedPullRequestMergeTests(unittest.TestCase):
         self.assertIn("inputs.run_live == true", ci)
         self.assertIn("workflow_dispatch:", hygiene)
         self.assertIn("--workflow-mode trusted-dispatch", update)
+
+    def test_list_dispatched_run_ids_ignores_other_workflow_run_ids(self):
+        # `gh run list --workflow <file>` can transiently include a run from a
+        # different workflow that was dispatched around the same time (as
+        # happened for automation/update-vods PR #114, where the Repo Launch
+        # Doctor lookup returned a Frontend CI run id). The workflowName must
+        # still be checked so that run is never mistaken for the real one.
+        sample_runs = [
+            {"databaseId": 33817504551, "workflowName": "Frontend CI"},
+            {"databaseId": 33817523382, "workflowName": "Repo Launch Doctor"},
+        ]
+        with mock.patch.object(checked_pr_merge, "_json", return_value=sample_runs):
+            result = checked_pr_merge._list_dispatched_run_ids(
+                "owner/repo",
+                "automation/update-vods",
+                "f818cd5",
+                "repo-launch-doctor.yml",
+                "Repo Launch Doctor",
+            )
+
+        self.assertEqual(result, {33817523382})
 
     def test_release_and_update_workflows_delegate_checked_merge(self):
         script_reference = "python .github/scripts/checked_pr_merge.py"
