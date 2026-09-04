@@ -139,7 +139,9 @@ def _wait_for_readiness(repo: str, branch: str, head_sha: str, attempts: int, in
         raise RuntimeError(f"public-readiness checked {checked_sha} instead of {head_sha}")
 
 
-def _list_dispatched_run_ids(repo: str, branch: str, head_sha: str, workflow_file: str) -> set[int]:
+def _list_dispatched_run_ids(
+    repo: str, branch: str, head_sha: str, workflow_file: str, workflow_name: str
+) -> set[int]:
     runs = _json(
         [
             "gh",
@@ -158,12 +160,22 @@ def _list_dispatched_run_ids(repo: str, branch: str, head_sha: str, workflow_fil
             "--limit",
             "20",
             "--json",
-            "databaseId",
+            "databaseId,workflowName",
         ]
     )
     if not isinstance(runs, list):
         return set()
-    return {int(run["databaseId"]) for run in runs if isinstance(run, Mapping) and run.get("databaseId") is not None}
+    # The GitHub API's `--workflow` filter can transiently return runs from a
+    # different workflow that was dispatched around the same time. Re-check
+    # workflowName here so a same-timestamp Frontend CI run is never mistaken
+    # for the Repo Launch Doctor run (or vice versa).
+    return {
+        int(run["databaseId"])
+        for run in runs
+        if isinstance(run, Mapping)
+        and run.get("databaseId") is not None
+        and run.get("workflowName") == workflow_name
+    }
 
 
 def _wait_for_dispatched_workflows(
@@ -175,11 +187,13 @@ def _wait_for_dispatched_workflows(
 ) -> None:
     run_ids: dict[str, int] = {}
     for workflow_name, workflow_file in REQUIRED_DISPATCH_WORKFLOWS:
-        existing_ids = _list_dispatched_run_ids(repo, branch, head_sha, workflow_file)
+        existing_ids = _list_dispatched_run_ids(repo, branch, head_sha, workflow_file, workflow_name)
         _run(["gh", "workflow", "run", workflow_file, "--repo", repo, "--ref", branch])
 
         def find_new_run_id() -> int | None:
-            new_ids = _list_dispatched_run_ids(repo, branch, head_sha, workflow_file) - existing_ids
+            new_ids = (
+                _list_dispatched_run_ids(repo, branch, head_sha, workflow_file, workflow_name) - existing_ids
+            )
             return max(new_ids) if new_ids else None
 
         run_ids[workflow_name] = _wait_for_value(
