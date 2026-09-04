@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-09-04T08:24:53+09:00",
-  "next_update_at": "2026-09-04T00:00:00+00:00",
+  "updated_at": "2026-09-05T08:08:13+09:00",
+  "next_update_at": "2026-09-05T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2864944291",
+      "vod_url": "https://www.twitch.tv/videos/2864944291",
+      "title": "【本日公開】セキロ映画の予習復習で一周クリアするよ！【SEKIRO: SHADOWS DIE TWICE】※投げ銭禁止",
+      "published_at": "2026-09-04T21:02:24+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/9091d7689930617f7b23_dotitao_316400861681_1788523338//thumb/thumb0-320x180.jpg",
+      "duration_sec": 10623,
+      "count": 3,
+      "chat_total": 1589,
+      "comments_per_hour": 538.492,
+      "detail_path": "/data/vods/2864944291.json"
+    },
     {
       "vod_id": "2864092984",
       "vod_url": "https://www.twitch.tv/videos/2864092984",
@@ -32,7 +44,7 @@
       "title": "既プレイを疑われている女のエルデン←どちらとも読める【エルデンリング/ELDEN RING Tarnished Edition】※投げ銭禁止",
       "published_at": "2026-09-01T22:35:25+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/e826d02795740ba78ae7_dotitao_316398072818_1788269720//thumb/thumb0-320x180.jpg",
-      "duration_sec": 18561,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 5275,
       "comments_per_hour": 1023.113,
@@ -625,18 +637,6 @@
       "chat_total": 3364,
       "comments_per_hour": 639.544,
       "detail_path": "/data/vods/2814175983.json"
-    },
-    {
-      "vod_id": "2813434771",
-      "vod_url": "https://www.twitch.tv/videos/2813434771",
-      "title": "【上田ゲー初見】伝説の名作、多くを語らぬ唯一無二の世界観を堪能します。【ICO】",
-      "published_at": "2026-07-06T21:38:43+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/6685d864aec9919da414_dotitao_316133102705_1783341518//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 5301,
-      "comments_per_hour": 1528.767,
-      "detail_path": "/data/vods/2813434771.json"
     }
   ]
 }
