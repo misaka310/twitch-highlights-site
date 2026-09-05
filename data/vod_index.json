@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-09-05T08:08:13+09:00",
-  "next_update_at": "2026-09-05T00:00:00+00:00",
+  "updated_at": "2026-09-06T07:56:13+09:00",
+  "next_update_at": "2026-09-06T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2865924936",
+      "vod_url": "https://www.twitch.tv/videos/2865924936",
+      "title": "【ラダーン祭】既プレイを疑われている女のエルデン←どちらとも読める【エルデンリング/ELDEN RING Tarnished Edition】※投げ銭禁止",
+      "published_at": "2026-09-05T22:10:16+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/0bb705862902bfaaa5db_dotitao_316416045170_1788613810//thumb/thumb0-320x180.jpg",
+      "duration_sec": 20177,
+      "count": 3,
+      "chat_total": 4653,
+      "comments_per_hour": 830.193,
+      "detail_path": "/data/vods/2865924936.json"
+    },
     {
       "vod_id": "2864944291",
       "vod_url": "https://www.twitch.tv/videos/2864944291",
@@ -32,7 +44,7 @@
       "title": "【祭】既プレイを疑われている女のエルデン←どちらとも読める【エルデンリング/ELDEN RING Tarnished Edition】※投げ銭禁止",
       "published_at": "2026-09-02T21:15:37+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/f4014156d516ea5ce88f_dotitao_316392120049_1788351332//thumb/thumb0-320x180.jpg",
-      "duration_sec": 17810,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 3964,
       "comments_per_hour": 801.258,
@@ -625,18 +637,6 @@
       "chat_total": 4580,
       "comments_per_hour": 575.357,
       "detail_path": "/data/vods/2815695547.json"
-    },
-    {
-      "vod_id": "2814175983",
-      "vod_url": "https://www.twitch.tv/videos/2814175983",
-      "title": "【上田ゲー初見】伝説の名作、多くを語らぬ唯一無二の世界観を堪能します。【ICO】",
-      "published_at": "2026-07-07T20:56:00+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/6134fa03d1cc6e1c6c40_dotitao_316200659059_1783425355//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 3364,
-      "comments_per_hour": 639.544,
-      "detail_path": "/data/vods/2814175983.json"
     }
   ]
 }
