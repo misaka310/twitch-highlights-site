@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-09-06T07:56:13+09:00",
-  "next_update_at": "2026-09-06T00:00:00+00:00",
+  "updated_at": "2026-09-07T08:01:30+09:00",
+  "next_update_at": "2026-09-07T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2866875215",
+      "vod_url": "https://www.twitch.tv/videos/2866875215",
+      "title": "【映画セキロ感想会】未視聴の方はこの枠は絶対に見ないでください！！【SEKIRO: NO DEFEAT】",
+      "published_at": "2026-09-06T22:14:45+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d467f1b3fe7495d9fc7f_dotitao_316477975795_1788700480//thumb/thumb0-320x180.jpg",
+      "duration_sec": 13511,
+      "count": 3,
+      "chat_total": 2924,
+      "comments_per_hour": 779.099,
+      "detail_path": "/data/vods/2866875215.json"
+    },
     {
       "vod_id": "2865924936",
       "vod_url": "https://www.twitch.tv/videos/2865924936",
@@ -32,7 +44,7 @@
       "title": "【公開前日】映画セキロ予習会！映画までに再度クリアしておきたい【SEKIRO: SHADOWS DIE TWICE】※投げ銭禁止",
       "published_at": "2026-09-03T21:13:49+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/0f466fb020fccdc5de03_dotitao_316396575345_1788437623//thumb/thumb0-320x180.jpg",
-      "duration_sec": 22355,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 3601,
       "comments_per_hour": 579.897,
