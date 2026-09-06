@@ -22,6 +22,11 @@ permissions:
 
 jobs:
   verification:
+    # automation/update-vods PRs use workflow-provided tokens that cannot
+    # see pending-approval runs on this workflow (see docs/OPERATIONS.md);
+    # those PRs verify via explicit workflow_dispatch instead, so skip the
+    # automatic pull_request run here to avoid a permanently red check.
+    if: github.event_name != 'pull_request' || github.head_ref != 'automation/update-vods'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
