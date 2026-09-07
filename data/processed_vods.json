@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-07T08:01:30+09:00",
+  "updated_at": "2026-09-08T08:30:21+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -24,7 +24,7 @@
           "start_time": "01:55:20",
           "end_time": "01:57:20",
           "reason": "Chat activity spike around 1h55m20s (z-score=5.573).",
-          "headline": "エス」は不要、「変な形」と指摘",
+          "headline": "エスの変な形にツッコむ",
           "tags": [
             "ww",
             "えっ",
@@ -42,7 +42,7 @@
           "start_time": "02:53:50",
           "end_time": "02:54:50",
           "reason": "Chat activity spike around 2h53m50s (z-score=6.087).",
-          "headline": "全員に見せ場を、回転するセリフ",
+          "headline": "全員に見せ場、セリフが回転",
           "tags": [
             "あ",
             "ww",
@@ -60,7 +60,7 @@
           "start_time": "03:06:00",
           "end_time": "03:07:20",
           "reason": "Chat activity spike around 3h6m0s (z-score=5.059).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "良い人たちに考察を見てもらえて",
           "tags": [
             "ホラー",
             "えっど",

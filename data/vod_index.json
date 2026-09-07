@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-07T08:01:30+09:00",
-  "next_update_at": "2026-09-07T00:00:00+00:00",
+  "updated_at": "2026-09-08T08:30:21+09:00",
+  "next_update_at": "2026-09-08T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "2866875215",
@@ -637,18 +637,6 @@
       "chat_total": 2912,
       "comments_per_hour": 565.345,
       "detail_path": "/data/vods/2816512215.json"
-    },
-    {
-      "vod_id": "2815695547",
-      "vod_url": "https://www.twitch.tv/videos/2815695547",
-      "title": "【上田ゲー初見】伝説の名作、多くを語らぬ唯一無二の世界観を堪能します。【ICO】",
-      "published_at": "2026-07-09T18:58:54+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/fb0b1a96897d7b6ed900_dotitao_316145351281_1783591129//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 4580,
-      "comments_per_hour": 575.357,
-      "detail_path": "/data/vods/2815695547.json"
     }
   ]
 }
