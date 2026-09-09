@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-09-09T08:24:13+09:00",
-  "next_update_at": "2026-09-09T00:00:00+00:00",
+  "updated_at": "2026-09-10T08:18:40+09:00",
+  "next_update_at": "2026-09-10T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2869469962",
+      "vod_url": "https://www.twitch.tv/videos/2869469962",
+      "title": "正座待機雑談→同時視聴【Nintendo Direct 2026.9.9】",
+      "published_at": "2026-09-09T21:09:47+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/782b65d592290adae4e2_dotitao_316423883505_1788955782//thumb/thumb0-320x180.jpg",
+      "duration_sec": 11863,
+      "count": 3,
+      "chat_total": 5360,
+      "comments_per_hour": 1626.57,
+      "detail_path": "/data/vods/2869469962.json"
+    },
     {
       "vod_id": "2868630900",
       "vod_url": "https://www.twitch.tv/videos/2868630900",
@@ -32,7 +44,7 @@
       "title": "【ラダーン祭】既プレイを疑われている女のエルデン←どちらとも読める【エルデンリング/ELDEN RING Tarnished Edition】※投げ銭禁止",
       "published_at": "2026-09-05T22:10:16+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/0bb705862902bfaaa5db_dotitao_316416045170_1788613810//thumb/thumb0-320x180.jpg",
-      "duration_sec": 20177,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 4653,
       "comments_per_hour": 830.193,
