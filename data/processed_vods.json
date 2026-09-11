@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-11T08:13:54+09:00",
+  "updated_at": "2026-09-12T08:13:56+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -24,7 +24,7 @@
           "start_time": "02:12:00",
           "end_time": "02:14:20",
           "reason": "Chat activity spike around 2h12m0s (z-score=4.269).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "ロリかパリかの話",
           "tags": [
             "あ",
             "ww",
@@ -42,7 +42,7 @@
           "start_time": "01:30:40",
           "end_time": "01:32:10",
           "reason": "Chat activity spike around 1h30m40s (z-score=5.686).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "100勝するから1勝でもOK",
           "tags": [
             "好プレー",
             "は",
@@ -60,7 +60,7 @@
           "start_time": "00:52:20",
           "end_time": "00:53:50",
           "reason": "Chat activity spike around 0h52m20s (z-score=4.977).",
-          "headline": "緊張の展開にざわつく",
+          "headline": "男の子の髪の毛と燃やす話",
           "tags": [
             "あ",
             "ホラー",
