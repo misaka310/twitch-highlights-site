@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-09-12T08:13:56+09:00",
-  "next_update_at": "2026-09-12T00:00:00+00:00",
+  "updated_at": "2026-09-13T08:04:28+09:00",
+  "next_update_at": "2026-09-13T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2872083252",
+      "vod_url": "https://www.twitch.tv/videos/2872083252",
+      "title": "【修行】行きて帰りし視聴者ぶっ倒し物語【エルデンリング/ELDEN RING Tarnished Edition】※投げ銭禁止",
+      "published_at": "2026-09-12T20:17:51+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/d47aa469c188336263a9_dotitao_316447047410_1789211866//thumb/thumb0-320x180.jpg",
+      "duration_sec": 32017,
+      "count": 3,
+      "chat_total": 7910,
+      "comments_per_hour": 889.403,
+      "detail_path": "/data/vods/2872083252.json"
+    },
     {
       "vod_id": "2870333438",
       "vod_url": "https://www.twitch.tv/videos/2870333438",
@@ -32,7 +44,7 @@
       "title": "新要素集めの旅いよいよ最後か⁉闘技場まっとれよ配信【エルデンリング/ELDEN RING Tarnished Edition】※投げ銭禁止",
       "published_at": "2026-09-08T21:36:24+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/00f6c80920b1c7bfa666_dotitao_316429501170_1788870979//thumb/thumb0-320x180.jpg",
-      "duration_sec": 9013,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 2556,
       "comments_per_hour": 1020.925,
