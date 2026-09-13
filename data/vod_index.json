@@ -1,7 +1,19 @@
 {
-  "updated_at": "2026-09-13T08:04:28+09:00",
-  "next_update_at": "2026-09-13T00:00:00+00:00",
+  "updated_at": "2026-09-14T08:13:32+09:00",
+  "next_update_at": "2026-09-14T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "2873115795",
+      "vod_url": "https://www.twitch.tv/videos/2873115795",
+      "title": "【修行】エルデンリングの本質を知る配信【エルデンリング/ELDEN RING Tarnished Edition】※投げ銭禁止",
+      "published_at": "2026-09-13T22:23:16+09:00",
+      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/05ce1bff70b532876f1d_dotitao_316442094449_1789305791//thumb/thumb0-320x180.jpg",
+      "duration_sec": 13714,
+      "count": 3,
+      "chat_total": 3429,
+      "comments_per_hour": 900.131,
+      "detail_path": "/data/vods/2873115795.json"
+    },
     {
       "vod_id": "2872083252",
       "vod_url": "https://www.twitch.tv/videos/2872083252",
@@ -32,7 +44,7 @@
       "title": "正座待機雑談→同時視聴【Nintendo Direct 2026.9.9】",
       "published_at": "2026-09-09T21:09:47+09:00",
       "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/782b65d592290adae4e2_dotitao_316423883505_1788955782//thumb/thumb0-320x180.jpg",
-      "duration_sec": 11863,
+      "duration_sec": null,
       "count": 3,
       "chat_total": 5360,
       "comments_per_hour": 1626.57,
