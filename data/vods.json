@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-14T08:13:32+09:00",
-  "next_update_at": "2026-09-14T00:00:00+00:00",
+  "updated_at": "2026-09-15T08:49:54+09:00",
+  "next_update_at": "2026-09-15T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "2873115795",
@@ -22,7 +22,6 @@
           "start_time": "03:18:50",
           "end_time": "03:20:50",
           "reason": "Chat activity spike around 3h18m50s (z-score=6.052).",
-          "headline": "エルデンリングでなぜこんなに上手くなった",
           "tags": [
             "おめ",
             "は",
@@ -40,7 +39,6 @@
           "start_time": "01:30:00",
           "end_time": "01:31:10",
           "reason": "Chat activity spike around 1h30m0s (z-score=4.707).",
-          "headline": "好プレーで盛り上がる",
           "tags": [
             "ww",
             "あ",
@@ -58,7 +56,6 @@
           "start_time": "00:47:40",
           "end_time": "00:48:30",
           "reason": "Chat activity spike around 0h47m40s (z-score=4.707).",
-          "headline": "霊証の機能について言及",
           "tags": [
             "ww",
             "ホラー"
