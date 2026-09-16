@@ -66,6 +66,10 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   expect(initial.plays).toBe(0);
   expect(initial.muted.at(-1)).toBe(true);
 
+  await page.locator(".highlight-item").first().click();
+  await expect(frame).toHaveAttribute("data-current-start-sec", "20");
+  expect((await getFakeYoutubeLog(page)).seeks).toContain(20);
+
   await page.locator(".highlight-item").nth(1).click();
   await expect(frame).toHaveAttribute("data-expected-autoplay", "true");
   await expect(frame).toHaveAttribute("data-expected-muted", "false");
@@ -75,6 +79,10 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   expect(afterHighlight.seeks).toContain(60);
   expect(afterHighlight.muted.at(-1)).toBe(false);
   expect(afterHighlight.plays).toBeGreaterThan(0);
+
+  await page.locator(".highlight-item").nth(2).click();
+  await expect(frame).toHaveAttribute("data-current-start-sec", "80");
+  expect((await getFakeYoutubeLog(page)).seeks).toContain(80);
 
   const chartBox = await page.locator(".activity-chart").boundingBox();
   expect(chartBox).not.toBeNull();
@@ -91,4 +99,9 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   await expect.poll(async () => (await getFakeYoutubeLog(page)).mounts.length).toBe(2);
   expect((await getFakeYoutubeLog(page)).mounts.at(-1)).toMatchObject({ videoId: secondVod.vod_id, autoplay: 1 });
   expect((await getFakeYoutubeLog(page)).destroys).toBeGreaterThan(0);
+
+  await page.locator(".highlight-item").first().click();
+  await expect(frame).toHaveAttribute("data-current-start-sec", "10");
+  expect((await getFakeYoutubeLog(page)).mounts).toHaveLength(2);
+  expect((await getFakeYoutubeLog(page)).seeks).toContain(10);
 });
