@@ -1834,6 +1834,7 @@ def download_segment_media(vod_url: str, start_sec: int, end_sec: int, work_dir:
         work_dir=work_dir,
         python_executable=sys.executable,
         timeout_sec=TRANSCRIPT_DOWNLOAD_TIMEOUT_SEC,
+        video_required=SEGMENT_SCREENSHOT_GENERATION_ENABLED,
     )
 
 

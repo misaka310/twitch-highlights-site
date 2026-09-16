@@ -8,7 +8,7 @@ providerがyoutubeのVODでは、vod_idとvod_urlがYouTubeの公開再生対象
 
 YouTube Oracle出力に含まれるvideoOffsetTimeMsecは取得時だけcontent_offset_secondsへ変換し、保存対象は集計後の数値と見どころだけに限定する。
 
-YouTube live_chatの実取得は、確定済みOracle VM（`64.110.102.170` / `ubuntu`）へSSHし、既存のOracle取得スクリプトを実行する経路だけを許可する。ローカルyt-dlpの直接実行結果をOracle取得結果として扱わず、Oracleスクリプトのログと一時TSVはメモリ上で解析する。
+YouTube live_chatの実取得は、確定済みOracle VM（`64.110.102.170` / `ubuntu`）へSSHし、既存のOracle取得スクリプトを実行する経路だけを許可する。ローカルyt-dlpの直接実行結果をOracle取得結果として扱わず、Oracleスクリプトのログと一時TSVはメモリ上で解析する。一時TSVのコメント本文は区間タグとYouTube用の見出しフォールバックを作るためだけに使い、公開データへ保存しない。
 
 ## 原則
 

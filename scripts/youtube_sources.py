@@ -172,6 +172,7 @@ def parse_youtube_oracle_output(
     expected_video_id = parse_youtube_video_id(expected_video)
     metadata: dict[str, Any] = {}
     offsets: list[float] = []
+    messages: list[str | None] = []
     in_tsv = False
     in_metadata = False
 
@@ -194,11 +195,21 @@ def parse_youtube_oracle_output(
         if in_tsv:
             if line == "video_offset\tposted_at_jst":
                 continue
-            parts = line.split("\t", 1)
+            if line == "video_offset\tposted_at_jst\tmessage":
+                continue
+            parts = line.split("\t", 2)
             if len(parts) == 2:
                 offset = _parse_clock_offset(parts[0])
                 if offset is not None:
                     offsets.append(offset)
+                    messages.append(None)
+                    continue
+            if len(parts) == 3:
+                offset = _parse_clock_offset(parts[0])
+                if offset is not None:
+                    offsets.append(offset)
+                    message = parts[2].strip()
+                    messages.append(message or None)
                     continue
             raise ValueError(f"Oracle TSV line {line_number} is invalid")
         if in_metadata:
@@ -206,7 +217,9 @@ def parse_youtube_oracle_output(
                 record = json.loads(line)
             except json.JSONDecodeError as exc:
                 raise ValueError(f"Oracle metadata line {line_number} is not JSON") from exc
+            before_count = len(offsets)
             _collect_oracle_record(record, metadata, offsets)
+            messages.extend([None] * (len(offsets) - before_count))
             continue
         try:
             record = json.loads(line)
@@ -214,7 +227,9 @@ def parse_youtube_oracle_output(
             if allow_transport_logs:
                 continue
             raise ValueError(f"Oracle output line {line_number} is not JSON") from exc
+        before_count = len(offsets)
         _collect_oracle_record(record, metadata, offsets)
+        messages.extend([None] * (len(offsets) - before_count))
 
     metadata_video_id = str(metadata.get("video_id") or "").strip()
     if metadata_video_id and metadata_video_id != expected_video_id:
@@ -234,7 +249,12 @@ def parse_youtube_oracle_output(
     if duration_sec is not None:
         video["duration_sec"] = duration_sec
 
-    comments = [{"content_offset_seconds": offset} for offset in offsets]
+    comments = []
+    for index, offset in enumerate(offsets):
+        comment: dict[str, Any] = {"content_offset_seconds": offset}
+        if index < len(messages) and messages[index]:
+            comment["message"] = messages[index]
+        comments.append(comment)
     return YoutubeFetchResult(video=video, chat=ChatFetchResult(comments=comments, duration_sec=duration_sec))
 
 
