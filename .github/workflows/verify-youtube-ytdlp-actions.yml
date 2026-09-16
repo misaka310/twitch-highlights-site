@@ -1,0 +1,148 @@
+name: Verify YouTube yt-dlp from Actions
+
+on:
+  push:
+    branches:
+      - chore/verify-youtube-actions-yt-dlp-20260917
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-youtube-ytdlp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TEST_VIDEO_URL: https://www.youtube.com/watch?v=WGTrmrSvZH0
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install "yt-dlp==2026.7.4"
+          ffmpeg -version | head -n 1
+          node --version || true
+          python -m yt_dlp --version
+          mkdir -p out
+          : > out/results.txt
+
+      - name: Baseline metadata probe
+        shell: bash
+        run: |
+          set +e
+          python -m yt_dlp \
+            --no-playlist \
+            --no-warnings \
+            --skip-download \
+            --print "%(id)s|%(title)s|%(duration)s|%(live_status)s" \
+            "$TEST_VIDEO_URL" 2>&1 | tee out/metadata.log
+          status=${PIPESTATUS[0]}
+          echo "metadata_status=$status" >> out/results.txt
+          exit 0
+
+      - name: Baseline live-chat replay probe
+        shell: bash
+        run: |
+          set +e
+          python -m yt_dlp \
+            --no-playlist \
+            --no-warnings \
+            --skip-download \
+            --write-subs \
+            --sub-langs live_chat \
+            --sub-format json \
+            -o "out/chat.%(ext)s" \
+            "$TEST_VIDEO_URL" 2>&1 | tee out/chat-download.log
+          status=${PIPESTATUS[0]}
+          echo "chat_download_status=$status" >> out/results.txt
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          out = Path("out")
+          candidates = sorted(p for p in out.glob("chat*") if p.is_file() and p.name not in {"chat-download.log"})
+          if not candidates:
+              print("chat_file=missing")
+              with (out / "results.txt").open("a", encoding="utf-8") as f:
+                  f.write("chat_offsets_status=1\n")
+              raise SystemExit(0)
+
+          chat = candidates[0]
+          raw = chat.read_text(encoding="utf-8", errors="replace")
+          offsets = [int(x) for x in re.findall(r'"videoOffsetTimeMsec"\s*:\s*"?(\d+)', raw)]
+          print(f"chat_file={chat} bytes={chat.stat().st_size} offset_count={len(offsets)}")
+          if offsets:
+              print("offset_samples_ms=" + ",".join(str(x) for x in offsets[:10]))
+              print(f"offset_range_ms={min(offsets)}..{max(offsets)}")
+          with (out / "results.txt").open("a", encoding="utf-8") as f:
+              f.write(f"chat_offsets_status={0 if offsets else 1}\n")
+          PY
+          exit 0
+
+      - name: Baseline five-second media section probe
+        shell: bash
+        run: |
+          set +e
+          python -m yt_dlp \
+            --force-overwrites \
+            --no-playlist \
+            --no-warnings \
+            --download-sections "*00:01:00-00:01:05" \
+            -S "res:144" \
+            --merge-output-format mp4 \
+            -o "out/clip.%(ext)s" \
+            "$TEST_VIDEO_URL" 2>&1 | tee out/clip-download.log
+          status=${PIPESTATUS[0]}
+          echo "clip_download_status=$status" >> out/results.txt
+          clip="$(find out -maxdepth 1 -type f -name 'clip.*' ! -name '*.part' ! -name '*.ytdl' | head -n 1)"
+          if [[ -n "$clip" && -s "$clip" ]]; then
+            bytes="$(stat -c%s "$clip")"
+            echo "clip_file_status=0" >> out/results.txt
+            echo "clip_file=$clip bytes=$bytes"
+            ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 "$clip" || true
+          else
+            echo "clip_file_status=1" >> out/results.txt
+            echo "clip_file=missing"
+          fi
+          exit 0
+
+      - name: Summarize verification
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== verification results ==="
+          cat out/results.txt || true
+          metadata="$(grep '^metadata_status=' out/results.txt | tail -n1 | cut -d= -f2 || echo 1)"
+          chat_download="$(grep '^chat_download_status=' out/results.txt | tail -n1 | cut -d= -f2 || echo 1)"
+          chat_offsets="$(grep '^chat_offsets_status=' out/results.txt | tail -n1 | cut -d= -f2 || echo 1)"
+          clip_download="$(grep '^clip_download_status=' out/results.txt | tail -n1 | cut -d= -f2 || echo 1)"
+          clip_file="$(grep '^clip_file_status=' out/results.txt | tail -n1 | cut -d= -f2 || echo 1)"
+          if [[ "$metadata" == "0" && "$chat_download" == "0" && "$chat_offsets" == "0" && "$clip_download" == "0" && "$clip_file" == "0" ]]; then
+            echo "YOUTUBE_YTDLP_ACTIONS_RESULT=PASS"
+            exit 0
+          fi
+          echo "YOUTUBE_YTDLP_ACTIONS_RESULT=FAIL"
+          exit 1
+
+      - name: Upload diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: youtube-ytdlp-actions-diagnostics
+          path: |
+            out/results.txt
+            out/*.log
+          if-no-files-found: warn
+          retention-days: 3
