@@ -140,6 +140,62 @@ jobs:
           fi
           exit 0
 
+      - name: Upgrade to latest pre-release yt-dlp
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade --pre "yt-dlp[default]"
+          version="$(python -m yt_dlp --version)"
+          echo "nightly_version=$version" | tee -a out/results.txt
+
+      - name: Latest yt-dlp metadata probe
+        shell: bash
+        run: |
+          set +e
+          python -m yt_dlp --no-playlist --no-warnings --skip-download \
+            --print "%(id)s|%(title)s|%(duration)s|%(live_status)s" \
+            "$TEST_VIDEO_URL" 2>&1 | tee out/nightly-metadata.log
+          status=${PIPESTATUS[0]}
+          echo "nightly_metadata_status=$status" >> out/results.txt
+          exit 0
+
+      - name: Latest yt-dlp live-chat replay probe
+        shell: bash
+        run: |
+          set +e
+          rm -f out/nightly-chat.*
+          python -m yt_dlp --no-playlist --no-warnings --skip-download \
+            --write-subs --sub-langs live_chat --sub-format json \
+            -o "out/nightly-chat.%(ext)s" "$TEST_VIDEO_URL" 2>&1 | tee out/nightly-chat-download.log
+          status=${PIPESTATUS[0]}
+          echo "nightly_chat_download_status=$status" >> out/results.txt
+          chat="$(find out -maxdepth 1 -type f -name 'nightly-chat.*' ! -name '*.log' | head -n 1)"
+          if [[ -n "$chat" && -s "$chat" ]]; then
+            echo "nightly_chat_file_status=0" >> out/results.txt
+          else
+            echo "nightly_chat_file_status=1" >> out/results.txt
+          fi
+          exit 0
+
+      - name: Latest yt-dlp five-second media probe
+        shell: bash
+        run: |
+          set +e
+          rm -f out/nightly-clip.*
+          python -m yt_dlp --force-overwrites --no-playlist --no-warnings \
+            --download-sections "*00:01:00-00:01:05" -S "res:144" \
+            --merge-output-format mp4 -o "out/nightly-clip.%(ext)s" \
+            "$TEST_VIDEO_URL" 2>&1 | tee out/nightly-clip-download.log
+          status=${PIPESTATUS[0]}
+          echo "nightly_clip_download_status=$status" >> out/results.txt
+          clip="$(find out -maxdepth 1 -type f -name 'nightly-clip.*' ! -name '*.log' ! -name '*.part' ! -name '*.ytdl' | head -n 1)"
+          if [[ -n "$clip" && -s "$clip" ]]; then
+            echo "nightly_clip_file_status=0" >> out/results.txt
+          else
+            echo "nightly_clip_file_status=1" >> out/results.txt
+          fi
+          exit 0
+
       - name: Summarize verification
         if: always()
         shell: bash
