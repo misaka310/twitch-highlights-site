@@ -4,6 +4,8 @@
 
 providerがyoutubeのVODでは、vod_idとvod_urlがYouTubeの公開再生対象を指す。Twitchの既存データではproviderを省略し、Twitchを既定値として扱う。
 
+公開UIの表示対象はYouTubeに限定する。Twitchデータは既存キャッシュと互換用の入力として保持できるが、公開UIの一覧・ページャー・VOD切替には含めない。
+
 YouTube Oracle出力に含まれるvideoOffsetTimeMsecは取得時だけcontent_offset_secondsへ変換し、保存対象は集計後の数値と見どころだけに限定する。
 
 YouTube live_chatの実取得は、確定済みOracle VM（`64.110.102.170` / `ubuntu`）へSSHし、既存のOracle取得スクリプトを実行する経路だけを許可する。ローカルyt-dlpの直接実行結果をOracle取得結果として扱わず、Oracleスクリプトのログと一時TSVはメモリ上で解析する。

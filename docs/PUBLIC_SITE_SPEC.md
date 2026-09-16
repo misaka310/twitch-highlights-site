@@ -13,7 +13,9 @@
 
 ## 2. サイトの目的
 
-Twitch VODのコメント量から抽出した見どころを、利用者が短時間で選び、該当時刻からすぐ再生できる非公式ファンサイトを提供する。
+YouTubeライブアーカイブのコメント量から抽出した見どころを、利用者が短時間で選び、該当時刻からすぐ再生できる非公式ファンサイトを提供する。
+
+現在の公開UIで表示・選択できるproviderはYouTubeだけとする。Twitchの既存集計データと再生実装は互換性のため保持するが、公開UIの一覧・ページャー・VOD切替からは除外する。
 
 公開画面では、文字起こし本文や内部解析過程ではなく、次だけを表示する。
 
@@ -32,13 +34,16 @@ Twitch VODのコメント量から抽出した見どころを、利用者が短�
 - TypeScript
 - Vite
 - Cloudflare Kumo
-- Twitch Player SDK
-- Twitch iframeフォールバック
+- YouTube IFrame Player API
+- YouTubeの公開埋め込み再生
 
-対応provider:
+公開UIの対応provider:
 
-- Twitch
 - YouTube via YouTube IFrame Player API
+
+互換保持するprovider:
+
+- Twitch（公開UIでは非表示）
 
 YouTube live_chatはOracle VM上で取得し、ローカルの直接取得を公開パイプラインの成功経路として扱わない。取得したvideoOffsetTimeMsecはcontent_offset_secondsへ正規化し、コメント本文や投稿者情報は保存しない。
 
@@ -71,7 +76,7 @@ PCでは2カラム構成とする。
 
 左カラム:
 
-1. Twitchプレイヤー
+1. YouTubeプレイヤー
 2. 盛り上がりマップ
 
 右カラム:
@@ -228,7 +233,7 @@ VODは `published_at` の新しい順に表示する。入力JSONの配列順へ
 - 別VODでは必要な場合だけプレイヤーを再生成する。
 - 連続クリック時は最後の要求を優先する。
 - 10秒戻るは実再生位置を基準にする。
-- Twitch SDK取得失敗時はiframeへフォールバックする。
+- YouTube IFrame Player API取得失敗時はエラーをUIへ表示し、別providerへ切り替えない。
 - iframeを重複生成しない。
 - React上のプレイヤー枠とbody直下ポータルの寸法を一致させる。
 

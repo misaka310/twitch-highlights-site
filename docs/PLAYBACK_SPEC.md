@@ -2,7 +2,7 @@
 
 ## YouTube provider
 
-YouTubeはYouTube IFrame Player APIを使い、初期表示、ユーザー操作、seek、10秒戻る、VOD切替の契約をTwitchと共通化する。APIを取得できない場合は失敗をUIへ表示し、偽の再生成功やローカル直接取得へフォールバックしない。
+現行の公開UIはYouTubeだけを表示対象とし、YouTube IFrame Player APIを使って初期表示、ユーザー操作、seek、10秒戻る、VOD切替を実行する。Twitchの再生アダプタは互換用に残すが、公開一覧からTwitchを選択できない。APIを取得できない場合は失敗をUIへ表示し、別providerやローカル直接取得へフォールバックしない。
 
 ## 目的
 
@@ -42,8 +42,8 @@ YouTubeはYouTube IFrame Player APIを使い、初期表示、ユーザー操作
 ## 実装メモ（仕様の主語ではない）
 
 - 公開UIは`frontend/`のReactアプリを正本とする。
-- 表示枠はReactレイアウト内に残し、Twitchプレイヤー本体だけを`body`直下へ配置してTwitchの可視性判定を満たす。
+- 表示枠はReactレイアウト内に残し、YouTubeプレイヤー本体を`body`直下へ配置する。
 - 初期表示は`autoplay=false / muted=true`で準備し、ユーザー操作は`autoplay=true / muted=false`で要求する。
 - 同一VODのseekは既存Playerインスタンスを再利用し、別VODではPlayerを再生成する。
-- SDKを取得できない場合は同じ再生意図を持つiframeへフォールバックする。
-- E2EテストではSDK互換の偽プレイヤーを使い、外部通信なしで再生意図、last-click-wins、seek、VOD切替、rewindを固定する。
+- YouTube IFrame APIを取得できない場合はUIへエラーを表示する。
+- E2EテストではYouTube IFrame API互換の偽プレイヤーを使い、外部通信なしで再生意図、last-click-wins、seek、VOD切替、rewindを固定する。
