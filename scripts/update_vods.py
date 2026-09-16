@@ -292,7 +292,6 @@ class BackfillSummary:
     failed_vod_ids: list[str] = field(default_factory=list)
     analyzed_details: list[dict[str, int | str]] = field(default_factory=list)
 
-
 def main() -> None:
     load_local_env(ENV_PATH)
     configure_runtime_environment(os.environ)
@@ -674,6 +673,7 @@ def normalize_cached_video(video: dict[str, Any]) -> dict[str, Any] | None:
         "title": video.get("title", ""),
         "published_at": video.get("published_at", ""),
         "thumbnail_url": video.get("thumbnail_url", ""),
+        "duration_sec": video.get("duration_sec"),
         "count": int(video.get("count") or len(items)),
         "chat_total": normalize_chat_total(video.get("chat_total")),
         "comments_per_hour": normalize_comments_per_hour(video.get("comments_per_hour")),

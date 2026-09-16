@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-15T08:49:54+09:00",
-  "next_update_at": "2026-09-15T00:00:00+00:00",
+  "updated_at": "2026-09-17T06:27:10+09:00",
+  "next_update_at": "2026-09-17T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "2873115795",
@@ -13,6 +13,19 @@
       "chat_total": 3429,
       "comments_per_hour": 900.131,
       "detail_path": "/data/vods/2873115795.json"
+    },
+    {
+      "vod_id": "WGTrmrSvZH0",
+      "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+      "title": "【修行】エルデンリングの本質を知る配信【エルデンリング/ELDEN RING Tarnished Edition】",
+      "published_at": "2026-09-13T00:00:00+00:00",
+      "thumbnail_url": "https://i.ytimg.com/vi/WGTrmrSvZH0/maxresdefault.jpg",
+      "duration_sec": 13679,
+      "count": 3,
+      "chat_total": 1365,
+      "comments_per_hour": 359.237,
+      "detail_path": "/data/vods/WGTrmrSvZH0.json",
+      "provider": "youtube"
     },
     {
       "vod_id": "2872083252",
@@ -661,30 +674,6 @@
       "chat_total": 2651,
       "comments_per_hour": 1859.626,
       "detail_path": "/data/vods/2823752375.json"
-    },
-    {
-      "vod_id": "2822899683",
-      "vod_url": "https://www.twitch.tv/videos/2822899683",
-      "title": "夏はナイトレインの季節→覚悟決まったら【Outlast】",
-      "published_at": "2026-07-18T19:04:01+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/264cd23cb30612abcb60_dotitao_316194461554_1784369036//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2664,
-      "comments_per_hour": 1051.694,
-      "detail_path": "/data/vods/2822899683.json"
-    },
-    {
-      "vod_id": "2822850288",
-      "vod_url": "https://www.twitch.tv/videos/2822850288",
-      "title": "ダイジェスト：どうも、ナイトレインコーチング教室美人講師のドチタオです。【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-07-18T16:36:24+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b73374c7af016d3ef261_dotitao_79973973386_6755559792//thumb/thumb2822850288-320x180.jpg",
-      "duration_sec": null,
-      "count": 1,
-      "chat_total": 167,
-      "comments_per_hour": 927.778,
-      "detail_path": "/data/vods/2822850288.json"
     }
   ]
 }

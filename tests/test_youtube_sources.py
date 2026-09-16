@@ -4,6 +4,7 @@ import unittest
 from datetime import datetime, timezone
 from unittest.mock import patch
 from pathlib import Path
+from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,8 +13,10 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from youtube_sources import (  # noqa: E402
     YoutubeOracleConfig,
     build_oracle_command,
+    fetch_youtube_video,
     parse_youtube_oracle_output,
     parse_youtube_video_id,
+    youtube_oracle_config_from_env,
 )
 import vod_serialization as serialization  # noqa: E402
 import vod_sources  # noqa: E402
@@ -87,6 +90,71 @@ class YoutubeSourceTests(unittest.TestCase):
             "https://i.ytimg.com/vi/WGTrmrSvZH0/maxresdefault.jpg",
         )
 
+    def test_parse_oracle_script_output_accepts_livechat_tsv_and_ignores_transport_logs(self):
+        output = "\n".join(
+            [
+                "REMOTE_HOST=primary-vnic",
+                "2026.08.19",
+                "[youtube_live_chat] Downloading live chat",
+                "ORACLE_CHAT_COUNT= 1365",
+                "__YOUTUBE_ORACLE_TSV_BEGIN__",
+                "video_offset\tposted_at_jst",
+                "00:00:00.000\t2026-09-13T22:20:12.467+09:00",
+                "00:00:55.830\t2026-09-13T22:24:46.148+09:00",
+                "03:47:58.311\t2026-09-14T02:11:48.522+09:00",
+                "__YOUTUBE_ORACLE_TSV_END__",
+                "__YOUTUBE_ORACLE_METADATA_BEGIN__",
+                json.dumps(
+                    {
+                        "id": "WGTrmrSvZH0",
+                        "title": "Confirmed Oracle title",
+                        "upload_date": "20260913",
+                        "duration": 13679,
+                        "thumbnail": "https://i.ytimg.com/vi/WGTrmrSvZH0/maxresdefault.jpg",
+                    }
+                ),
+                "__YOUTUBE_ORACLE_METADATA_END__",
+                "RAW_CHAT_REMOVED=YES",
+            ]
+        )
+
+        result = parse_youtube_oracle_output(
+            output,
+            "WGTrmrSvZH0",
+            allow_transport_logs=True,
+        )
+
+        self.assertEqual(len(result.chat.comments), 3)
+        self.assertEqual(result.chat.comments[-1]["content_offset_seconds"], 13678.311)
+        self.assertEqual(result.video["title"], "Confirmed Oracle title")
+        self.assertEqual(result.video["published_at"], "2026-09-13T00:00:00+00:00")
+        self.assertEqual(result.video["duration_sec"], 13679)
+
+    def test_fixed_oracle_config_uses_the_confirmed_vm_route(self):
+        config = youtube_oracle_config_from_env(
+            {
+                "YOUTUBE_ORACLE_HOST": "64.110.102.170",
+                "YOUTUBE_ORACLE_USER": "ubuntu",
+                "YOUTUBE_ORACLE_KEY_PATH": r"C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key",
+                "YOUTUBE_ORACLE_SCRIPT_PATH": r"C:\00_dev\_system\tmp\oracle_livechat.sh",
+            }
+        )
+        self.assertEqual(
+            build_oracle_command(config, "WGTrmrSvZH0"),
+            [
+                "ssh.exe",
+                "-i",
+                r"C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key",
+                "-o",
+                "BatchMode=yes",
+                "-o",
+                "ConnectTimeout=20",
+                "ubuntu@64.110.102.170",
+                "bash",
+                "-s",
+            ],
+        )
+
     def test_parse_oracle_output_rejects_video_id_mismatch_and_empty_chat(self):
         mismatch = json.dumps({"type": "metadata", "video_id": "different01"})
         with self.assertRaises(ValueError):
@@ -96,16 +164,41 @@ class YoutubeSourceTests(unittest.TestCase):
             parse_youtube_oracle_output(json.dumps({"type": "metadata", "video_id": "WGTrmrSvZH0"}), "WGTrmrSvZH0")
 
     def test_build_oracle_command_requires_remote_command_and_url_token(self):
-        config = YoutubeOracleConfig(command=("ssh", "oracle-vm", "fetch", "{url}"))
-        self.assertEqual(
-            build_oracle_command(config, "https://www.youtube.com/watch?v=WGTrmrSvZH0"),
-            ["ssh", "oracle-vm", "fetch", "https://www.youtube.com/watch?v=WGTrmrSvZH0"],
+        config = YoutubeOracleConfig(
+            host="64.110.102.170",
+            user="ubuntu",
+            key_path=Path(r"C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key"),
+            script_path=Path(r"C:\00_dev\_system\tmp\oracle_livechat.sh"),
         )
+        self.assertEqual(build_oracle_command(config, "WGTrmrSvZH0")[-3:], ["ubuntu@64.110.102.170", "bash", "-s"])
 
-        with self.assertRaises(ValueError):
-            build_oracle_command(YoutubeOracleConfig(command=("yt-dlp", "{url}")), "WGTrmrSvZH0")
-        with self.assertRaises(ValueError):
-            build_oracle_command(YoutubeOracleConfig(command=("ssh", "oracle-vm", "fetch")), "WGTrmrSvZH0")
+    def test_fetch_uses_script_over_ssh_without_text_newline_conversion(self):
+        config = YoutubeOracleConfig(
+            host="64.110.102.170",
+            user="ubuntu",
+            key_path=Path(r"C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key"),
+            script_path=Path(r"C:\00_dev\_system\tmp\oracle_livechat.sh"),
+        )
+        calls = []
+
+        def runner(command, **kwargs):
+            calls.append((command, kwargs))
+            return SimpleNamespace(
+                returncode=0,
+                stdout=(
+                    "__YOUTUBE_ORACLE_TSV_BEGIN__\n"
+                    "video_offset\tposted_at_jst\n"
+                    "00:00:01.000\t2026-09-13T22:20:13.000+09:00\n"
+                    "__YOUTUBE_ORACLE_TSV_END__\n"
+                ).encode("utf-8"),
+            )
+
+        result = fetch_youtube_video("WGTrmrSvZH0", config=config, runner=runner)
+
+        self.assertEqual(len(result.chat.comments), 1)
+        self.assertIsInstance(calls[0][1]["input"], bytes)
+        self.assertIn("bash", calls[0][0])
+        self.assertIn(b"WGTrmrSvZH0", calls[0][1]["input"])
 
     def test_youtube_provider_is_serialized_and_uses_oracle_chat_dispatch(self):
         source = {
@@ -176,6 +269,18 @@ class YoutubeSourceTests(unittest.TestCase):
         self.assertEqual(analyzed["provider"], "youtube")
         self.assertEqual(analyzed["title"], "Oracle title")
         self.assertEqual(analyzed["duration_sec"], 100)
+
+    def test_cache_normalization_preserves_existing_twitch_duration(self):
+        normalized = uv.normalize_cached_video(
+            {
+                "vod_id": "2873115795",
+                "vod_url": "https://www.twitch.tv/videos/2873115795",
+                "published_at": "2026-09-13T22:23:16+09:00",
+                "duration_sec": 13714,
+                "items": [],
+            }
+        )
+        self.assertEqual(normalized["duration_sec"], 13714)
 
 
 if __name__ == "__main__":

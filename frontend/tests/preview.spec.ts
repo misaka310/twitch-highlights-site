@@ -115,6 +115,12 @@ test("renders production layout and preserves same-VOD playback behavior", async
 });
 
 test("latest click wins and a different VOD remounts with sound", async ({ page }) => {
+  await page.route("**/data/vod_index.json", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    payload.videos = payload.videos.filter((video: { provider?: string }) => (video.provider || "twitch") === "twitch");
+    await route.fulfill({ response, json: payload });
+  });
   await page.goto("/");
   const frame = page.locator(".player-frame");
   await expect(frame).toHaveAttribute("data-player-mode", "interactive");
