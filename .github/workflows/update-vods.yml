@@ -38,6 +38,9 @@ permissions:
 
 jobs:
   update-vods:
+    # Temporary subscriber-only maintenance: automatic push/schedule events remain
+    # declared for compatibility checks, but only manual dispatch may run the job.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     env:
       TZ: Asia/Tokyo
