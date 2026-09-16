@@ -15,7 +15,9 @@ export function normalizeDataPath(path: string): string {
 }
 
 export function normalizeAssetPath(path = ""): string {
-  return normalizeDataPath(path);
+  const value = String(path || "").trim();
+  if (/^https?:\/\//i.test(value)) return value;
+  return normalizeDataPath(value);
 }
 
 export function orderSegments(items?: HighlightSegment[]): HighlightSegment[] {

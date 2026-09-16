@@ -43,6 +43,11 @@ test("renders production layout and preserves same-VOD playback behavior", async
   await expect(frame).toHaveAttribute("data-expected-muted", "true");
 
   await expect(page.locator(".highlight-item")).toHaveCount(3);
+  await expect(page.locator(".highlight-item img")).toHaveCount(3);
+  await expect(page.locator(".highlight-item img").first()).toHaveAttribute(
+    "src",
+    /i\.ytimg\.com\/vi\/930HUhvRKHc\/maxresdefault\.jpg/,
+  );
   await expect(page.getByText("Showing 1-3 of 5", { exact: true })).toBeVisible();
   await expect(page.getByRole("tab").first()).toContainText("9/15");
   await expect(page.getByRole("tab").first()).not.toContainText("YouTube");
