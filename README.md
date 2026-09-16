@@ -4,7 +4,7 @@
 
 https://dotitao-moments.onrender.com/
 
-Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。現在の公開インスタンスは`dotitao moments`です。対象チャンネル、サイト名、公開URLは`config/site.json`、チャンネル固有の追加タグ規則は`config/tag-rules.json`へ分離されているため、汎用ロジックを書き換えずに別のTwitchチャンネルへ切り替えられます。
+YouTubeライブアーカイブのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。現在の公開インスタンスは`dotitao moments`です。公開画面ではYouTubeだけを表示し、既存のTwitchデータと再生実装は互換用に保持します。
 
 > **非公式・非提携について**
 > このプロジェクトは独立して開発された非公式ツールであり、Twitchまたは対象チャンネル・配信者の公式製品、提携製品、承認製品、スポンサー製品ではありません。Twitch、チャンネル名、配信者名および関連する名称・商標・コンテンツの権利は各権利者に帰属します。
@@ -19,8 +19,7 @@ VODのコメント量から見どころを抽出し、閲覧用の静的サイ�
 
 ## 主な機能
 
-- Twitch VOD一覧の取得
-- YouTube live archiveのOracle経由取得と同一UIでの再生
+- YouTube live archiveのOracle経由取得と再生
 - コメント量の時系列集計と見どころ抽出
 - Groqを利用した見どころ見出し生成とフォールバック
 - Whisperを利用できる内部エンリッチメント処理
@@ -50,10 +49,10 @@ public/                      公開ビルドの生成先
 
 - 初期表示では自動再生せず、ミュート状態で準備します。
 - 見どころ、VODタブ、盛り上がりマップを押すと音声付きで再生します。
-- 同じVOD内の移動はTwitch Player SDKのseekを使います。
+- 同じVOD内の移動はYouTube IFrame Player APIのseekを使います。
 - プレイヤー準備中は最後の操作を優先します。
 - 10秒戻るは可能な限り実際の再生位置を基準にします。
-- SDKを読み込めない場合はTwitch iframeへフォールバックします。
+- YouTube IFrame Player APIを読み込めない場合はエラーを表示します。
 
 詳細は[`docs/PLAYBACK_SPEC.md`](docs/PLAYBACK_SPEC.md)を参照してください。
 
@@ -122,7 +121,7 @@ npm run verify
 
 Twitch実サービスとデプロイ済みRenderを確認する場合は、通常ゲート成功後に`npm run verify:live`を実行します。対象URLは`config/site.json`の`site.base_url`を正本とし、別環境を確認する場合だけ`LIVE_BASE_URL`で上書きします。
 
-フロントE2EはTwitch SDK互換の偽プレイヤーを使い、初期再生方針、音声付きクリック再生、同一VODのseek、別VOD切替、last-click-wins、10秒戻る、PC・スマホ表示を外部通信なしで検証します。
+フロントE2EはYouTube IFrame API互換の偽プレイヤーを使い、初期再生方針、音声付きクリック再生、同一VODのseek、別VOD切替、last-click-wins、10秒戻る、PC・スマホ表示を外部通信なしで検証します。
 
 ## プライバシー
 

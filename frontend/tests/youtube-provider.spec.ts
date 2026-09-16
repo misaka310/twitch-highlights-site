@@ -58,6 +58,7 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   const frame = page.locator(".player-frame");
   await expect(frame).toHaveAttribute("data-player-provider", "youtube");
   await expect(frame).toHaveAttribute("data-player-mode", "interactive");
+  await expect(page.getByRole("tab").first()).toContainText("YouTube");
   await expect(page.locator("body > .player-embed--portal [data-fake-youtube-player='true']")).toHaveCount(1);
 
   const initial = await getFakeYoutubeLog(page);
