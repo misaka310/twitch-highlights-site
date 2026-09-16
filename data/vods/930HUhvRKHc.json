@@ -18,7 +18,10 @@
       "start_time": "03:45:50",
       "end_time": "03:47:50",
       "reason": "Chat activity spike around 3h45m50s (z-score=3.895).",
-      "tags": [],
+      "headline": "笑いが一気に広がる",
+      "tags": [
+        "ww"
+      ],
       "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=13550s"
     },
     {
@@ -30,7 +33,12 @@
       "start_time": "01:35:30",
       "end_time": "01:37:20",
       "reason": "Chat activity spike around 1h35m30s (z-score=3.895).",
-      "tags": [],
+      "headline": "好プレーで盛り上がる",
+      "tags": [
+        "好プレー",
+        "ww",
+        "えっ"
+      ],
       "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=5730s"
     },
     {
@@ -42,7 +50,12 @@
       "start_time": "00:13:00",
       "end_time": "00:15:00",
       "reason": "Chat activity spike around 0h13m0s (z-score=2.941).",
-      "tags": [],
+      "headline": "好プレーで盛り上がる",
+      "tags": [
+        "ww",
+        "好プレー",
+        "おめ"
+      ],
       "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=780s"
     }
   ],

@@ -10,6 +10,7 @@ from statistics import mean
 from typing import Any
 
 from project_config import load_project_config
+from headline_candidate_selection import build_tag_based_fallback_headline
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

@@ -62,6 +62,30 @@ class YoutubeSourceTests(unittest.TestCase):
         self.assertEqual(result.video["duration_sec"], 13678)
         self.assertEqual([item["content_offset_seconds"] for item in result.chat.comments], [123.456, 2.0])
         self.assertNotIn("message", result.chat.comments[0])
+
+    def test_parse_oracle_output_keeps_message_only_in_memory_for_tag_detection(self):
+        output = "\n".join(
+            [
+                "__YOUTUBE_ORACLE_TSV_BEGIN__",
+                "video_offset\tposted_at_jst\tmessage",
+                "00:00:10.500\t2026-09-17T10:00:00+09:00\tすごいww",
+                "__YOUTUBE_ORACLE_TSV_END__",
+                "__YOUTUBE_ORACLE_METADATA_BEGIN__",
+                json.dumps(
+                    {
+                        "id": "930HUhvRKHc",
+                        "title": "video",
+                        "upload_date": "20260917",
+                        "duration": 100,
+                    }
+                ),
+                "__YOUTUBE_ORACLE_METADATA_END__",
+            ]
+        )
+
+        result = parse_youtube_oracle_output(output, "930HUhvRKHc")
+
+        self.assertEqual(result.chat.comments[0]["message"], "すごいww")
         self.assertNotIn("author", result.chat.comments[0])
 
     def test_parse_oracle_output_accepts_yt_dlp_infojson_metadata(self):
@@ -269,6 +293,47 @@ class YoutubeSourceTests(unittest.TestCase):
         self.assertEqual(analyzed["provider"], "youtube")
         self.assertEqual(analyzed["title"], "Oracle title")
         self.assertEqual(analyzed["duration_sec"], 100)
+
+    def test_update_analysis_adds_existing_tag_based_headline_for_youtube(self):
+        source_video = {
+            "provider": "youtube",
+            "vod_id": "930HUhvRKHc",
+            "vod_url": "https://www.youtube.com/watch?v=930HUhvRKHc",
+            "title": "input title",
+            "published_at": "2026-09-17T00:00:00+00:00",
+            "thumbnail_url": "",
+        }
+        oracle_result = type(
+            "YoutubeResult",
+            (),
+            {
+                "video": source_video,
+                "chat": vod_sources.ChatFetchResult(
+                    comments=[{"content_offset_seconds": 20.0, "message": "すごいww"}],
+                    duration_sec=100,
+                ),
+            },
+        )()
+        with patch("update_vods.fetch_youtube_video", return_value=oracle_result):
+            with patch("update_vods.build_activity_map", return_value={"duration_sec": 100, "buckets": [1]}):
+                with patch(
+                    "update_vods.detect_items",
+                    return_value=[
+                        {
+                            "id": "930HUhvRKHc_20_40",
+                            "start_sec": 20,
+                            "end_sec": 40,
+                            "tags": ["ww"],
+                        }
+                    ],
+                ):
+                    analyzed, status = uv.analyze_video_entry(
+                        source_video,
+                        datetime(2026, 9, 17, tzinfo=timezone.utc),
+                    )
+
+        self.assertEqual(status, "analyzed")
+        self.assertEqual(analyzed["items"][0]["headline"], "笑いが一気に広がる")
 
     def test_cache_normalization_preserves_existing_twitch_duration(self):
         normalized = uv.normalize_cached_video(
