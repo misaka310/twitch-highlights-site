@@ -11,6 +11,7 @@ import { formatChatVolume, formatClock, localizeReason } from "../../src/lib/for
 import { loadVodPage } from "../../src/hooks/use-vod-page.js";
 import {
   normalizeDataPath,
+  normalizeAssetPath,
   orderSegments,
   pageUrl,
   parsePageSearch,
@@ -21,6 +22,13 @@ test("normalizes public data paths without changing canonical paths", () => {
   assert.equal(normalizeDataPath("/data/vods/1.json"), "/data/vods/1.json");
   assert.equal(normalizeDataPath("data/vods/1.json"), "/data/vods/1.json");
   assert.equal(normalizeDataPath("vods/1.json"), "/data/vods/1.json");
+});
+
+test("preserves remote thumbnail URLs for image fallbacks", () => {
+  assert.equal(
+    normalizeAssetPath("https://i.ytimg.com/vi/930HUhvRKHc/maxresdefault.jpg"),
+    "https://i.ytimg.com/vi/930HUhvRKHc/maxresdefault.jpg",
+  );
 });
 
 test("orders segments by rank and derives duration with existing precedence", () => {

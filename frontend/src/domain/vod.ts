@@ -25,6 +25,7 @@ export type VodData = {
   vod_url?: string;
   title: string;
   published_at: string;
+  thumbnail_url?: string;
   duration_sec?: number;
   chat_total?: number;
   comments_per_hour?: number;

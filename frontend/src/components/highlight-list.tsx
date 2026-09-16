@@ -6,17 +6,19 @@ import { normalizeAssetPath } from "../lib/vod-data.js";
 
 type HighlightListProps = {
   vodId: string;
+  vodThumbnailUrl?: string;
   segments: HighlightSegment[];
   activeSegmentId: string;
   onSelect: (segment: HighlightSegment) => void;
 };
 
-export function HighlightList({ vodId, segments, activeSegmentId, onSelect }: HighlightListProps) {
+export function HighlightList({ vodId, vodThumbnailUrl, segments, activeSegmentId, onSelect }: HighlightListProps) {
   return (
     <div className="highlight-list">
       {segments.length > 0 ? segments.map((segment) => {
         const selected = segment.id === activeSegmentId;
         const title = String(segment.headline || localizeReason(segment.reason) || "見どころ").trim();
+        const thumbnailUrl = segment.screenshot_url || vodThumbnailUrl;
         return (
           <button
             key={segment.id}
@@ -28,8 +30,8 @@ export function HighlightList({ vodId, segments, activeSegmentId, onSelect }: Hi
             onClick={() => onSelect(segment)}
           >
             <span className="thumb-wrap">
-              {segment.screenshot_url ? (
-                <img src={normalizeAssetPath(segment.screenshot_url)} alt="" loading="lazy" />
+              {thumbnailUrl ? (
+                <img src={normalizeAssetPath(thumbnailUrl)} alt="" loading="lazy" />
               ) : (
                 <span className="thumb-fallback"><PlayIcon weight="fill" /></span>
               )}
