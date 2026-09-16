@@ -7,7 +7,7 @@ type SiteHeaderProps = {
   nextUpdateAt: string;
 };
 
-export function SiteHeader({ siteName, updatedAt, nextUpdateAt }: SiteHeaderProps) {
+export function SiteHeader({ siteName, updatedAt }: SiteHeaderProps) {
   return (
     <header className="site-header">
       <div>
@@ -15,11 +15,11 @@ export function SiteHeader({ siteName, updatedAt, nextUpdateAt }: SiteHeaderProp
           <PlayIcon weight="fill" aria-hidden="true" />
           <h1>{siteName}</h1>
         </div>
-        <p>直近2ヶ月の配信の見どころをすぐ再生［非公式ファンサイト］</p>
+        <p>現在サブスク限定公開のため、新しい見どころは利用できません［非公式ファンサイト］</p>
       </div>
       <div className="update-stack" aria-label="更新情報">
         <span>データ更新: {formatUpdate(updatedAt)}</span>
-        <span>次回更新予定: {formatUpdate(nextUpdateAt)}</span>
+        <span>自動更新: 一時停止中</span>
       </div>
     </header>
   );
