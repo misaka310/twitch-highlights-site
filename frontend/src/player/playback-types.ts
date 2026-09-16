@@ -1,3 +1,5 @@
+import type { VodProvider } from "../domain/vod.js";
+
 export type PlaybackStatus = "idle" | "loading" | "ready" | "playing" | "blocked" | "error";
 
 export type PlaybackRequest = {
@@ -7,12 +9,14 @@ export type PlaybackRequest = {
   autoplay: boolean;
   muted: boolean;
   triggeredByUser: boolean;
+  provider?: VodProvider;
 };
 
 export type PlaybackOptions = {
   autoplay?: boolean;
   muted?: boolean;
   triggeredByUser?: boolean;
+  provider?: VodProvider;
 };
 
 export type PlaybackRuntimeState = {
@@ -21,6 +25,8 @@ export type PlaybackRuntimeState = {
   mountInFlight: boolean;
   mountVodId: string;
   hasInteractivePlayer: boolean;
+  playerProvider?: VodProvider;
+  mountProvider?: VodProvider;
 };
 
 export type PlaybackDecision = {

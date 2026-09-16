@@ -14,6 +14,8 @@ import {
 } from "../player/twitch-player-adapter.js";
 import { ensurePlayerScript, getTwitchPlayerConstructor } from "../player/twitch-sdk-loader.js";
 import { formatTwitchTime, getTwitchParents } from "../player/twitch-url.js";
+import { createYoutubePlayerAdapter } from "../player/youtube-player-adapter.js";
+import { ensureYoutubePlayerScript, getYoutubePlayerConstructor } from "../player/youtube-sdk-loader.js";
 
 const INTERACTIVE_SEEK_STABILIZE_MS = 2500;
 
@@ -40,7 +42,9 @@ export function useInteractivePlayer({
   const requestSequenceRef = useRef(0);
   const mountInFlightRef = useRef(false);
   const mountVodIdRef = useRef("");
+  const mountProviderRef = useRef<"twitch" | "youtube">("twitch");
   const playerVodIdRef = useRef("");
+  const playerProviderRef = useRef<"twitch" | "youtube">("twitch");
   const playerReadyRef = useRef(false);
   const lastKnownPositionRef = useRef(0);
   const lastSeekTargetRef = useRef<number | null>(null);
@@ -56,6 +60,7 @@ export function useInteractivePlayer({
     if (frame) {
       frame.dataset.playerStatus = status;
       frame.dataset.currentVodId = request?.vodId || "";
+      frame.dataset.playerProvider = request?.provider || "twitch";
       frame.dataset.currentStartSec = request ? String(request.startSec) : "";
       frame.dataset.playerMode = mode;
       frame.dataset.expectedAutoplay = String(request?.autoplay === true);
@@ -111,6 +116,8 @@ export function useInteractivePlayer({
     stopPolling();
     playerReadyRef.current = false;
     playerVodIdRef.current = "";
+    playerProviderRef.current = "twitch";
+    mountProviderRef.current = "twitch";
     const player = playerRef.current;
     playerRef.current = null;
     destroyPlayer(player);
@@ -137,7 +144,13 @@ export function useInteractivePlayer({
 
   const seekInteractivePlayer = (request: PlaybackRequest) => {
     const player = playerRef.current;
-    if (!player || !playerReadyRef.current || playerVodIdRef.current !== request.vodId) return false;
+    const provider = request.provider || "twitch";
+    if (
+      !player
+      || !playerReadyRef.current
+      || playerVodIdRef.current !== request.vodId
+      || playerProviderRef.current !== provider
+    ) return false;
     safeSetMuted(player, request.muted);
     lastSeekTargetRef.current = request.startSec;
     lastSeekAtRef.current = Date.now();
@@ -157,10 +170,125 @@ export function useInteractivePlayer({
     return true;
   };
 
-  const mountInteractivePlayer = async (request: PlaybackRequest): Promise<void> => {
+  const mountYoutubeInteractivePlayer = async (request: PlaybackRequest): Promise<void> => {
     if (mountInFlightRef.current) return;
     mountInFlightRef.current = true;
     mountVodIdRef.current = request.vodId;
+    mountProviderRef.current = "youtube";
+
+    const scriptLoaded = await ensureYoutubePlayerScript();
+    const latestAfterLoad = desiredRef.current;
+    const PlayerClass = getYoutubePlayerConstructor();
+    if (!scriptLoaded || !PlayerClass) {
+      mountInFlightRef.current = false;
+      mountVodIdRef.current = "";
+      mountProviderRef.current = "twitch";
+      if (latestAfterLoad?.provider === "youtube") {
+        setUiState("error", latestAfterLoad, "YouTubeプレイヤーを読み込めませんでした", "");
+      }
+      return;
+    }
+
+    const continuation = decideMountContinuation(request, latestAfterLoad);
+    if (continuation === "stop") {
+      mountInFlightRef.current = false;
+      mountVodIdRef.current = "";
+      mountProviderRef.current = "twitch";
+      return;
+    }
+    if (continuation === "restart" && latestAfterLoad) {
+      mountInFlightRef.current = false;
+      mountVodIdRef.current = "";
+      mountProviderRef.current = "twitch";
+      void mountYoutubeInteractivePlayer(latestAfterLoad);
+      return;
+    }
+
+    destroyInteractivePlayer();
+    const host = hostRef.current;
+    if (!host) {
+      mountInFlightRef.current = false;
+      mountVodIdRef.current = "";
+      mountProviderRef.current = "twitch";
+      return;
+    }
+
+    const inner = document.createElement("div");
+    inner.className = "player-embed-slot";
+    host.replaceChildren(inner);
+
+    let player: TwitchPlayerInstance | null = null;
+    const rawPlayer = new PlayerClass(inner, {
+      videoId: request.vodId,
+      playerVars: {
+        autoplay: request.autoplay ? 1 : 0,
+        controls: 1,
+        playsinline: 1,
+        start: request.startSec,
+        origin: location.origin,
+      },
+      events: {
+        onReady: () => {
+          if (playerRef.current !== player) return;
+          playerReadyRef.current = true;
+          mountInFlightRef.current = false;
+          mountVodIdRef.current = "";
+          mountProviderRef.current = "twitch";
+          startPolling();
+
+          const latest = desiredRef.current;
+          if (!latest) return;
+          if (latest.vodId !== request.vodId || (latest.provider || "twitch") !== "youtube") {
+            destroyInteractivePlayer();
+            void mountInteractivePlayer(latest);
+            return;
+          }
+
+          safeSetMuted(player, latest.muted);
+          lastKnownPositionRef.current = latest.startSec;
+          if (latest.startSec !== request.startSec) {
+            seekInteractivePlayer(latest);
+            return;
+          }
+          if (latest.autoplay) safePlay(player);
+          onPositionChange(latest.startSec);
+          setUiState(
+            latest.autoplay ? "playing" : "ready",
+            latest,
+            latest.autoplay ? "再生中" : "待機中",
+            "interactive",
+          );
+        },
+        onStateChange: (event) => {
+          if (playerRef.current !== player) return;
+          if (event.data === 1) setUiState("playing", desiredRef.current, "再生中", "interactive");
+          if (event.data === 2 || event.data === 0) setUiState("ready", desiredRef.current, "待機中", "interactive");
+        },
+        onError: () => {
+          if (playerRef.current !== player) return;
+          mountInFlightRef.current = false;
+          mountVodIdRef.current = "";
+          mountProviderRef.current = "twitch";
+          setUiState("error", desiredRef.current, "YouTubeプレイヤーでエラーが発生しました", "interactive");
+        },
+      },
+    });
+    player = createYoutubePlayerAdapter(rawPlayer);
+    playerRef.current = player;
+    playerVodIdRef.current = request.vodId;
+    playerProviderRef.current = "youtube";
+    playerReadyRef.current = false;
+  };
+
+  const mountInteractivePlayer = async (request: PlaybackRequest): Promise<void> => {
+    if (request.provider === "youtube") {
+      await mountYoutubeInteractivePlayer(request);
+      return;
+    }
+    if (mountInFlightRef.current) return;
+    mountInFlightRef.current = true;
+    mountVodIdRef.current = request.vodId;
+    mountProviderRef.current = "twitch";
 
     const scriptLoaded = await ensurePlayerScript();
     const latestAfterLoad = desiredRef.current;
@@ -168,6 +296,7 @@ export function useInteractivePlayer({
     if (!scriptLoaded || !PlayerClass) {
       mountInFlightRef.current = false;
       mountVodIdRef.current = "";
+      mountProviderRef.current = "twitch";
       if (latestAfterLoad) setUiState("ready", latestAfterLoad, "プレイヤー準備完了", "iframe");
       return;
     }
@@ -175,11 +304,13 @@ export function useInteractivePlayer({
     if (continuation === "stop") {
       mountInFlightRef.current = false;
       mountVodIdRef.current = "";
+      mountProviderRef.current = "twitch";
       return;
     }
     if (continuation === "restart" && latestAfterLoad) {
       mountInFlightRef.current = false;
       mountVodIdRef.current = "";
+      mountProviderRef.current = "twitch";
       void mountInteractivePlayer(latestAfterLoad);
       return;
     }
@@ -209,6 +340,7 @@ export function useInteractivePlayer({
 
     playerRef.current = player;
     playerVodIdRef.current = request.vodId;
+    playerProviderRef.current = "twitch";
     playerReadyRef.current = false;
 
     const readyEvent = PlayerClass.READY || "ready";
@@ -223,12 +355,13 @@ export function useInteractivePlayer({
       playerReadyRef.current = true;
       mountInFlightRef.current = false;
       mountVodIdRef.current = "";
+      mountProviderRef.current = "twitch";
       startPolling();
 
       const latest = desiredRef.current;
       if (!latest) return;
-      if (latest.vodId !== request.vodId) {
-        mountFallbackIframe(latest);
+      if (latest.vodId !== request.vodId || (latest.provider || "twitch") !== "twitch") {
+        if ((latest.provider || "twitch") === "twitch") mountFallbackIframe(latest);
         void mountInteractivePlayer(latest);
         return;
       }
@@ -294,9 +427,11 @@ export function useInteractivePlayer({
       mountInFlight: mountInFlightRef.current,
       mountVodId: mountVodIdRef.current,
       hasInteractivePlayer: playerRef.current != null,
+      playerProvider: playerProviderRef.current,
+      mountProvider: mountProviderRef.current,
     });
     if (decision.seekInteractive && seekInteractivePlayer(request)) return;
-    if (decision.mountFallback) mountFallbackIframe(request);
+    if (decision.mountFallback && (request.provider || "twitch") === "twitch") mountFallbackIframe(request);
     if (decision.waitForMount) return;
     if (decision.destroyInteractive) destroyInteractivePlayer();
     if (decision.mountInteractive) void mountInteractivePlayer(request);

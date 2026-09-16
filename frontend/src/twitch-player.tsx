@@ -36,12 +36,13 @@ export const TwitchPlayer = forwardRef<TwitchPlayerHandle, TwitchPlayerProps>(fu
       data-player-status="idle"
       data-current-vod-id=""
       data-current-start-sec=""
+      data-player-provider="twitch"
       data-player-mode=""
       data-expected-autoplay="false"
       data-expected-muted="true"
       data-triggered-by-user="false"
     >
-      <span className="sr-only" aria-live="polite">Twitchプレイヤー</span>
+      <span className="sr-only" aria-live="polite">動画プレイヤー</span>
     </div>
   );
 });

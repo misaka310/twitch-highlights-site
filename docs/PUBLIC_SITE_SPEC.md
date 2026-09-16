@@ -35,6 +35,13 @@ Twitch VODのコメント量から抽出した見どころを、利用者が短�
 - Twitch Player SDK
 - Twitch iframeフォールバック
 
+対応provider:
+
+- Twitch
+- YouTube via YouTube IFrame Player API
+
+YouTube live_chatはOracle VM上で取得し、ローカルの直接取得を公開パイプラインの成功経路として扱わない。取得したvideoOffsetTimeMsecはcontent_offset_secondsへ正規化し、コメント本文や投稿者情報は保存しない。
+
 ローカルURLは `http://localhost:4174/` とする。
 
 `frontend/` が公開UIの唯一の正本であり、表示内容・並び順・再生挙動の実装と検証はfrontendのコードとテストへ集約する。

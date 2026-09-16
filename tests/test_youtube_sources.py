@@ -1,0 +1,182 @@
+import json
+import sys
+import unittest
+from datetime import datetime, timezone
+from unittest.mock import patch
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from youtube_sources import (  # noqa: E402
+    YoutubeOracleConfig,
+    build_oracle_command,
+    parse_youtube_oracle_output,
+    parse_youtube_video_id,
+)
+import vod_serialization as serialization  # noqa: E402
+import vod_sources  # noqa: E402
+import update_vods as uv  # noqa: E402
+
+
+class YoutubeSourceTests(unittest.TestCase):
+    def test_parse_youtube_video_id_accepts_public_url_shapes(self):
+        self.assertEqual(parse_youtube_video_id("https://www.youtube.com/watch?v=WGTrmrSvZH0"), "WGTrmrSvZH0")
+        self.assertEqual(parse_youtube_video_id("https://youtu.be/WGTrmrSvZH0?t=30"), "WGTrmrSvZH0")
+        self.assertEqual(parse_youtube_video_id("WGTrmrSvZH0"), "WGTrmrSvZH0")
+
+    def test_parse_oracle_output_normalizes_offsets_and_drops_chat_payload(self):
+        output = "\n".join(
+            [
+                json.dumps(
+                    {
+                        "type": "metadata",
+                        "video_id": "WGTrmrSvZH0",
+                        "title": "Oracle archive",
+                        "published_at": "2026-07-25T00:00:00+00:00",
+                        "thumbnail_url": "https://i.ytimg.com/vi/WGTrmrSvZH0/hqdefault.jpg",
+                        "duration_sec": 13678,
+                    }
+                ),
+                json.dumps(
+                    {
+                        "replayChatItemAction": {
+                            "videoOffsetTimeMsec": "123456",
+                            "actions": [{"message": "private text", "author": "private user"}],
+                        }
+                    }
+                ),
+                json.dumps({"videoOffsetTimeMsec": 2000}),
+                json.dumps({"videoOffsetTimeMsec": "invalid"}),
+            ]
+        )
+
+        result = parse_youtube_oracle_output(output, "https://www.youtube.com/watch?v=WGTrmrSvZH0")
+
+        self.assertEqual(result.video["vod_id"], "WGTrmrSvZH0")
+        self.assertEqual(result.video["provider"], "youtube")
+        self.assertEqual(result.video["duration_sec"], 13678)
+        self.assertEqual([item["content_offset_seconds"] for item in result.chat.comments], [123.456, 2.0])
+        self.assertNotIn("message", result.chat.comments[0])
+        self.assertNotIn("author", result.chat.comments[0])
+
+    def test_parse_oracle_output_accepts_yt_dlp_infojson_metadata(self):
+        output = "\n".join(
+            [
+                json.dumps(
+                    {
+                        "id": "WGTrmrSvZH0",
+                        "title": "Archive from Oracle",
+                        "upload_date": "20260725",
+                        "duration": 13678.2,
+                        "thumbnail": "https://i.ytimg.com/vi/WGTrmrSvZH0/maxresdefault.jpg",
+                    }
+                ),
+                json.dumps({"videoOffsetTimeMsec": 5000}),
+            ]
+        )
+
+        result = parse_youtube_oracle_output(output, "WGTrmrSvZH0")
+
+        self.assertEqual(result.video["title"], "Archive from Oracle")
+        self.assertEqual(result.video["published_at"], "2026-07-25T00:00:00+00:00")
+        self.assertEqual(result.video["duration_sec"], 13679)
+        self.assertEqual(
+            result.video["thumbnail_url"],
+            "https://i.ytimg.com/vi/WGTrmrSvZH0/maxresdefault.jpg",
+        )
+
+    def test_parse_oracle_output_rejects_video_id_mismatch_and_empty_chat(self):
+        mismatch = json.dumps({"type": "metadata", "video_id": "different01"})
+        with self.assertRaises(ValueError):
+            parse_youtube_oracle_output(mismatch, "WGTrmrSvZH0")
+
+        with self.assertRaises(ValueError):
+            parse_youtube_oracle_output(json.dumps({"type": "metadata", "video_id": "WGTrmrSvZH0"}), "WGTrmrSvZH0")
+
+    def test_build_oracle_command_requires_remote_command_and_url_token(self):
+        config = YoutubeOracleConfig(command=("ssh", "oracle-vm", "fetch", "{url}"))
+        self.assertEqual(
+            build_oracle_command(config, "https://www.youtube.com/watch?v=WGTrmrSvZH0"),
+            ["ssh", "oracle-vm", "fetch", "https://www.youtube.com/watch?v=WGTrmrSvZH0"],
+        )
+
+        with self.assertRaises(ValueError):
+            build_oracle_command(YoutubeOracleConfig(command=("yt-dlp", "{url}")), "WGTrmrSvZH0")
+        with self.assertRaises(ValueError):
+            build_oracle_command(YoutubeOracleConfig(command=("ssh", "oracle-vm", "fetch")), "WGTrmrSvZH0")
+
+    def test_youtube_provider_is_serialized_and_uses_oracle_chat_dispatch(self):
+        source = {
+            "provider": "youtube",
+            "vod_id": "WGTrmrSvZH0",
+            "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+            "title": "Oracle archive",
+            "published_at": "2026-07-25T00:00:00+00:00",
+            "items": [],
+            "activity_map": {},
+        }
+        public = serialization.to_public_video_entry(source)
+        index = serialization.to_public_video_index_entry(source)
+        self.assertEqual(public["provider"], "youtube")
+        self.assertEqual(index["provider"], "youtube")
+
+        with patch("youtube_sources.fetch_youtube_video") as fetch:
+            fetch.return_value.chat.comments = [{"content_offset_seconds": 3.0}]
+            result = vod_sources.fetch_chat_data(
+                "WGTrmrSvZH0",
+                vod_sources.FetchConfig(),
+                provider="youtube",
+                vod_url="https://www.youtube.com/watch?v=WGTrmrSvZH0",
+            )
+        self.assertEqual(result.comments, [{"content_offset_seconds": 3.0}])
+        fetch.assert_called_once()
+
+    def test_update_analysis_keeps_youtube_provider_and_oracle_metadata(self):
+        source_video = {
+            "provider": "youtube",
+            "vod_id": "WGTrmrSvZH0",
+            "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+            "title": "input title",
+            "published_at": "2026-07-25T00:00:00+00:00",
+            "thumbnail_url": "",
+        }
+        oracle_result = type(
+            "YoutubeResult",
+            (),
+            {
+                "video": {
+                    "provider": "youtube",
+                    "vod_id": "WGTrmrSvZH0",
+                    "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+                    "title": "Oracle title",
+                    "published_at": "2026-07-25T00:00:00+00:00",
+                    "thumbnail_url": "https://i.ytimg.com/vi/WGTrmrSvZH0/hqdefault.jpg",
+                    "duration_sec": 100,
+                },
+                "chat": vod_sources.ChatFetchResult(
+                    comments=[{"content_offset_seconds": 20.0}],
+                    duration_sec=100,
+                ),
+            },
+        )()
+        with patch("update_vods.fetch_youtube_video", return_value=oracle_result):
+            with patch("update_vods.build_activity_map", return_value={"duration_sec": 100, "buckets": [1]}):
+                with patch(
+                    "update_vods.detect_items",
+                    return_value=[{"id": "WGTrmrSvZH0_20_40", "start_sec": 20, "end_sec": 40}],
+                ):
+                    analyzed, status = uv.analyze_video_entry(
+                        source_video,
+                        datetime(2026, 7, 25, tzinfo=timezone.utc),
+                    )
+
+        self.assertEqual(status, "analyzed")
+        self.assertEqual(analyzed["provider"], "youtube")
+        self.assertEqual(analyzed["title"], "Oracle title")
+        self.assertEqual(analyzed["duration_sec"], 100)
+
+
+if __name__ == "__main__":
+    unittest.main()

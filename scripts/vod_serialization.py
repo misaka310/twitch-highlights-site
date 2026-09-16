@@ -129,7 +129,7 @@ def calculate_comments_per_hour(chat_total: int, duration_sec: int | None) -> fl
 
 def to_public_video_entry(video: dict[str, Any]) -> dict[str, Any]:
     vod_id = str(video.get("vod_id") or "").strip()
-    return {
+    public_video = {
         "vod_id": vod_id,
         "vod_url": video.get("vod_url") or f"https://www.twitch.tv/videos/{vod_id}",
         "title": video.get("title", ""),
@@ -142,11 +142,15 @@ def to_public_video_entry(video: dict[str, Any]) -> dict[str, Any]:
         "items": [to_public_item_entry(item) for item in (video.get("items") or [])],
         "activity_map": to_public_activity_map(video.get("activity_map")),
     }
+    provider = str(video.get("provider") or "").strip().lower()
+    if provider and provider != "twitch":
+        public_video["provider"] = provider
+    return public_video
 
 
 def to_public_video_index_entry(video: dict[str, Any]) -> dict[str, Any]:
     vod_id = str(video.get("vod_id") or "").strip()
-    return {
+    public_video = {
         "vod_id": vod_id,
         "vod_url": video.get("vod_url") or f"https://www.twitch.tv/videos/{vod_id}",
         "title": video.get("title", ""),
@@ -158,6 +162,10 @@ def to_public_video_index_entry(video: dict[str, Any]) -> dict[str, Any]:
         "comments_per_hour": normalize_comments_per_hour(video.get("comments_per_hour")),
         "detail_path": build_vod_detail_path(vod_id),
     }
+    provider = str(video.get("provider") or "").strip().lower()
+    if provider and provider != "twitch":
+        public_video["provider"] = provider
+    return public_video
 
 
 def build_vod_detail_path(vod_id: str) -> str:
@@ -287,6 +295,7 @@ def resolve_public_segment_screenshot_url_if_exists(vod_id: str, segment_id: str
 def sanitize_video_for_storage(video: dict[str, Any]) -> dict[str, Any]:
     fields = (
         "vod_id",
+        "provider",
         "vod_url",
         "title",
         "published_at",
