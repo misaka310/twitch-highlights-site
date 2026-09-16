@@ -1,6 +1,9 @@
 name: Verify YouTube yt-dlp from Actions
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - chore/verify-youtube-actions-yt-dlp-20260917
