@@ -9,7 +9,7 @@ export function usePlayerPortal(frameRef: RefObject<HTMLDivElement | null>) {
 
     const host = document.createElement("div");
     host.className = "player-embed player-embed--portal";
-    host.setAttribute("aria-label", "Twitch player");
+    host.setAttribute("aria-label", "Video player");
     document.body.append(host);
     hostRef.current = host;
     frame.dataset.playerPortal = "body";

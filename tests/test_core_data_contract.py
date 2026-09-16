@@ -77,7 +77,7 @@ class CoreDataContractTests(unittest.TestCase):
             "timestamps": [{"start_sec": 10}],
         }
         sanitized = uv.sanitize_video_for_storage(source)
-        self.assertTrue(set(sanitized) <= VIDEO_FIELDS | {"analysis_version", "analyzed_at"})
+        self.assertTrue(set(sanitized) <= VIDEO_FIELDS | {"provider", "analysis_version", "analyzed_at"})
         self.assertTrue(set(sanitized["items"][0]) <= ITEM_FIELDS)
         self.assertEqual(sanitized["items"][0]["headline"], "legacy")
         self.assertEqual([key for key in iter_keys(sanitized) if any(part in key.lower() for part in RETIRED_KEY_PARTS)], [])
@@ -88,15 +88,15 @@ class CoreDataContractTests(unittest.TestCase):
         index = json.loads((ROOT / "data" / "vod_index.json").read_text(encoding="utf-8-sig"))
 
         for video in processed.get("videos", []):
-            self.assertTrue(set(video) <= VIDEO_FIELDS | {"analysis_version", "analyzed_at"})
+            self.assertTrue(set(video) <= VIDEO_FIELDS | {"provider", "analysis_version", "analyzed_at"})
             for item in video.get("items", []):
                 self.assertTrue(set(item) <= ITEM_FIELDS)
         for video in public.get("videos", []):
-            self.assertEqual(set(video), VIDEO_FIELDS)
+            self.assertEqual(set(video), VIDEO_FIELDS | ({"provider"} if video.get("provider") else set()))
             for item in video.get("items", []):
                 self.assertTrue(set(item) <= ITEM_FIELDS)
         for video in index.get("videos", []):
-            self.assertEqual(set(video), INDEX_FIELDS)
+            self.assertEqual(set(video), INDEX_FIELDS | ({"provider"} if video.get("provider") else set()))
 
         for payload in (processed, public, index):
             bad = [key for key in iter_keys(payload) if any(part in key.lower() for part in RETIRED_KEY_PARTS)]

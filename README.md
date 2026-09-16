@@ -20,6 +20,7 @@ VODのコメント量から見どころを抽出し、閲覧用の静的サイ�
 ## 主な機能
 
 - Twitch VOD一覧の取得
+- YouTube live archiveのOracle経由取得と同一UIでの再生
 - コメント量の時系列集計と見どころ抽出
 - Groqを利用した見どころ見出し生成とフォールバック
 - Whisperを利用できる内部エンリッチメント処理
@@ -91,6 +92,15 @@ Copy-Item .env.example .env
 ```
 
 `.env`へTwitch API資格情報を設定します。Groqを使う場合だけ`GROQ_API_KEY`も設定します。依存バージョンとGitHub Actions上のTwitchDownloaderCLIアーカイブは固定・検証されています。
+
+YouTubeのライブアーカイブを生成する場合は、Oracle VM上で取得処理を実行するコマンドをURL置換トークン付きJSON配列で指定します。ローカルのyt-dlp直接実行はこの経路に使いません。
+
+```powershell
+$env:YOUTUBE_ORACLE_COMMAND_JSON = '["ssh", "<oracle-host>", "<oracle-fetch-command>", "{url}"]'
+python scripts/update_vods.py --youtube-url "https://www.youtube.com/watch?v=WGTrmrSvZH0"
+```
+
+コマンドはJSONLで動画メタデータと`videoOffsetTimeMsec`を標準出力へ返す必要があります。値は実行中だけ正規化され、公開データには集計値と見どころだけが保存されます。
 
 ## 公開ビルド
 

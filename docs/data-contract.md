@@ -1,8 +1,16 @@
 # Data contract
 
+## YouTube provider
+
+providerがyoutubeのVODでは、vod_idとvod_urlがYouTubeの公開再生対象を指す。Twitchの既存データではproviderを省略し、Twitchを既定値として扱う。
+
+YouTube Oracle出力に含まれるvideoOffsetTimeMsecは取得時だけcontent_offset_secondsへ変換し、保存対象は集計後の数値と見どころだけに限定する。
+
+YouTube live_chatの実取得はOracle VM経由のコマンドだけを許可する。ローカルyt-dlpの直接実行結果をOracle取得結果として扱わず、Oracleコマンドの標準出力はメモリ上で解析する。
+
 ## 原則
 
-公開データには、Twitchコメントを集計して得た数値、見どころ区間、区間を説明する短い見出し、場面サムネイルだけを保存します。コメント本文、投稿者情報、文字起こし本文、外部動画の識別子は保存しません。
+公開データには、コメントを集計して得た数値、見どころ区間、区間を説明する短い見出し、場面サムネイルを保存します。コメント本文、投稿者情報、文字起こし本文、Oracleの生レスポンスは保存しません。再生に必要な`vod_id`と`vod_url`はproviderごとの公開再生参照として保持します。
 
 ## `data/processed_vods.json`
 
@@ -10,6 +18,7 @@
 
 各VODで保持するフィールド:
 
+- `provider`（YouTubeでは`youtube`、Twitchでは省略可）
 - `vod_id`
 - `vod_url`
 - `title`
@@ -45,6 +54,7 @@
 
 最新3件をトップ画面へ表示する公開データです。各VODは次のフィールドだけを持ちます。
 
+- `provider`（YouTubeでは`youtube`、Twitchでは省略可）
 - `vod_id`
 - `vod_url`
 - `title`
@@ -63,6 +73,7 @@
 
 公開期間内のVOD一覧です。各行は次のフィールドだけを持ちます。
 
+- `provider`（YouTubeでは`youtube`、Twitchでは省略可）
 - `vod_id`
 - `vod_url`
 - `title`
@@ -91,6 +102,6 @@
 
 - コメント本文、投稿者名、ユーザーID、コメント単位の投稿時刻
 - 音声や文字起こし本文
-- 外部動画のID・URL・照合結果
+- Oracleの生レスポンス、取得用コマンド、照合用の一時フィールド
 - 見出し生成に使った入力文、候補、プロンプト、モデル応答
 - raw chatアーカイブ

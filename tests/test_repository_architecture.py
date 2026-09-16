@@ -38,6 +38,18 @@ class RepositoryArchitectureTests(unittest.TestCase):
         )
         self.assertEqual([str(path.relative_to(ROOT)) for path in forbidden_paths if path.exists()], [])
 
+    def test_public_site_documents_define_multi_provider_oracle_contract(self):
+        spec = (ROOT / "docs" / "PUBLIC_SITE_SPEC.md").read_text(encoding="utf-8")
+        playback = (ROOT / "docs" / "PLAYBACK_SPEC.md").read_text(encoding="utf-8")
+        data_contract = (ROOT / "docs" / "data-contract.md").read_text(encoding="utf-8")
+        operations = (ROOT / "docs" / "OPERATIONS.md").read_text(encoding="utf-8")
+
+        self.assertIn("YouTube", spec)
+        self.assertIn("provider", spec)
+        self.assertIn("YouTube IFrame Player API", playback)
+        self.assertIn("videoOffsetTimeMsec", data_contract)
+        self.assertIn("YOUTUBE_ORACLE_COMMAND_JSON", operations)
+
     def test_disallowed_backend_integrations_are_absent_from_public_infrastructure(self):
         disallowed_markers = (
             "".join(("ano", "sa")),

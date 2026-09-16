@@ -3,6 +3,7 @@ import test from "node:test";
 import { decideMountContinuation, decidePlayback } from "../../src/player/playback-decision.js";
 import { createPlaybackRequest, normalizeVodId } from "../../src/player/playback-request.js";
 import { buildEmbedUrl, formatTwitchTime, getTwitchParents } from "../../src/player/twitch-url.js";
+import { getVodProvider } from "../../src/lib/vod-data.js";
 
 function request(id = 1, vodId = "123") {
   const value = createPlaybackRequest(id, vodId, 42.9);
@@ -32,6 +33,20 @@ test("normalizes playback requests with the existing defaults", () => {
     autoplay: false,
     muted: false,
     triggeredByUser: true,
+  });
+});
+
+test("keeps provider identity in explicit YouTube playback requests", () => {
+  assert.equal(getVodProvider({ vod_id: "WGTrmrSvZH0", vod_url: "https://www.youtube.com/watch?v=WGTrmrSvZH0" }), "youtube");
+  assert.equal(getVodProvider({ vod_id: "123", vod_url: "https://www.twitch.tv/videos/123" }), "twitch");
+  assert.deepEqual(createPlaybackRequest(6, "WGTrmrSvZH0", 12, { provider: "youtube" }), {
+    requestId: 6,
+    vodId: "WGTrmrSvZH0",
+    startSec: 12,
+    autoplay: true,
+    muted: true,
+    triggeredByUser: false,
+    provider: "youtube",
   });
 });
 

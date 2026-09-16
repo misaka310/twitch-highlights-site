@@ -1,5 +1,9 @@
 # PLAYBACK_SPEC
 
+## YouTube provider
+
+YouTubeはYouTube IFrame Player APIを使い、初期表示、ユーザー操作、seek、10秒戻る、VOD切替の契約をTwitchと共通化する。APIを取得できない場合は失敗をUIへ表示し、偽の再生成功やローカル直接取得へフォールバックしない。
+
 ## 目的
 
 この仕様は、再生の**内部実装経路**ではなく、ユーザーが体験する**挙動の一貫性**を定義する。
