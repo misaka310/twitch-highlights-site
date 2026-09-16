@@ -2,7 +2,6 @@ import { LayerCard, Pagination, Tabs } from "@cloudflare/kumo";
 import type { HighlightSegment, VodData } from "../domain/vod.js";
 import { VOD_PAGE_SIZE } from "../domain/vod.js";
 import { formatDate } from "../lib/formatters.js";
-import { getVodProvider } from "../lib/vod-data.js";
 import { HighlightList } from "./highlight-list.js";
 import { StreamSummary } from "./stream-summary.js";
 
@@ -37,9 +36,7 @@ export function VodRail({
 }: VodRailProps) {
   const tabItems = vods.map((vod) => ({
     value: vod.vod_id,
-    label: `${formatDate(vod.published_at, { month: "numeric", day: "numeric", weekday: "short" })} · ${
-      getVodProvider(vod) === "youtube" ? "YouTube" : "Twitch"
-    }`,
+    label: formatDate(vod.published_at, { month: "numeric", day: "numeric", weekday: "short" }),
   }));
 
   return (
