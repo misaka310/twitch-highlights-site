@@ -41,7 +41,15 @@ PR作成、対象SHAの検証、head SHA確認、squash mergeは`.github/scripts
 
 ## 定期VOD更新
 
-YouTubeの実データ生成は、通常の自動更新とは分離した明示CLIで行う。`YOUTUBE_ORACLE_COMMAND_JSON`にはURL置換トークンを含むOracle VM向けコマンドを設定し、ローカル直接取得へフォールバックしない。YouTube生成と検証が完了するまで、subscriber-only対応で停止中の自動更新を再開しない。
+YouTubeの実データ生成は、通常の自動更新とは分離した明示CLIで行う。確定済みのOracle VM（`<ORACLE_HOST>`、`ubuntu`）へ、指定SSH鍵で接続し、既存のOracle取得スクリプトを`bash -s`で実行する。ローカル直接取得へフォールバックしない。YouTube生成と検証が完了するまで、subscriber-only対応で停止中の自動更新を再開しない。
+
+```powershell
+$env:YOUTUBE_ORACLE_HOST = '<ORACLE_HOST>'
+$env:YOUTUBE_ORACLE_USER = '<ORACLE_USER>'
+$env:YOUTUBE_ORACLE_KEY_PATH = '<SSH_KEY_PATH>'
+$env:YOUTUBE_ORACLE_SCRIPT_PATH = '<ORACLE_SCRIPT_PATH>'
+python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGTrmrSvZH0'
+```
 
 - `.github/workflows/update-vods.yml` は毎日 **06:07 JST** に処理を開始し、**09:00 JSTまでの公開反映**を目標とする。
 - GitHub ActionsのcronはUTCなので、正本は `7 21 * * *` とする。毎時0分を避けて開始遅延を抑える。

@@ -70,12 +70,12 @@ Interfaces:
   Run: python -m unittest tests.test_youtube_sources -v
   Expected: FAIL because the module and parser do not exist.
 - [ ] Step 3: Implement the pure parser and command builder.
-  Walk JSON Lines recursively for videoOffsetTimeMsec, normalize finite nonnegative values, retain only safe metadata, reject wrong video ids, and never expose raw lines or chat text in the result.
+  Parse the Oracle script's transport logs and temporary `video_offset` TSV, normalize finite nonnegative values, retain only safe metadata, reject wrong video ids, and never expose raw lines or chat text in the result.
 - [ ] Step 4: Run the focused tests.
   Run: python -m unittest tests.test_youtube_sources -v
   Expected: PASS.
 - [ ] Step 5: Add subprocess transport and Twitch-preserving dispatch.
-  Run the configured command as an argument list with the URL substituted, enforce that the production command is an explicitly configured remote/Oracle command, surface nonzero/timeout errors, and dispatch only when provider == "youtube".
+  Run the confirmed `ssh -i <key> ubuntu@<ORACLE_HOST> bash -s` transport with the existing Oracle script supplied over stdin, normalize its temporary TSV output, surface nonzero/timeout errors, and dispatch only when provider == "youtube".
 - [ ] Step 6: Add transport tests with an injected runner.
   Assert the command receives the target URL, the output is parsed, and a runner exception is surfaced without falling back to direct local HTTP.
 - [ ] Step 7: Run the focused tests again.
@@ -219,11 +219,11 @@ Files:
 - Test evidence: frontend/artifacts/ or repository-approved verification artifact location; do not commit raw chat.
 
 Interfaces:
-- YOUTUBE_ORACLE_COMMAND_JSON points to the existing Oracle VM transport and emits the documented JSON Lines.
+- The configured SSH transport reaches `<ORACLE_HOST>` as `ubuntu`, runs the existing Oracle script, and emits the documented temporary TSV.
 - python scripts/update_vods.py --youtube-url https://www.youtube.com/watch?v=WGTrmrSvZH0 produces normalized public data.
 
 - [ ] Step 1: Preflight Oracle and runtime configuration.
-  Confirm the configured command resolves to the Oracle VM route, yt-dlp/Deno are remote, no cookies/keys are in the repository, and no same-port server is running unexpectedly.
+  Confirm the configured SSH route resolves to the Oracle VM, yt-dlp/Deno/cookies remain remote, no cookies/keys are in the repository, and no same-port server is running unexpectedly.
 - [ ] Step 2: Run the real Oracle fetch.
   Run the explicit YouTube command with the target URL. Record only the count of normalized offsets, duration, and safe metadata; remove any raw temporary output after parsing.
 - [ ] Step 3: Run public data generation.

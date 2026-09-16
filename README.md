@@ -93,14 +93,17 @@ Copy-Item .env.example .env
 
 `.env`へTwitch API資格情報を設定します。Groqを使う場合だけ`GROQ_API_KEY`も設定します。依存バージョンとGitHub Actions上のTwitchDownloaderCLIアーカイブは固定・検証されています。
 
-YouTubeのライブアーカイブを生成する場合は、Oracle VM上で取得処理を実行するコマンドをURL置換トークン付きJSON配列で指定します。ローカルのyt-dlp直接実行はこの経路に使いません。
+YouTubeのライブアーカイブを生成する場合は、確定済みのOracle VMへSSHし、既存の取得スクリプトを標準入力で実行します。ローカルのyt-dlp直接実行はこの経路に使いません。SSH秘密鍵の内容やCookieはリポジトリへ入れません。
 
 ```powershell
-$env:YOUTUBE_ORACLE_COMMAND_JSON = '["ssh", "<oracle-host>", "<oracle-fetch-command>", "{url}"]'
+$env:YOUTUBE_ORACLE_HOST = '<ORACLE_HOST>'
+$env:YOUTUBE_ORACLE_USER = '<ORACLE_USER>'
+$env:YOUTUBE_ORACLE_KEY_PATH = '<SSH_KEY_PATH>'
+$env:YOUTUBE_ORACLE_SCRIPT_PATH = '<ORACLE_SCRIPT_PATH>'
 python scripts/update_vods.py --youtube-url "https://www.youtube.com/watch?v=WGTrmrSvZH0"
 ```
 
-コマンドはJSONLで動画メタデータと`videoOffsetTimeMsec`を標準出力へ返す必要があります。値は実行中だけ正規化され、公開データには集計値と見どころだけが保存されます。
+Oracleスクリプトは`yt-dlp 2026.08.19`、Deno、`$HOME/youtube-cookies.txt`を使い、`videoOffsetTimeMsec`を含む一時TSVを返します。ログとTSVは実行中だけ解析され、公開データには集計値と見どころだけが保存されます。
 
 ## 公開ビルド
 
