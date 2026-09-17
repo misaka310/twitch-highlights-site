@@ -54,6 +54,7 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 ```
 
 - Oracleの`ops/oracle/youtube-highlight.timer`は毎日**06:07 JST**に起動し、Actionsの`process-youtube-material.yml`へ`repository_dispatch`を送る。GitHub ActionsのcronはYouTube取得経路に使わない。
+- yt-dlpがライブチャットJSONを生成した後に付随形式のHTTP 403で終了する場合は、生成済みJSONが非空であることを検証して処理を継続する。JSONがない、または空の場合は失敗として扱う。
 - 既存`.github/workflows/update-vods.yml`のschedule宣言は互換検査のため残すが、現在の`if: github.event_name == 'workflow_dispatch'`による停止を無条件に解除しない。
 - GitHub側の混雑により実際の開始・完了が遅れることはある。画面の「次回更新予定」は処理開始時刻ではなく、公開反映目標の09:00 JSTを表示する。
 - 手動更新は `workflow_dispatch` で `main` を指定する。
