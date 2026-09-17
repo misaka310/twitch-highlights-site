@@ -207,7 +207,6 @@ def _metadata(completed: subprocess.CompletedProcess[str], video_id: str, video_
 def _download_chat_and_metadata(video_url: str, work_dir: Path, ytdlp: str, deno: str, cookies: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     video_id = parse_youtube_video_id(video_url)
     stem = work_dir / "archive"
-    chat_files = list(work_dir.glob("*.live_chat.json"))
     try:
         _run_ytdlp(
             _yt_dlp_base(ytdlp, deno, cookies)
@@ -218,9 +217,9 @@ def _download_chat_and_metadata(video_url: str, work_dir: Path, ytdlp: str, deno
         # return 403 while probing an unrelated video format. Keep the chat
         # artifact only when it exists; the parser below remains authoritative
         # for rejecting empty or malformed output.
-        chat_files = list(work_dir.glob("*.live_chat.json"))
-        if exc.category != "yt_dlp_failure" or not chat_files:
+        if exc.category != "yt_dlp_failure":
             raise
+    chat_files = list(work_dir.glob("*.live_chat.json"))
     if not chat_files:
         raise OracleJobFailure("live_chat_zero", "yt-dlp returned no live chat file")
     comments = _read_live_chat(chat_files[0])
