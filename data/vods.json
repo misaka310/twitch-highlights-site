@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-17T07:40:30+09:00",
-  "next_update_at": "2026-09-17T00:00:00+00:00",
+  "updated_at": "2026-09-17T10:13:41+09:00",
+  "next_update_at": "2026-09-18T00:00:00+00:00",
   "videos": [
     {
       "vod_id": "930HUhvRKHc",
@@ -22,11 +22,12 @@
           "start_time": "03:45:50",
           "end_time": "03:47:50",
           "reason": "Chat activity spike around 3h45m50s (z-score=3.895).",
-          "headline": "笑いが一気に広がる",
+          "headline": "バナナを目指してクリアする",
           "tags": [
             "ww"
           ],
-          "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=13550s"
+          "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=13550s",
+          "screenshot_url": "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_13550_13670.webp"
         },
         {
           "rank": 2,
@@ -37,13 +38,14 @@
           "start_time": "01:35:30",
           "end_time": "01:37:20",
           "reason": "Chat activity spike around 1h35m30s (z-score=3.895).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "カリスマに押し上げた理由",
           "tags": [
             "好プレー",
             "ww",
             "えっ"
           ],
-          "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=5730s"
+          "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=5730s",
+          "screenshot_url": "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_5730_5840.webp"
         },
         {
           "rank": 3,
@@ -54,13 +56,14 @@
           "start_time": "00:13:00",
           "end_time": "00:15:00",
           "reason": "Chat activity spike around 0h13m0s (z-score=2.941).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "おっさんの発言がポロリ",
           "tags": [
             "ww",
             "好プレー",
             "おめ"
           ],
-          "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=780s"
+          "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=780s",
+          "screenshot_url": "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_780_900.webp"
         }
       ],
       "activity_map": {
@@ -237,11 +240,12 @@
           "start_time": "03:18:20",
           "end_time": "03:19:40",
           "reason": "Chat activity spike around 3h18m20s (z-score=7.161).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "パリィが決まる瞬間",
           "tags": [
             "好プレー"
           ],
-          "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=11900s"
+          "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=11900s",
+          "screenshot_url": "/data/segment-thumbnails/WGTrmrSvZH0/WGTrmrSvZH0_11900_11980.webp"
         },
         {
           "rank": 2,
@@ -252,11 +256,12 @@
           "start_time": "00:46:00",
           "end_time": "00:47:50",
           "reason": "Chat activity spike around 0h46m0s (z-score=4.476).",
-          "headline": "笑いが一気に広がる",
+          "headline": "一個だけ浮かんでいることに気づく",
           "tags": [
             "ww"
           ],
-          "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=2760s"
+          "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=2760s",
+          "screenshot_url": "/data/segment-thumbnails/WGTrmrSvZH0/WGTrmrSvZH0_2760_2870.webp"
         },
         {
           "rank": 3,
@@ -267,11 +272,12 @@
           "start_time": "01:56:10",
           "end_time": "01:58:20",
           "reason": "Chat activity spike around 1h56m10s (z-score=3.582).",
-          "headline": "笑いが一気に広がる",
+          "headline": "黄金の木の根元を確かめる",
           "tags": [
             "ww"
           ],
-          "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=6970s"
+          "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=6970s",
+          "screenshot_url": "/data/segment-thumbnails/WGTrmrSvZH0/WGTrmrSvZH0_6970_7100.webp"
         }
       ],
       "activity_map": {

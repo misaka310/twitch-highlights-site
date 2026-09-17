@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-17T07:40:30+09:00",
+  "updated_at": "2026-09-17T10:02:48+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -25,7 +25,7 @@
           "start_time": "03:45:50",
           "end_time": "03:47:50",
           "reason": "Chat activity spike around 3h45m50s (z-score=3.895).",
-          "headline": "笑いが一気に広がる",
+          "headline": "バナナを目指してクリアする",
           "tags": [
             "ww"
           ],
@@ -41,7 +41,7 @@
           "start_time": "01:35:30",
           "end_time": "01:37:20",
           "reason": "Chat activity spike around 1h35m30s (z-score=3.895).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "カリスマに押し上げた理由",
           "tags": [
             "好プレー",
             "ww",
@@ -59,7 +59,7 @@
           "start_time": "00:13:00",
           "end_time": "00:15:00",
           "reason": "Chat activity spike around 0h13m0s (z-score=2.941).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "おっさんの発言がポロリ",
           "tags": [
             "ww",
             "好プレー",
@@ -118,7 +118,7 @@
         ]
       },
       "analysis_version": "chat-zscore-v8",
-      "analyzed_at": "2026-09-17T07:37:53+09:00"
+      "analyzed_at": "2026-09-17T09:54:05+09:00"
     },
     {
       "vod_id": "2873115795",
@@ -249,7 +249,7 @@
           "start_time": "03:18:20",
           "end_time": "03:19:40",
           "reason": "Chat activity spike around 3h18m20s (z-score=7.161).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "パリィが決まる瞬間",
           "tags": [
             "好プレー"
           ],
@@ -265,7 +265,7 @@
           "start_time": "00:46:00",
           "end_time": "00:47:50",
           "reason": "Chat activity spike around 0h46m0s (z-score=4.476).",
-          "headline": "笑いが一気に広がる",
+          "headline": "一個だけ浮かんでいることに気づく",
           "tags": [
             "ww"
           ],
@@ -281,7 +281,7 @@
           "start_time": "01:56:10",
           "end_time": "01:58:20",
           "reason": "Chat activity spike around 1h56m10s (z-score=3.582).",
-          "headline": "笑いが一気に広がる",
+          "headline": "黄金の木の根元を確かめる",
           "tags": [
             "ww"
           ],
@@ -333,7 +333,7 @@
         ]
       },
       "analysis_version": "chat-zscore-v8",
-      "analyzed_at": "2026-09-17T07:38:32+09:00"
+      "analyzed_at": "2026-09-17T09:56:10+09:00"
     },
     {
       "vod_id": "2872083252",
@@ -514,7 +514,7 @@
           "start_time": "04:32:10",
           "end_time": "04:36:00",
           "reason": "Chat activity spike around 4h32m10s (z-score=3.988).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "蛇女キャラの見た目に驚く",
           "tags": [
             "ww",
             "ホラー",
@@ -532,7 +532,7 @@
           "start_time": "02:59:20",
           "end_time": "03:02:30",
           "reason": "Chat activity spike around 2h59m20s (z-score=4.948).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "キノコの前で立ち止まる",
           "tags": [
             "は",
             "好プレー"
@@ -549,7 +549,7 @@
           "start_time": "03:15:30",
           "end_time": "03:17:00",
           "reason": "Chat activity spike around 3h15m30s (z-score=6.869).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "プレイヤースキルでゴリ押しする",
           "tags": [
             "おめ",
             "好プレー",
@@ -648,7 +648,7 @@
         ]
       },
       "analysis_version": "chat-zscore-v8",
-      "analyzed_at": "2026-09-17T07:39:09+09:00"
+      "analyzed_at": "2026-09-17T09:58:08+09:00"
     },
     {
       "vod_id": "2870333438",
@@ -786,7 +786,7 @@
           "start_time": "02:47:10",
           "end_time": "02:50:10",
           "reason": "Chat activity spike around 2h47m10s (z-score=5.267).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "フリーレンコスの2人が合体",
           "tags": [
             "ww",
             "ホラー",
@@ -804,7 +804,7 @@
           "start_time": "02:58:00",
           "end_time": "02:59:20",
           "reason": "Chat activity spike around 2h58m0s (z-score=7.008).",
-          "headline": "笑いが一気に広がる",
+          "headline": "今のプレーを思わず謝る",
           "tags": [
             "ww",
             "は",
@@ -822,7 +822,7 @@
           "start_time": "01:36:00",
           "end_time": "01:37:40",
           "reason": "Chat activity spike around 1h36m0s (z-score=4.397).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "エルデン勢がパリィを使わない理由",
           "tags": [
             "ww",
             "好プレー",
@@ -878,7 +878,7 @@
         ]
       },
       "analysis_version": "chat-zscore-v8",
-      "analyzed_at": "2026-09-17T07:39:52+09:00"
+      "analyzed_at": "2026-09-17T10:00:48+09:00"
     },
     {
       "vod_id": "2869469962",
@@ -1008,7 +1008,7 @@
           "start_time": "02:35:00",
           "end_time": "02:37:00",
           "reason": "Chat activity spike around 2h35m0s (z-score=7.216).",
-          "headline": "祝福コメントが集まる",
+          "headline": "報酬配布で当たりを引く",
           "tags": [
             "おめ",
             "ww",
@@ -1026,7 +1026,7 @@
           "start_time": "01:48:10",
           "end_time": "01:49:10",
           "reason": "Chat activity spike around 1h48m10s (z-score=3.962).",
-          "headline": "好プレーで盛り上がる",
+          "headline": "Switch2の大人向け新作に驚く",
           "tags": [
             "えっ",
             "好プレー",
@@ -1044,7 +1044,7 @@
           "start_time": "01:13:00",
           "end_time": "01:13:50",
           "reason": "Chat activity spike around 1h13m0s (z-score=3.962).",
-          "headline": "祝福コメントが集まる",
+          "headline": "お母さんの優しさに気づく",
           "tags": [
             "ww",
             "おめ"
@@ -1092,7 +1092,7 @@
         ]
       },
       "analysis_version": "chat-zscore-v8",
-      "analyzed_at": "2026-09-17T07:40:30+09:00"
+      "analyzed_at": "2026-09-17T10:02:48+09:00"
     },
     {
       "vod_id": "2868630900",

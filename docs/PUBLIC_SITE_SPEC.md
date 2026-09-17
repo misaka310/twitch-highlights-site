@@ -15,7 +15,7 @@
 
 YouTubeライブアーカイブのコメント量から抽出した見どころを、利用者が短時間で選び、該当時刻からすぐ再生できる非公式ファンサイトを提供する。
 
-現在の公開UIで表示・選択できるproviderはYouTubeだけとする。Twitchの既存集計データと再生実装は互換性のため保持するが、公開UIの一覧・ページャー・VOD切替からは除外する。
+公開UIはTwitchとYouTubeのproviderを表示・選択できる。provider専用の切替タブは追加せず、VODの日付タブから選択したデータに応じて再生アダプタを切り替える。
 
 公開画面では、文字起こし本文や内部解析過程ではなく、次だけを表示する。
 
@@ -43,7 +43,7 @@ YouTubeライブアーカイブのコメント量から抽出した見どころ�
 
 互換保持するprovider:
 
-- Twitch（公開UIでは非表示）
+- Twitch via Twitch SDK / iframe fallback
 
 YouTube live_chatはOracle VM上で取得し、ローカルの直接取得を公開パイプラインの成功経路として扱わない。取得したvideoOffsetTimeMsecはcontent_offset_secondsへ正規化し、コメント本文や投稿者情報は保存しない。
 
@@ -76,7 +76,7 @@ PCでは2カラム構成とする。
 
 左カラム:
 
-1. YouTubeプレイヤー
+1. provider対応プレイヤー
 2. 盛り上がりマップ
 
 右カラム:
@@ -166,9 +166,8 @@ VODは `published_at` の新しい順に表示する。入力JSONの配列順へ
 ### 7.4 見出し
 
 - `headline` があれば使用する。
-- なければ `reason` を表示用に整形する。
-- `Chat activity spike around ... (z-score=...)` 形式は `コメントが集中した場面` とする。
-- どちらもなければ `見どころ` とする。
+- YouTubeの `headline` が欠損している場合は見出し未生成として扱い、反応理由を見出しに昇格させない。
+- 既存Twitchデータは互換維持のため、`headline` 欠損時に従来の `reason` 整形表示を許容する。
 
 ## 8. 配信概要
 

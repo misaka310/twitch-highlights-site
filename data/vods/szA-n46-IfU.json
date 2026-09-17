@@ -18,13 +18,14 @@
       "start_time": "02:35:00",
       "end_time": "02:37:00",
       "reason": "Chat activity spike around 2h35m0s (z-score=7.216).",
-      "headline": "祝福コメントが集まる",
+      "headline": "報酬配布で当たりを引く",
       "tags": [
         "おめ",
         "ww",
         "えっ"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=szA-n46-IfU&t=9300s"
+      "watch_url": "https://www.youtube.com/watch?v=szA-n46-IfU&t=9300s",
+      "screenshot_url": "/data/segment-thumbnails/szA-n46-IfU/szA-n46-IfU_9300_9420.webp"
     },
     {
       "rank": 2,
@@ -35,13 +36,14 @@
       "start_time": "01:48:10",
       "end_time": "01:49:10",
       "reason": "Chat activity spike around 1h48m10s (z-score=3.962).",
-      "headline": "好プレーで盛り上がる",
+      "headline": "Switch2の大人向け新作に驚く",
       "tags": [
         "えっ",
         "好プレー",
         "ww"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=szA-n46-IfU&t=6490s"
+      "watch_url": "https://www.youtube.com/watch?v=szA-n46-IfU&t=6490s",
+      "screenshot_url": "/data/segment-thumbnails/szA-n46-IfU/szA-n46-IfU_6490_6550.webp"
     },
     {
       "rank": 3,
@@ -52,12 +54,13 @@
       "start_time": "01:13:00",
       "end_time": "01:13:50",
       "reason": "Chat activity spike around 1h13m0s (z-score=3.962).",
-      "headline": "祝福コメントが集まる",
+      "headline": "お母さんの優しさに気づく",
       "tags": [
         "ww",
         "おめ"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=szA-n46-IfU&t=4380s"
+      "watch_url": "https://www.youtube.com/watch?v=szA-n46-IfU&t=4380s",
+      "screenshot_url": "/data/segment-thumbnails/szA-n46-IfU/szA-n46-IfU_4380_4430.webp"
     }
   ],
   "activity_map": {

@@ -30,6 +30,7 @@ class PublicEnrichmentFallbackTests(unittest.TestCase):
         return {
             "videos": [
                 {
+                    "provider": "youtube",
                     "vod_id": "123",
                     "items": [
                         {
@@ -48,13 +49,13 @@ class PublicEnrichmentFallbackTests(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"webp")
 
-    def test_reason_fallback_allows_missing_headline(self):
+    def test_reason_does_not_fallback_to_a_missing_headline(self):
         verifier = self.load_verifier()
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self.create_screenshot(root)
             failures = verifier.collect_public_enrichment_failures(self.build_payload(), root=root)
-        self.assertEqual([], failures)
+        self.assertEqual(["segment_id=123_3723_3783: headline missing"], failures)
 
     def test_missing_headline_and_reason_remains_blocking(self):
         verifier = self.load_verifier()
@@ -62,7 +63,7 @@ class PublicEnrichmentFallbackTests(unittest.TestCase):
             root = Path(tmp)
             self.create_screenshot(root)
             failures = verifier.collect_public_enrichment_failures(self.build_payload(reason=""), root=root)
-        self.assertEqual(["segment_id=123_3723_3783: display title source missing"], failures)
+        self.assertEqual(["segment_id=123_3723_3783: headline missing"], failures)
 
     def test_runtime_loader_uses_detail_payload_referenced_by_index(self):
         verifier = self.load_verifier()

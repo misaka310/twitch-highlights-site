@@ -47,7 +47,7 @@ from vod_highlights import (  # noqa: F401
     build_activity_map,
     build_segment_screenshot_file_path,
     build_segment_screenshot_public_path,
-    build_watch_url, build_tag_based_fallback_headline,
+    build_watch_url,
     bucket_counts,
     calculate_closing_chatter_penalty,
     classify_segment_tags,
@@ -744,7 +744,6 @@ def analyze_video_entry(
                 start_sec = parse_int(item.get("start_sec"))
                 if start_sec is not None:
                     item["watch_url"] = build_youtube_watch_url(vod_id, start_sec)
-                item["headline"] = str(item.get("headline") or "").strip() or build_tag_based_fallback_headline(item.get("tags"))
     except Exception as exc:
         print(f"warn: skip {vod_id} ({exc})")
         return None, "failed"

@@ -2,7 +2,8 @@
 
 ## YouTube provider
 
-現行の公開UIはYouTubeだけを表示対象とし、YouTube IFrame Player APIを使って初期表示、ユーザー操作、seek、10秒戻る、VOD切替を実行する。Twitchの再生アダプタは互換用に残すが、公開一覧からTwitchを選択できない。APIを取得できない場合は失敗をUIへ表示し、別providerやローカル直接取得へフォールバックしない。
+公開UIはTwitchとYouTubeを表示対象とし、VODのproviderに応じた再生アダプタで初期表示、ユーザー操作、seek、10秒戻る、VOD切替を実行する。APIを取得できない場合は失敗をUIへ表示し、別providerやローカル直接取得へフォールバックしない。
+- YouTubeはYouTube IFrame Player APIを使用する。
 
 ## 目的
 

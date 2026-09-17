@@ -30,7 +30,6 @@ DEFAULT_YOUTUBE_ORACLE_HOST = "<ORACLE_HOST>"
 DEFAULT_YOUTUBE_ORACLE_USER = "ubuntu"
 DEFAULT_YOUTUBE_ORACLE_KEY_PATH = Path(r"<SSH_KEY_PATH>")
 DEFAULT_YOUTUBE_ORACLE_SCRIPT_PATH = Path(r"<ORACLE_SCRIPT_PATH>")
-COMPAT_YOUTUBE_ORACLE_SCRIPT_PATH = Path(r"<ORACLE_SCRIPT_PATH>")
 
 
 @dataclass(frozen=True)
@@ -104,12 +103,7 @@ def youtube_oracle_config_from_env(env: Mapping[str, str] | None = None) -> Yout
     user = str(source.get(YOUTUBE_ORACLE_USER_ENV) or DEFAULT_YOUTUBE_ORACLE_USER).strip()
     key_path = Path(str(source.get(YOUTUBE_ORACLE_KEY_ENV) or DEFAULT_YOUTUBE_ORACLE_KEY_PATH).strip())
     configured_script_path = str(source.get(YOUTUBE_ORACLE_SCRIPT_ENV) or "").strip()
-    if configured_script_path:
-        script_path = Path(configured_script_path)
-    elif DEFAULT_YOUTUBE_ORACLE_SCRIPT_PATH.is_file():
-        script_path = DEFAULT_YOUTUBE_ORACLE_SCRIPT_PATH
-    else:
-        script_path = COMPAT_YOUTUBE_ORACLE_SCRIPT_PATH
+    script_path = Path(configured_script_path) if configured_script_path else DEFAULT_YOUTUBE_ORACLE_SCRIPT_PATH
     return YoutubeOracleConfig(
         host=host,
         user=user,

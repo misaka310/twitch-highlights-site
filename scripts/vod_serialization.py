@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -271,7 +272,10 @@ def infer_vod_id_from_segment_id(segment_id: str) -> str:
     if not value:
         return ""
     head, _, _ = value.partition("_")
-    return head if head.isdigit() else ""
+    # Twitch IDs are numeric, while YouTube IDs are alphanumeric and may
+    # contain '-' or '_'. Keep the whitelist tight because this value is also
+    # used to resolve a local thumbnail path.
+    return head if re.fullmatch(r"[A-Za-z0-9_-]{1,64}", head) else ""
 
 
 def has_segment_screenshot_file(vod_id: str, segment_id: str) -> bool:

@@ -17,6 +17,7 @@ def run_youtube_mode(
     write_public_data: Callable[..., Any],
     output_path: Path,
     fetch_video: Callable[[str], YoutubeFetchResult] = fetch_youtube_video,
+    enrich_video: Callable[[dict[str, Any]], tuple[dict[str, Any], Any]] | None = None,
 ) -> None:
     result = fetch_video(youtube_url)
     analyzed_video, status = analyze_video_entry(
@@ -27,6 +28,12 @@ def run_youtube_mode(
     )
     if not analyzed_video or status != "analyzed":
         raise RuntimeError(f"YouTube archive produced no publishable highlights: {youtube_url}")
+
+    if enrich_video is None:
+        from youtube_enrichment import enrich_youtube_video
+
+        enrich_video = enrich_youtube_video
+    analyzed_video, enrichment_summary = enrich_video(analyzed_video)
 
     cache_payload = load_processed_cache()
     cached_by_vod_id = {
@@ -42,5 +49,8 @@ def run_youtube_mode(
         f" vod_id={analyzed_video['vod_id']}"
         f" oracle_comments={analyzed_video['chat_total']}"
         f" highlights={len(analyzed_video.get('items') or [])}"
+        f" transcribed={getattr(enrichment_summary, 'transcribed', 'unknown')}"
+        f" headlines={getattr(enrichment_summary, 'headlines', 'unknown')}"
+        f" screenshots={getattr(enrichment_summary, 'screenshots', 'unknown')}"
     )
     print(f"wrote {output_path}")

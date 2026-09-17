@@ -4,7 +4,7 @@
 
 https://dotitao-moments.onrender.com/
 
-YouTubeライブアーカイブのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。現在の公開インスタンスは`dotitao moments`です。公開画面ではYouTubeだけを表示し、既存のTwitchデータと再生実装は互換用に保持します。
+TwitchおよびYouTubeアーカイブのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。現在の公開インスタンスは`dotitao moments`です。公開画面はprovider対応で、VODに応じた再生アダプタを使用します。
 
 > **非公式・非提携について**
 > このプロジェクトは独立して開発された非公式ツールであり、Twitchまたは対象チャンネル・配信者の公式製品、提携製品、承認製品、スポンサー製品ではありません。Twitch、チャンネル名、配信者名および関連する名称・商標・コンテンツの権利は各権利者に帰属します。
@@ -92,7 +92,7 @@ Copy-Item .env.example .env
 
 `.env`へTwitch API資格情報を設定します。Groqを使う場合だけ`GROQ_API_KEY`も設定します。依存バージョンとGitHub Actions上のTwitchDownloaderCLIアーカイブは固定・検証されています。
 
-YouTubeのライブアーカイブを生成する場合は、確定済みのOracle VMへSSHし、既存の取得スクリプトを標準入力で実行します。ローカルのyt-dlp直接実行はこの経路に使いません。SSH秘密鍵の内容やCookieはリポジトリへ入れません。
+YouTubeのライブアーカイブを生成する場合は、確定済みのOracle VMを唯一のYouTube取得経路として使います。ローカルのyt-dlp直接実行はこの経路に使いません。SSH秘密鍵の内容やCookieはリポジトリへ入れません。
 
 ```powershell
 $env:YOUTUBE_ORACLE_HOST = '<ORACLE_HOST>'
@@ -102,7 +102,9 @@ $env:YOUTUBE_ORACLE_SCRIPT_PATH = '<ORACLE_SCRIPT_PATH>'
 python scripts/update_vods.py --youtube-url "https://www.youtube.com/watch?v=WGTrmrSvZH0"
 ```
 
-Oracleスクリプトは`yt-dlp 2026.08.19`、Deno、`$HOME/youtube-cookies.txt`を使い、`videoOffsetTimeMsec`を含む一時TSVを返します。ログとTSVは実行中だけ解析され、公開データには集計値と見どころだけが保存されます。
+Oracleスクリプトは`yt-dlp 2026.08.19`、Deno、`$HOME/youtube-cookies.txt`を使い、`videoOffsetTimeMsec`を含む一時データを解析します。ログ、raw chat、TSVは実行中だけ扱われ、公開データには集計値と見どころだけが保存されます。定期運用は`ops/oracle/youtube-highlight.timer`でOracleから選択区間だけをOCI Object Storageの一時PARへ渡し、`.github/workflows/process-youtube-material.yml`がActions上でWhisper、見出し、サムネイル、検証、checked PR公開を行います。
+
+Oracle timerの秘密値とOCI PAR、GitHub Actions Secretの設定は[`ops/oracle/README.md`](ops/oracle/README.md)を参照してください。既存の`.github/workflows/update-vods.yml`の停止中scheduleはこの経路の完成を待って無条件には再開しません。
 
 ## 公開ビルド
 
@@ -125,7 +127,7 @@ Twitch実サービスとデプロイ済みRenderを確認する場合は、通�
 
 ## プライバシー
 
-取得したTwitchコメントは解析中のメモリ上だけで処理します。コメント本文、ユーザー名、コメント単位の投稿時刻をリポジトリへ保存しません。公開データには時間帯ごとの件数、抽出済み見どころ、生成済み見出し、サムネイルなどの集計結果だけを含めます。
+取得したTwitch/YouTubeコメントは解析中のメモリ上だけで処理します。コメント本文、ユーザー名、コメント単位の投稿時刻をリポジトリやActions用bundleへ保存しません。公開データには時間帯ごとの件数、抽出済み見どころ、生成済み見出し、サムネイルなどの集計結果だけを含めます。
 
 詳細は[`PRIVACY.md`](PRIVACY.md)と[`docs/data-contract.md`](docs/data-contract.md)を参照してください。
 

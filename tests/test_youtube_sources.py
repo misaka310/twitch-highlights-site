@@ -294,7 +294,7 @@ class YoutubeSourceTests(unittest.TestCase):
         self.assertEqual(analyzed["title"], "Oracle title")
         self.assertEqual(analyzed["duration_sec"], 100)
 
-    def test_update_analysis_adds_existing_tag_based_headline_for_youtube(self):
+    def test_update_analysis_does_not_turn_tags_into_youtube_headline(self):
         source_video = {
             "provider": "youtube",
             "vod_id": "930HUhvRKHc",
@@ -333,7 +333,7 @@ class YoutubeSourceTests(unittest.TestCase):
                     )
 
         self.assertEqual(status, "analyzed")
-        self.assertEqual(analyzed["items"][0]["headline"], "笑いが一気に広がる")
+        self.assertNotIn("headline", analyzed["items"][0])
 
     def test_cache_normalization_preserves_existing_twitch_duration(self):
         normalized = uv.normalize_cached_video(

@@ -46,9 +46,9 @@ test("renders production layout and preserves same-VOD playback behavior", async
   await expect(page.locator(".highlight-item img")).toHaveCount(3);
   await expect(page.locator(".highlight-item img").first()).toHaveAttribute(
     "src",
-    /i\.ytimg\.com\/vi\/930HUhvRKHc\/maxresdefault\.jpg/,
+    "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_13550_13670.webp",
   );
-  await expect(page.getByText("Showing 1-3 of 5", { exact: true })).toBeVisible();
+  await expect(page.getByText("Showing 1-3 of 60", { exact: true })).toBeVisible();
   await expect(page.getByRole("tab").first()).toContainText("9/15");
   await expect(page.getByRole("tab").first()).not.toContainText("YouTube");
   await expect(page.getByRole("tab").first()).not.toContainText("Twitch");
@@ -239,7 +239,7 @@ test("keeps legacy ordering and missing metadata fallbacks", async ({ page }) =>
   await expect(frame).toHaveAttribute("data-current-vod-id", "newer");
   await expect(frame).toHaveAttribute("data-current-start-sec", "20");
   await expect(page.locator(".time-chip")).toHaveText(["00:00:20", "00:00:40", "00:01:00"]);
-  await expect(page.locator(".highlight-copy > strong")).toHaveText(["1番目", "コメントが集中した場面", "3番目"]);
+  await expect(page.locator(".highlight-copy > strong")).toHaveText(["1番目", "見出し未生成", "3番目"]);
   await expect(page.locator(".stream-summary dd").nth(0)).toHaveText("―");
   await expect(page.locator(".stream-summary dd").nth(2)).toHaveText("00:01:30");
   await expect(page.locator(".stream-summary dd").nth(3)).toHaveText("―");

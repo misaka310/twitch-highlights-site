@@ -112,6 +112,14 @@ class CoreDataContractTests(unittest.TestCase):
         with_bom = [str(path.relative_to(ROOT)) for path in paths if path.read_bytes().startswith(b"\xef\xbb\xbf")]
         self.assertEqual(with_bom, [])
 
+    def test_youtube_ids_resolve_segment_thumbnail_paths(self):
+        self.assertEqual(
+            "WGTrmrSvZH0",
+            uv.infer_vod_id_from_segment_id("WGTrmrSvZH0_11900_11980"),
+        )
+        self.assertEqual("2873115795", uv.infer_vod_id_from_segment_id("2873115795_10_20"))
+        self.assertEqual("", uv.infer_vod_id_from_segment_id("../outside_10_20"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,18 +6,24 @@ import { normalizeAssetPath } from "../lib/vod-data.js";
 
 type HighlightListProps = {
   vodId: string;
+  provider?: "twitch" | "youtube";
   vodThumbnailUrl?: string;
   segments: HighlightSegment[];
   activeSegmentId: string;
   onSelect: (segment: HighlightSegment) => void;
 };
 
-export function HighlightList({ vodId, vodThumbnailUrl, segments, activeSegmentId, onSelect }: HighlightListProps) {
+export function HighlightList({ vodId, provider = "twitch", vodThumbnailUrl, segments, activeSegmentId, onSelect }: HighlightListProps) {
   return (
     <div className="highlight-list">
       {segments.length > 0 ? segments.map((segment) => {
         const selected = segment.id === activeSegmentId;
-        const title = String(segment.headline || localizeReason(segment.reason) || "見どころ").trim();
+        // Reaction reasons belong in metadata, never in the viewer-facing heading.
+        // A missing content headline must remain visibly incomplete instead of
+        // masquerading as a generic highlight title.
+        const title = String(
+          segment.headline || (provider === "twitch" ? localizeReason(segment.reason) : "見出し未生成"),
+        ).trim();
         const thumbnailUrl = segment.screenshot_url || vodThumbnailUrl;
         return (
           <button

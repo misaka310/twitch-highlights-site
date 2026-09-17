@@ -18,11 +18,12 @@
       "start_time": "03:18:20",
       "end_time": "03:19:40",
       "reason": "Chat activity spike around 3h18m20s (z-score=7.161).",
-      "headline": "好プレーで盛り上がる",
+      "headline": "パリィが決まる瞬間",
       "tags": [
         "好プレー"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=11900s"
+      "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=11900s",
+      "screenshot_url": "/data/segment-thumbnails/WGTrmrSvZH0/WGTrmrSvZH0_11900_11980.webp"
     },
     {
       "rank": 2,
@@ -33,11 +34,12 @@
       "start_time": "00:46:00",
       "end_time": "00:47:50",
       "reason": "Chat activity spike around 0h46m0s (z-score=4.476).",
-      "headline": "笑いが一気に広がる",
+      "headline": "一個だけ浮かんでいることに気づく",
       "tags": [
         "ww"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=2760s"
+      "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=2760s",
+      "screenshot_url": "/data/segment-thumbnails/WGTrmrSvZH0/WGTrmrSvZH0_2760_2870.webp"
     },
     {
       "rank": 3,
@@ -48,11 +50,12 @@
       "start_time": "01:56:10",
       "end_time": "01:58:20",
       "reason": "Chat activity spike around 1h56m10s (z-score=3.582).",
-      "headline": "笑いが一気に広がる",
+      "headline": "黄金の木の根元を確かめる",
       "tags": [
         "ww"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=6970s"
+      "watch_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0&t=6970s",
+      "screenshot_url": "/data/segment-thumbnails/WGTrmrSvZH0/WGTrmrSvZH0_6970_7100.webp"
     }
   ],
   "activity_map": {
