@@ -106,7 +106,7 @@ test("keeps the page usable when one VOD detail payload fails", async () => {
   assert.equal(result.totalCount, 2);
 });
 
-test("keeps Twitch and YouTube entries in the public page", async () => {
+test("keeps only YouTube entries in the public page", async () => {
   const fetcher = async (input: string | URL | Request): Promise<Response> => {
     const path = String(input);
     if (path === "/data/vod_index.json") {
@@ -129,8 +129,8 @@ test("keeps Twitch and YouTube entries in the public page", async () => {
 
   const result = await loadVodPage(1, fetcher as typeof fetch);
 
-  assert.deepEqual(result.vods.map((vod) => vod.vod_id), ["twitch-1", "youtube-1"]);
-  assert.equal(result.totalCount, 2);
+  assert.deepEqual(result.vods.map((vod) => vod.vod_id), ["youtube-1"]);
+  assert.equal(result.totalCount, 1);
 });
 
 test("keeps display formatting and reason localization", () => {

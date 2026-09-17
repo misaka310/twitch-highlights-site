@@ -6,7 +6,7 @@ import re
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 from vod_highlights import (
     DetectConfig,
@@ -55,6 +55,22 @@ TAG_LABEL_ALIASES = {
     "えっろ": "えっど",
     "は？": "は",
 }
+
+
+def is_youtube_video(video: Mapping[str, Any]) -> bool:
+    """Return whether a cached video belongs to the current public YouTube feed."""
+
+    provider = str(video.get("provider") or "").strip().lower()
+    if provider:
+        return provider == "youtube"
+    url = str(video.get("vod_url") or "").strip().lower()
+    return "youtube.com/" in url or "youtu.be/" in url
+
+
+def filter_youtube_videos(videos: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Exclude legacy Twitch cache entries from YouTube public output."""
+
+    return [video for video in videos if is_youtube_video(video)]
 
 
 def normalize_tag_labels(tags: Iterable[Any]) -> list[str]:

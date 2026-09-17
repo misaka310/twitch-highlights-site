@@ -15,7 +15,7 @@
 
 YouTubeライブアーカイブのコメント量から抽出した見どころを、利用者が短時間で選び、該当時刻からすぐ再生できる非公式ファンサイトを提供する。
 
-公開UIはTwitchとYouTubeのproviderを表示・選択できる。provider専用の切替タブは追加せず、VODの日付タブから選択したデータに応じて再生アダプタを切り替える。
+公開UIはYouTube providerだけを表示・選択する。provider専用の切替タブは追加せず、YouTube VODの日付タブから選択したデータを再生する。旧Twitchキャッシュが入力へ残っていても、公開一覧・ページャー・VODタブには出さない。
 
 公開画面では、文字起こし本文や内部解析過程ではなく、次だけを表示する。
 
@@ -41,7 +41,7 @@ YouTubeライブアーカイブのコメント量から抽出した見どころ�
 
 - YouTube via YouTube IFrame Player API
 
-互換保持するprovider:
+内部互換テストだけで保持するprovider:
 
 - Twitch via Twitch SDK / iframe fallback
 
@@ -156,6 +156,8 @@ PCでは2カラム構成とする。
 
 VODは `published_at` の新しい順に表示する。入力JSONの配列順へ依存しない。
 
+公開対象はYouTube VODだけとする。旧Twitchデータが入力JSONや内部キャッシュに残っていても、表示件数・ページャー総件数・日付タブへ含めない。
+
 ### 7.3 見どころ順序
 
 見どころは次の優先順位で並べ、先頭3件を表示する。
@@ -167,7 +169,7 @@ VODは `published_at` の新しい順に表示する。入力JSONの配列順へ
 
 - `headline` があれば使用する。
 - YouTubeの `headline` が欠損している場合は見出し未生成として扱い、反応理由を見出しに昇格させない。
-- 既存Twitchデータは互換維持のため、`headline` 欠損時に従来の `reason` 整形表示を許容する。
+- 旧Twitchデータは公開対象外とし、公開UIでは`reason`を見出しへフォールバックしない。
 
 ## 8. 配信概要
 

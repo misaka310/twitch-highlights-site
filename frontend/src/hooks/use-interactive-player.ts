@@ -233,7 +233,7 @@ export function useInteractivePlayer({
           playerReadyRef.current = true;
           mountInFlightRef.current = false;
           mountVodIdRef.current = "";
-          mountProviderRef.current = "twitch";
+          mountProviderRef.current = "youtube";
           startPolling();
 
           const latest = desiredRef.current;

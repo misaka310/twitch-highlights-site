@@ -25,6 +25,7 @@ from update_vods import (
     write_public_data,
 )
 from vod_sources import ChatFetchResult
+from vod_serialization import filter_youtube_videos
 from youtube_enrichment import enrich_youtube_video
 from youtube_handoff import extract_material_bundle
 
@@ -98,7 +99,7 @@ def process_bundle(bundle_path: Path, *, now: datetime | None = None) -> dict[st
         }
         cached_by_vod_id[enriched["vod_id"]] = enriched
         write_processed_cache(cached_by_vod_id.values(), active_now)
-        write_public_data(cached_by_vod_id.values(), active_now)
+        write_public_data(filter_youtube_videos(cached_by_vod_id.values()), active_now)
         result = {
             "vod_id": enriched["vod_id"],
             "chat_total": enriched["chat_total"],

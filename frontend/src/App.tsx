@@ -134,7 +134,7 @@ export default function App() {
     );
   }
 
-  const siteName = String(data.siteConfig.site?.name || "Twitch Highlights").trim();
+  const siteName = String(data.siteConfig.site?.name || "YouTube Highlights").trim();
 
   return (
     <div className="preview-shell">

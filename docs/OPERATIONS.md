@@ -58,8 +58,8 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 - 既存`.github/workflows/update-vods.yml`のschedule宣言は互換検査のため残すが、現在の`if: github.event_name == 'workflow_dispatch'`による停止を無条件に解除しない。
 - GitHub側の混雑により実際の開始・完了が遅れることはある。画面の「次回更新予定」は処理開始時刻ではなく、公開反映目標の09:00 JSTを表示する。
 - 手動更新は `workflow_dispatch` で `main` を指定する。
-- `data/vods.json` は公開トップ用の最新3件、`data/vod_index.json` は保持期間内の一覧を持つ。
-- 更新データは `automation/update-vods` ブランチとPRを経由し、公開準備チェック成功後にmainへマージする。
+- `data/vods.json` は公開トップ用のYouTube最新3件、`data/vod_index.json` は保持期間内のYouTube一覧を持つ。既存キャッシュにTwitchが残っていても、YouTubeのActions処理が公開出力前に除外する。
+- YouTube更新データは `automation/youtube-material-*` ブランチとPRを経由し、公開準備チェック成功後にmainへマージする。旧Twitch更新workflowは停止中であり、公開出力へTwitchを戻さない。
 - YouTubeでWhisperの内容を確定できない区間は `headline` 欠損のまま扱い、反応タグや既存の `reason` を公開UIの表示見出しへフォールバックしない。既存Twitchデータは互換維持のため従来の `reason` 表示を許容する。
 - YouTube更新では、タグを見出しへ変換しない。公開用の `headline` は、Oracleから取得した見どころ区間の音声・映像を後段のWhisper/見出し生成へ渡して作る。素材や文字起こしを取得できない項目は `headline` を欠損のまま扱い、反応タグを見出しに見せかけない。
 - YouTubeの内部音声解析は、スクリーンショット不要時はHTTPS音声のみ、必要時はHTTPSの軽量映像・音声を選ぶ。Twitchの区間取得フォーマットは変更しない。
