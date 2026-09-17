@@ -77,12 +77,16 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 | Compartment | `kiralab`（root） |
 | Bucket | `youtube-material-upload`（private / Standard） |
 | 固定オブジェクト | `youtube-material/latest.tar.gz` |
-| Upload PAR | `youtube-material-upload-par`（object write/overwrite、2027-03-17 07:00 UTCまで） |
-| Read PAR | `youtube-material-read-par`（object read、2027-03-17 07:00 UTCまで） |
+| Upload PAR | `youtube-material-upload-par-20260917`（object write/overwrite、2027-03-17 07:00 UTCまで） |
+| Read PAR | `youtube-material-read-par-20260917`（object read、2027-03-17 07:00 UTCまで） |
 | Lifecycle | `delete-youtube-material-after-1-day`（有効、`youtube-material/`接頭辞、1日後削除） |
 | IAM policy | `YouTubeMaterialLifecyclePolicy`（`target.bucket.name='youtube-material-upload'`条件付き） |
 
 PAR URLそのものは秘密情報のため、repositoryやドキュメントには保存しない。PARでは削除できないため、Workflowの削除処理は持たず、OCI Lifecycleに任せる。
+
+2026-09-17に対象バケットを再作成した際、OCI上では旧PARがアクティブに見えても旧バケットを指して404になったため、Upload/Read PARを同日付の名前で再発行し、Oracle環境とGitHub Actions Secretを更新した。以後もPARは期限まで再利用し、期限前に両方を同時ローテーションする。
+
+YouTubeの認証Cookieが切れた場合は、Oracle VMのChromeへログインして認証済みCookieを更新し、Oracle上の`$HOME/youtube-cookies.txt`（mode `600`）へ配置する。Windows側のCookieを本番経路の代替にせず、更新後はOracle上のyt-dlpメディア取得テストとone-shot serviceで復旧を確認する。Cookie・Chromeプロファイル・SSH秘密鍵はrepositoryへ保存しない。
 
 Oracleのsystemd service/timerテンプレートとインストール手順は`ops/oracle/README.md`に置く。Discord通知はOracle側の`DISCORD_WEBHOOK_URL`だけで行い、Cookie認証失敗、bot/challenge、Oracle runtime、yt-dlp/Deno、live_chat 0件、一時ネットワーク障害を分類し、同一連続失敗は一度だけ通知する。復旧時は一度だけ復旧通知を送る。
 

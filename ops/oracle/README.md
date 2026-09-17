@@ -20,9 +20,9 @@ existing `shareclip` bucket is unrelated and must not be used by this flow.
 - Compartment: `kiralab` (root)
 - Bucket: `youtube-material-upload` (private, Standard tier)
 - Object: `youtube-material/latest.tar.gz`
-- Upload PAR: `youtube-material-upload-par`, object write/overwrite, expires
+- Upload PAR: `youtube-material-upload-par-20260917`, object write/overwrite, expires
   2027-03-17 07:00 UTC
-- Read PAR: `youtube-material-read-par`, object read, expires 2027-03-17
+- Read PAR: `youtube-material-read-par-20260917`, object read, expires 2027-03-17
   07:00 UTC
 - Lifecycle rule: `delete-youtube-material-after-1-day`, enabled, delete
   Objects after 1 day, inclusion prefix `youtube-material/`
@@ -33,7 +33,9 @@ existing `shareclip` bucket is unrelated and must not be used by this flow.
 PAR URLs are intentionally not recorded in the repository or this document.
 They are bearer credentials and must be stored only in the Oracle environment
 file and the GitHub Actions secret described below. PARs are reusable until
-their expiration; rotate both URLs together before 2027-03-17 07:00 UTC.
+their expiration; the 2026-09-17 rotation replaced PARs that still appeared
+active in OCI after the target bucket had been recreated. Rotate both URLs
+together before 2027-03-17 07:00 UTC.
 
 ## Install on Oracle
 
@@ -82,6 +84,19 @@ status and counts; it does not print cookies, keys, chat text, or PAR URLs.
 If yt-dlp returns `yt_dlp_failure` after creating a non-empty live-chat JSON,
 the job keeps that artifact and validates it before continuing; an absent or
 empty artifact remains a hard failure.
+<<<<<<< HEAD
+
+## Refreshing YouTube authentication
+
+The production cookie file is `$HOME/youtube-cookies.txt` on Oracle and
+must remain mode `600`. If YouTube authentication expires, sign in to YouTube
+in the Oracle VM's Chrome profile, export the authenticated cookies from that
+Oracle browser, replace the file, and rerun the one-shot test before starting
+the service. The Windows Chrome cookie export is not a production fallback;
+the service must use the Oracle VM's current login session. Never put the
+cookie file, browser profile, or SSH key in the repository.
+=======
+>>>>>>> origin/main
 
 ## GitHub Actions secrets
 
