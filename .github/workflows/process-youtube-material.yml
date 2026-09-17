@@ -22,7 +22,6 @@ jobs:
     env:
       TZ: Asia/Tokyo
       YOUTUBE_ORACLE_BUNDLE_READ_URL: ${{ secrets.YOUTUBE_ORACLE_BUNDLE_READ_URL }}
-      YOUTUBE_ORACLE_BUNDLE_DELETE_URL: ${{ secrets.YOUTUBE_ORACLE_BUNDLE_DELETE_URL }}
       TRANSCRIPT_MODEL: large-v3-turbo
       TRANSCRIPT_BEAM_SIZE: 3
       TRANSCRIPT_CONDITION_ON_PREVIOUS_TEXT: "false"
@@ -118,11 +117,3 @@ jobs:
             --expected-base-sha "$expected_main_sha" \
             --workflow-mode pull-request \
             --merge-attempts 6
-
-      - name: Delete temporary Oracle material
-        if: ${{ always() && env.YOUTUBE_ORACLE_BUNDLE_DELETE_URL != '' }}
-        shell: bash
-        run: |
-          curl --silent --show-error --fail --request DELETE \
-            "$YOUTUBE_ORACLE_BUNDLE_DELETE_URL" \
-            >/dev/null 2>&1 || echo "temporary material deletion failed; inspect OCI lifecycle policy"

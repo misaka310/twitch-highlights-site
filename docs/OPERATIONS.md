@@ -66,7 +66,7 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 
 ### Oracle → Actions 一時素材
 
-受け渡しはOCI Object Storageの短命オブジェクトとPre-Authenticated Request（PAR）を使う。Oracleは`YOUTUBE_ORACLE_BUNDLE_UPLOAD_URL`へ選択区間だけをPUTし、Actionsは`YOUTUBE_ORACLE_BUNDLE_READ_URL`で取得する。処理後は`YOUTUBE_ORACLE_BUNDLE_DELETE_URL`で削除し、削除権限を分離する場合はOCIの1日以内のlifecycle ruleを必須にする。bundleには公開メタデータ、offset-onlyの時刻一覧、選択区間ごとのWAV/WEBPだけを入れ、raw chat、ユーザー名、メッセージ、文字起こしは入れない。
+受け渡しはOCI Object Storageの短命オブジェクトとPre-Authenticated Request（PAR）を使う。Oracleは固定した一時オブジェクトに対する`YOUTUBE_ORACLE_BUNDLE_UPLOAD_URL`へ選択区間だけをPUTし、Actionsは`YOUTUBE_ORACLE_BUNDLE_READ_URL`で取得する。PARは期限まで再利用できるため毎日作り直さず、6か月を目安に両方を同時ローテーションする。OCIのPARではオブジェクトを削除できないため、OCIの1日以内のlifecycle ruleで一時オブジェクトを自動削除する。bundleには公開メタデータ、offset-onlyの時刻一覧、選択区間ごとのWAV/WEBPだけを入れ、raw chat、ユーザー名、メッセージ、文字起こしは入れない。
 
 Oracleのsystemd service/timerテンプレートとインストール手順は`ops/oracle/README.md`に置く。Discord通知はOracle側の`DISCORD_WEBHOOK_URL`だけで行い、Cookie認証失敗、bot/challenge、Oracle runtime、yt-dlp/Deno、live_chat 0件、一時ネットワーク障害を分類し、同一連続失敗は一度だけ通知する。復旧時は一度だけ復旧通知を送る。
 
