@@ -6,7 +6,7 @@ import {
   type VodIndexData,
   type VodPageData,
 } from "../domain/vod.js";
-import { normalizeDataPath, orderSegments } from "../lib/vod-data.js";
+import { getVodProvider, normalizeDataPath, orderSegments } from "../lib/vod-data.js";
 
 export async function loadVodPage(page: number, fetcher: typeof fetch = fetch): Promise<VodPageData> {
   const [indexResponse, configResponse] = await Promise.all([
@@ -16,7 +16,8 @@ export async function loadVodPage(page: number, fetcher: typeof fetch = fetch): 
   if (!indexResponse.ok) throw new Error("配信一覧を読み込めませんでした。");
   const index = (await indexResponse.json()) as VodIndexData;
   const siteConfig = configResponse.ok ? ((await configResponse.json()) as RuntimeSiteConfig) : {};
-  const entries = Array.isArray(index.videos) ? [...index.videos] : [];
+  const entries = (Array.isArray(index.videos) ? [...index.videos] : [])
+    .filter((entry) => getVodProvider(entry) === "youtube");
   entries.sort((a, b) => new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime());
   const pageCount = Math.max(1, Math.ceil(entries.length / VOD_PAGE_SIZE));
   const requestedPage = Math.max(1, Math.floor(Number(page) || 1));
@@ -28,6 +29,7 @@ export async function loadVodPage(page: number, fetcher: typeof fetch = fetch): 
       const response = await fetcher(normalizeDataPath(entry.detail_path), { cache: "no-store" });
       if (!response.ok) throw new Error(`VOD ${entry.vod_id} を読み込めませんでした。`);
       const vod = (await response.json()) as VodData;
+      if (getVodProvider(vod) !== "youtube") throw new Error(`VOD ${entry.vod_id} はYouTubeデータではありません。`);
       return { ...vod, items: orderSegments(vod.items) };
     }),
   );

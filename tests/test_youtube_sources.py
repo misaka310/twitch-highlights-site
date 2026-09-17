@@ -21,9 +21,70 @@ from youtube_sources import (  # noqa: E402
 import vod_serialization as serialization  # noqa: E402
 import vod_sources  # noqa: E402
 import update_vods as uv  # noqa: E402
+import youtube_update  # noqa: E402
 
 
 class YoutubeSourceTests(unittest.TestCase):
+    def test_youtube_public_filter_excludes_legacy_twitch_cache_entries(self):
+        videos = [
+            {
+                "vod_id": "2873115795",
+                "vod_url": "https://www.twitch.tv/videos/2873115795",
+                "published_at": "2026-09-13T00:00:00+00:00",
+            },
+            {
+                "provider": "youtube",
+                "vod_id": "WGTrmrSvZH0",
+                "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+                "published_at": "2026-09-13T00:00:00+00:00",
+            },
+        ]
+
+        self.assertEqual(
+            [video["vod_id"] for video in serialization.filter_youtube_videos(videos)],
+            ["WGTrmrSvZH0"],
+        )
+
+    def test_youtube_update_publishes_only_the_youtube_cache_scope(self):
+        youtube_video = {
+            "provider": "youtube",
+            "vod_id": "WGTrmrSvZH0",
+            "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+            "title": "YouTube archive",
+            "published_at": "2026-09-13T00:00:00+00:00",
+            "chat_total": 1,
+            "items": [{"id": "WGTrmrSvZH0_10_20", "start_sec": 10, "end_sec": 20}],
+        }
+        public_batches = []
+
+        def analyze(video, _now, **_kwargs):
+            return dict(video), "analyzed"
+
+        youtube_update.run_youtube_mode(
+            datetime(2026, 9, 17, tzinfo=timezone.utc),
+            youtube_video["vod_url"],
+            analyze_video_entry=analyze,
+            load_processed_cache=lambda: {
+                "videos": [
+                    {"vod_id": "2873115795", "vod_url": "https://www.twitch.tv/videos/2873115795"},
+                    {**youtube_video, "vod_id": "older-youtube"},
+                ]
+            },
+            write_processed_cache=lambda _videos, _now: None,
+            write_public_data=lambda videos, _now: public_batches.append(list(videos)),
+            output_path=Path("data/vods.json"),
+            fetch_video=lambda _url: SimpleNamespace(
+                video=youtube_video,
+                chat=vod_sources.ChatFetchResult(comments=[{"content_offset_seconds": 10.0}], duration_sec=20),
+            ),
+            enrich_video=lambda video: (video, SimpleNamespace(transcribed=1, headlines=1, screenshots=1)),
+        )
+
+        self.assertEqual(
+            [video["vod_id"] for video in public_batches[0]],
+            ["older-youtube", "WGTrmrSvZH0"],
+        )
+
     def test_parse_youtube_video_id_accepts_public_url_shapes(self):
         self.assertEqual(parse_youtube_video_id("https://www.youtube.com/watch?v=WGTrmrSvZH0"), "WGTrmrSvZH0")
         self.assertEqual(parse_youtube_video_id("https://youtu.be/WGTrmrSvZH0?t=30"), "WGTrmrSvZH0")

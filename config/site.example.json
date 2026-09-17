@@ -1,7 +1,7 @@
 {
   "site": {
-    "name": "Twitch Highlights",
-    "description": "Twitch VODのコメント量から見どころを表示する非公式サイトです。",
+    "name": "YouTube Highlights",
+    "description": "YouTubeライブアーカイブのコメント量から見どころを表示する非公式サイトです。",
     "base_url": "https://example.com",
     "language": "ja",
     "analytics": {

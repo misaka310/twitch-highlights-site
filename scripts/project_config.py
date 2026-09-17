@@ -102,10 +102,10 @@ def load_project_config(
             "or underscores and be 1-25 characters long"
         )
 
-    site_name = _env_or_config(environment, "SITE_NAME", site.get("name")) or "Twitch Highlights"
+    site_name = _env_or_config(environment, "SITE_NAME", site.get("name")) or "YouTube Highlights"
     site_description = _env_or_config(environment, "SITE_DESCRIPTION", site.get("description"))
     if not site_description:
-        site_description = "Twitch VODのコメント量から見どころを表示する非公式サイトです。"
+        site_description = "YouTubeライブアーカイブのコメント量から見どころを表示する非公式サイトです。"
 
     return ProjectConfig(
         site_name=site_name,

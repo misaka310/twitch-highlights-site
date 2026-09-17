@@ -4,9 +4,9 @@ import type { RuntimeSiteConfig } from "../domain/vod.js";
 export function useSiteMetadata(siteConfig?: RuntimeSiteConfig): void {
   useEffect(() => {
     const site = siteConfig?.site;
-    const siteName = String(site?.name || "Twitch Highlights").trim();
+    const siteName = String(site?.name || "YouTube Highlights").trim();
     const description = String(
-      site?.description || "Twitch配信の見どころをすぐ再生できる非公式ファンサイトです。",
+      site?.description || "YouTube配信の見どころをすぐ再生できる非公式ファンサイトです。",
     ).trim();
     const language = String(site?.language || "ja").trim() || "ja";
     const baseUrl = String(site?.base_url || "").trim().replace(/\/+$/, "");

@@ -107,9 +107,9 @@ def check_static_metadata() -> None:
     if "__SITE_" in index_html:
         fail("index.html still contains unresolved site metadata placeholders")
 
-    name = html.escape(str(site.get("name") or "Twitch Highlights").strip(), quote=True)
+    name = html.escape(str(site.get("name") or "YouTube Highlights").strip(), quote=True)
     description = html.escape(
-        str(site.get("description") or "Twitch VODのコメント量から見どころを表示する非公式サイトです。").strip(),
+        str(site.get("description") or "YouTubeライブアーカイブのコメント量から見どころを表示する非公式サイトです。").strip(),
         quote=True,
     )
     language = html.escape(str(site.get("language") or "ja").strip(), quote=True)

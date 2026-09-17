@@ -14,8 +14,8 @@ PLACEHOLDERS = {
     "__SITE_LANGUAGE__": "language",
 }
 DEFAULTS = {
-    "name": "Twitch Highlights",
-    "description": "Twitch VODのコメント量から見どころを表示する非公式サイトです。",
+    "name": "YouTube Highlights",
+    "description": "YouTubeライブアーカイブのコメント量から見どころを表示する非公式サイトです。",
     "base_url": "",
     "language": "ja",
 }

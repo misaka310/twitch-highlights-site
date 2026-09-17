@@ -48,7 +48,7 @@ test("renders production layout and preserves same-VOD playback behavior", async
     "src",
     "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_13550_13670.webp",
   );
-  await expect(page.getByText("Showing 1-3 of 60", { exact: true })).toBeVisible();
+  await expect(page.getByText("Showing 1-3 of 5", { exact: true })).toBeVisible();
   await expect(page.getByRole("tab").first()).toContainText("9/15");
   await expect(page.getByRole("tab").first()).not.toContainText("YouTube");
   await expect(page.getByRole("tab").first()).not.toContainText("Twitch");
