@@ -79,6 +79,9 @@ systemctl list-timers youtube-highlight.timer
 Useful one-shot checks are `systemctl start youtube-highlight.service` and
 `journalctl -u youtube-highlight.service`. The job prints only classified
 status and counts; it does not print cookies, keys, chat text, or PAR URLs.
+If yt-dlp returns `yt_dlp_failure` after creating a non-empty live-chat JSON,
+the job keeps that artifact and validates it before continuing; an absent or
+empty artifact remains a hard failure.
 
 ## GitHub Actions secrets
 
