@@ -21,7 +21,7 @@ const INTERACTIVE_SEEK_STABILIZE_MS = 2500;
 
 export type InteractivePlayerController = {
   requestPlayback: (vodId: string, startSec: number, options?: PlaybackOptions) => void;
-  getCurrentTime: () => number | null;
+  getCurrentTime: (options?: { preferPendingSeek?: boolean }) => number | null;
 };
 
 type UseInteractivePlayerOptions = {
@@ -70,7 +70,13 @@ export function useInteractivePlayer({
     onStatusChange(label, status);
   };
 
-  const getCurrentTime = (): number | null => {
+  const getCurrentTime = (options: { preferPendingSeek?: boolean } = {}): number | null => {
+    if (options.preferPendingSeek && lastSeekTargetRef.current != null) {
+      const seekAge = Date.now() - lastSeekAtRef.current;
+      if (seekAge >= 0 && seekAge <= INTERACTIVE_SEEK_STABILIZE_MS) {
+        return lastSeekTargetRef.current;
+      }
+    }
     const player = playerRef.current;
     if (player?.getCurrentTime) {
       try {

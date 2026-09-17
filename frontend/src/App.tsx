@@ -109,7 +109,7 @@ export default function App() {
 
   function rewindTenSeconds() {
     if (!activeVod) return;
-    const current = playerRef.current?.getCurrentTime();
+    const current = playerRef.current?.getCurrentTime({ preferPendingSeek: true });
     const base = current == null ? positionSec : current;
     requestUserPlayback(activeVod.vod_id, Math.max(0, Math.floor(base) - 10));
   }

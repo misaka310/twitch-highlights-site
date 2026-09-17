@@ -5,7 +5,7 @@ import type { PlaybackOptions, PlaybackStatus } from "./player/playback-types.js
 
 export type TwitchPlayerHandle = {
   requestPlayback: (vodId: string, startSec: number, options?: PlaybackOptions) => void;
-  getCurrentTime: () => number | null;
+  getCurrentTime: (options?: { preferPendingSeek?: boolean }) => number | null;
 };
 
 type TwitchPlayerProps = {
