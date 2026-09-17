@@ -4,7 +4,7 @@
 
 https://dotitao-moments.onrender.com/
 
-Twitch VODのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。現在の公開インスタンスは`dotitao moments`です。対象チャンネル、サイト名、公開URLは`config/site.json`、チャンネル固有の追加タグ規則は`config/tag-rules.json`へ分離されているため、汎用ロジックを書き換えずに別のTwitchチャンネルへ切り替えられます。
+TwitchおよびYouTubeアーカイブのコメント量を時間帯ごとに集計し、変化が大きい区間を見どころとして表示する静的サイト基盤です。現在の公開インスタンスは`dotitao moments`です。公開画面はprovider対応で、VODに応じた再生アダプタを使用します。
 
 > **非公式・非提携について**
 > このプロジェクトは独立して開発された非公式ツールであり、Twitchまたは対象チャンネル・配信者の公式製品、提携製品、承認製品、スポンサー製品ではありません。Twitch、チャンネル名、配信者名および関連する名称・商標・コンテンツの権利は各権利者に帰属します。
@@ -19,7 +19,7 @@ VODのコメント量から見どころを抽出し、閲覧用の静的サイ�
 
 ## 主な機能
 
-- Twitch VOD一覧の取得
+- YouTube live archiveのOracle経由取得と再生
 - コメント量の時系列集計と見どころ抽出
 - Groqを利用した見どころ見出し生成とフォールバック
 - Whisperを利用できる内部エンリッチメント処理
@@ -49,10 +49,10 @@ public/                      公開ビルドの生成先
 
 - 初期表示では自動再生せず、ミュート状態で準備します。
 - 見どころ、VODタブ、盛り上がりマップを押すと音声付きで再生します。
-- 同じVOD内の移動はTwitch Player SDKのseekを使います。
+- 同じVOD内の移動はYouTube IFrame Player APIのseekを使います。
 - プレイヤー準備中は最後の操作を優先します。
 - 10秒戻るは可能な限り実際の再生位置を基準にします。
-- SDKを読み込めない場合はTwitch iframeへフォールバックします。
+- YouTube IFrame Player APIを読み込めない場合はエラーを表示します。
 
 詳細は[`docs/PLAYBACK_SPEC.md`](docs/PLAYBACK_SPEC.md)を参照してください。
 
@@ -92,6 +92,20 @@ Copy-Item .env.example .env
 
 `.env`へTwitch API資格情報を設定します。Groqを使う場合だけ`GROQ_API_KEY`も設定します。依存バージョンとGitHub Actions上のTwitchDownloaderCLIアーカイブは固定・検証されています。
 
+YouTubeのライブアーカイブを生成する場合は、確定済みのOracle VMを唯一のYouTube取得経路として使います。ローカルのyt-dlp直接実行はこの経路に使いません。SSH秘密鍵の内容やCookieはリポジトリへ入れません。
+
+```powershell
+$env:YOUTUBE_ORACLE_HOST = '64.110.102.170'
+$env:YOUTUBE_ORACLE_USER = 'ubuntu'
+$env:YOUTUBE_ORACLE_KEY_PATH = 'C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key'
+$env:YOUTUBE_ORACLE_SCRIPT_PATH = 'C:\00_dev\_system\tmp\oracle_livechat.sh'
+python scripts/update_vods.py --youtube-url "https://www.youtube.com/watch?v=WGTrmrSvZH0"
+```
+
+Oracleスクリプトは`yt-dlp 2026.08.19`、Deno、`/home/ubuntu/youtube-cookies.txt`を使い、`videoOffsetTimeMsec`を含む一時データを解析します。ログ、raw chat、TSVは実行中だけ扱われ、公開データには集計値と見どころだけが保存されます。定期運用は`ops/oracle/youtube-highlight.timer`でOracleから選択区間だけをOCI Object Storageの一時PARへ渡し、`.github/workflows/process-youtube-material.yml`がActions上でWhisper、見出し、サムネイル、検証、checked PR公開を行います。
+
+Oracle timerの秘密値とOCI PAR、GitHub Actions Secretの設定は[`ops/oracle/README.md`](ops/oracle/README.md)を参照してください。既存の`.github/workflows/update-vods.yml`の停止中scheduleはこの経路の完成を待って無条件には再開しません。
+
 ## 公開ビルド
 
 ```bash
@@ -109,11 +123,11 @@ npm run verify
 
 Twitch実サービスとデプロイ済みRenderを確認する場合は、通常ゲート成功後に`npm run verify:live`を実行します。対象URLは`config/site.json`の`site.base_url`を正本とし、別環境を確認する場合だけ`LIVE_BASE_URL`で上書きします。
 
-フロントE2EはTwitch SDK互換の偽プレイヤーを使い、初期再生方針、音声付きクリック再生、同一VODのseek、別VOD切替、last-click-wins、10秒戻る、PC・スマホ表示を外部通信なしで検証します。
+フロントE2EはYouTube IFrame API互換の偽プレイヤーを使い、初期再生方針、音声付きクリック再生、同一VODのseek、別VOD切替、last-click-wins、10秒戻る、PC・スマホ表示を外部通信なしで検証します。
 
 ## プライバシー
 
-取得したTwitchコメントは解析中のメモリ上だけで処理します。コメント本文、ユーザー名、コメント単位の投稿時刻をリポジトリへ保存しません。公開データには時間帯ごとの件数、抽出済み見どころ、生成済み見出し、サムネイルなどの集計結果だけを含めます。
+取得したTwitch/YouTubeコメントは解析中のメモリ上だけで処理します。コメント本文、ユーザー名、コメント単位の投稿時刻をリポジトリやActions用bundleへ保存しません。公開データには時間帯ごとの件数、抽出済み見どころ、生成済み見出し、サムネイルなどの集計結果だけを含めます。
 
 詳細は[`PRIVACY.md`](PRIVACY.md)と[`docs/data-contract.md`](docs/data-contract.md)を参照してください。
 

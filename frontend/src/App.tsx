@@ -8,7 +8,7 @@ import { useMediaQuery } from "./hooks/use-media-query.js";
 import { useSiteMetadata } from "./hooks/use-site-metadata.js";
 import { useVodPage } from "./hooks/use-vod-page.js";
 import { createActivityGeometry, createActivityOverlay } from "./lib/activity-geometry.js";
-import { pageUrl, parsePageSearch, resolveDurationSec } from "./lib/vod-data.js";
+import { getVodProvider, pageUrl, parsePageSearch, resolveDurationSec } from "./lib/vod-data.js";
 import { TwitchPlayer, type TwitchPlayerHandle } from "./twitch-player";
 
 export default function App() {
@@ -46,6 +46,7 @@ export default function App() {
       autoplay: false,
       muted: true,
       triggeredByUser: false,
+      provider: getVodProvider(firstVod),
     });
   }, [data]);
 
@@ -74,13 +75,14 @@ export default function App() {
     setPageState(safePage);
   }
 
-  function requestUserPlayback(vodId: string, startSec: number) {
+  function requestUserPlayback(vodId: string, startSec: number, provider = getVodProvider(activeVod)) {
     const safeStartSec = Math.max(0, Math.floor(Number(startSec) || 0));
     setPositionSec(safeStartSec);
     playerRef.current?.requestPlayback(vodId, safeStartSec, {
       autoplay: true,
       muted: false,
       triggeredByUser: true,
+      provider,
     });
   }
 
@@ -90,7 +92,7 @@ export default function App() {
     const startSec = Number(first?.start_sec || 0);
     setActiveVodId(vodId);
     setActiveSegmentId(first?.id || "");
-    requestUserPlayback(vodId, startSec);
+    requestUserPlayback(vodId, startSec, getVodProvider(vod));
   }
 
   function selectSegment(segment: HighlightSegment) {

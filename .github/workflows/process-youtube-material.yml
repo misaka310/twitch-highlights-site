@@ -1,0 +1,119 @@
+name: Process Oracle YouTube material
+
+concurrency:
+  group: process-youtube-material
+  cancel-in-progress: false
+
+on:
+  repository_dispatch:
+    types:
+      - youtube-material-ready
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  process-material:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      TZ: Asia/Tokyo
+      YOUTUBE_ORACLE_BUNDLE_READ_URL: ${{ secrets.YOUTUBE_ORACLE_BUNDLE_READ_URL }}
+      TRANSCRIPT_MODEL: large-v3-turbo
+      TRANSCRIPT_BEAM_SIZE: 3
+      TRANSCRIPT_CONDITION_ON_PREVIOUS_TEXT: "false"
+      TRANSCRIPT_VAD_FILTER: "true"
+      TRANSCRIPT_VAD_MIN_SILENCE_DURATION_MS: 2000
+      TRANSCRIPT_MAX_SEGMENTS: 9
+      TRANSCRIPT_RETRY_ERRORS: 1
+      TRANSCRIPT_MAX_DURATION_SEC: 150
+      HEADLINE_MAX_CHARS: 28
+      TRANSCRIPT_SECOND_PASS_TOP_N: 3
+      SEGMENT_SCREENSHOT_GENERATION_ENABLED: "true"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.11"
+
+      - name: Install ffmpeg
+        uses: AnimMouse/setup-ffmpeg@2afa535ca6e6bc550066c82457d987656876d248
+
+      - name: Install transcription dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-transcribe.txt
+
+      - name: Download and validate Oracle material
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$YOUTUBE_ORACLE_BUNDLE_READ_URL"
+          mkdir -p .tmp/youtube-material
+          curl --silent --show-error --fail --location --retry 3 --retry-all-errors \
+            "$YOUTUBE_ORACLE_BUNDLE_READ_URL" \
+            --output .tmp/youtube-material/material.tar.gz 2>/dev/null
+          test -s .tmp/youtube-material/material.tar.gz
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, "scripts")
+          from youtube_handoff import extract_material_bundle
+
+          extract_material_bundle(
+              Path(".tmp/youtube-material/material.tar.gz"),
+              Path(".tmp/youtube-material/validated"),
+          )
+          print("Oracle material bundle validated")
+          PY
+
+      - name: Run Whisper and update public data
+        run: python scripts/process_youtube_bundle.py --bundle .tmp/youtube-material/material.tar.gz
+
+      - name: Build public site
+        shell: bash
+        run: sh scripts/build_public.sh
+
+      - name: Verify generated public data
+        run: |
+          python scripts/verify_public_enrichment.py
+          python scripts/check_public_build.py
+          python -m unittest tests.test_privacy_retention -v
+
+      - name: Publish through a checked pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          diff_targets=(data/processed_vods.json data/vods.json data/vod_index.json data/vods data/segment-thumbnails)
+          if git diff --quiet -- "${diff_targets[@]}"; then
+            echo "No YouTube data changes to publish."
+            exit 0
+          fi
+          automation_branch="automation/youtube-material-${GITHUB_RUN_ID}"
+          git add -A -- "${diff_targets[@]}"
+          git commit -m "Update YouTube highlight data"
+          git push origin "HEAD:refs/heads/$automation_branch"
+          head_sha="$(git rev-parse HEAD)"
+          expected_main_sha="$(git rev-parse origin/main)"
+          python .github/scripts/checked_pr_merge.py \
+            --branch "$automation_branch" \
+            --head-sha "$head_sha" \
+            --title "Update YouTube highlight data" \
+            --body "Publish Oracle-selected YouTube material after public-readiness verification." \
+            --expected-base-sha "$expected_main_sha" \
+            --workflow-mode pull-request \
+            --merge-attempts 6

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { getFakeTwitchLog, installFakeTwitch } from "./fake-twitch";
+import { getFakeYoutubeLog, installFakeYoutube } from "./fake-youtube";
 
 const artifactsDirectory = resolve(process.cwd(), "artifacts");
 
@@ -10,7 +10,7 @@ test.beforeAll(() => {
 });
 
 test.beforeEach(async ({ page }) => {
-  await installFakeTwitch(page);
+  await installFakeYoutube(page);
 });
 
 test("renders production layout and preserves same-VOD playback behavior", async ({ page }, testInfo) => {
@@ -38,11 +38,20 @@ test("renders production layout and preserves same-VOD playback behavior", async
   await expect(frame).toHaveAttribute("data-player-mode", "interactive");
   await expect(page.locator("body > .player-embed--portal")).toHaveCount(1);
   await expect(page.locator("body > .player-embed--portal iframe")).toHaveCount(0);
-  await expect(page.locator("body > .player-embed--portal [data-fake-twitch-player='true']")).toHaveCount(1);
+  await expect(page.locator("body > .player-embed--portal [data-fake-youtube-player='true']")).toHaveCount(1);
   await expect(frame).toHaveAttribute("data-expected-autoplay", "false");
   await expect(frame).toHaveAttribute("data-expected-muted", "true");
 
   await expect(page.locator(".highlight-item")).toHaveCount(3);
+  await expect(page.locator(".highlight-item img")).toHaveCount(3);
+  await expect(page.locator(".highlight-item img").first()).toHaveAttribute(
+    "src",
+    "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_13550_13670.webp",
+  );
+  await expect(page.getByText("Showing 1-3 of 60", { exact: true })).toBeVisible();
+  await expect(page.getByRole("tab").first()).toContainText("9/15");
+  await expect(page.getByRole("tab").first()).not.toContainText("YouTube");
+  await expect(page.getByRole("tab").first()).not.toContainText("Twitch");
   await expect(page.locator(".highlight-item").first()).toHaveClass(/is-selected/);
   const firstTags = page.locator(".highlight-item").first().locator(".highlight-tag");
   expect(await firstTags.count()).toBeLessThanOrEqual(2);
@@ -58,9 +67,10 @@ test("renders production layout and preserves same-VOD playback behavior", async
   await expect(activityChart).toHaveCSS("height", testInfo.project.name === "mobile" ? "60px" : "88px");
   await expect(page.locator(".activity-peak, .activity-grid-line, .activity-current-time")).toHaveCount(0);
 
-  const initialLog = await getFakeTwitchLog(page);
+  const initialLog = await getFakeYoutubeLog(page);
   expect(initialLog.mounts).toHaveLength(1);
-  expect(initialLog.mounts[0]).toMatchObject({ autoplay: false, muted: true });
+  expect(initialLog.mounts[0]).toMatchObject({ autoplay: 0 });
+  expect(initialLog.muted.at(-1)).toBe(true);
 
   const second = page.locator(".highlight-item").nth(1);
   await second.click();
@@ -70,7 +80,7 @@ test("renders production layout and preserves same-VOD playback behavior", async
 
   const selected = Number(await frame.getAttribute("data-current-start-sec"));
   expect(selected).toBeGreaterThan(0);
-  const sameVodLog = await getFakeTwitchLog(page);
+  const sameVodLog = await getFakeYoutubeLog(page);
   expect(sameVodLog.mounts).toHaveLength(1);
   expect(sameVodLog.seeks).toContain(selected);
   expect(sameVodLog.muted.at(-1)).toBe(false);
@@ -78,7 +88,7 @@ test("renders production layout and preserves same-VOD playback behavior", async
 
   await page.getByRole("button", { name: "10秒戻る" }).click();
   await expect(frame).toHaveAttribute("data-current-start-sec", String(Math.max(0, selected - 10)));
-  expect((await getFakeTwitchLog(page)).seeks).toContain(Math.max(0, selected - 10));
+  expect((await getFakeYoutubeLog(page)).seeks).toContain(Math.max(0, selected - 10));
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
@@ -115,6 +125,35 @@ test("renders production layout and preserves same-VOD playback behavior", async
 });
 
 test("latest click wins and a different VOD remounts with sound", async ({ page }) => {
+  await page.route("**/data/vod_index.json", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    const [first] = payload.videos.filter((video: { provider?: string }) => video.provider === "youtube");
+    payload.videos = [
+      first,
+      {
+        ...first,
+        vod_id: "preview-second-youtube",
+        detail_path: "/data/vods/preview-second-youtube.json",
+        published_at: "2026-08-01T00:00:00Z",
+      },
+    ];
+    await route.fulfill({ response, json: payload });
+  });
+  await page.route("**/data/vods/preview-second-youtube.json", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        provider: "youtube",
+        vod_id: "preview-second-youtube",
+        title: "別のYouTube配信",
+        published_at: "2026-08-01T00:00:00Z",
+        duration_sec: 120,
+        activity_map: { duration_sec: 120, buckets: [1, 2] },
+        items: [{ id: "preview-second-10", rank: 1, start_sec: 10, end_sec: 20, headline: "別の見どころ" }],
+      }),
+    });
+  });
   await page.goto("/");
   const frame = page.locator(".player-frame");
   await expect(frame).toHaveAttribute("data-player-mode", "interactive");
@@ -129,7 +168,7 @@ test("latest click wins and a different VOD remounts with sound", async ({ page 
     return 0;
   }));
   await expect(frame).toHaveAttribute("data-current-start-sec", String(lastSelectedStart));
-  expect((await getFakeTwitchLog(page)).mounts).toHaveLength(1);
+  expect((await getFakeYoutubeLog(page)).mounts).toHaveLength(1);
 
   const tabs = page.getByRole("tab");
   test.skip((await tabs.count()) < 2, "requires at least two VODs");
@@ -137,12 +176,12 @@ test("latest click wins and a different VOD remounts with sound", async ({ page 
   await expect.poll(async () => frame.getAttribute("data-current-vod-id")).not.toBe(initialVodId);
   await expect(frame).toHaveAttribute("data-expected-autoplay", "true");
   await expect(frame).toHaveAttribute("data-expected-muted", "false");
-  await expect.poll(async () => (await getFakeTwitchLog(page)).mounts.length).toBeGreaterThan(1);
-  expect((await getFakeTwitchLog(page)).mounts.at(-1)).toMatchObject({ autoplay: true, muted: false });
+  await expect.poll(async () => (await getFakeYoutubeLog(page)).mounts.length).toBeGreaterThan(1);
+  expect((await getFakeYoutubeLog(page)).mounts.at(-1)).toMatchObject({ autoplay: 1 });
   await expect(page.locator("body > .player-embed--portal")).toHaveCount(1);
   await expect(page.locator("body > .player-embed--portal iframe")).toHaveCount(0);
-  await expect(page.locator("body > .player-embed--portal [data-fake-twitch-player='true']")).toHaveCount(1);
-  expect((await getFakeTwitchLog(page)).destroys).toBeGreaterThan(0);
+  await expect(page.locator("body > .player-embed--portal [data-fake-youtube-player='true']")).toHaveCount(1);
+  expect((await getFakeYoutubeLog(page)).destroys).toBeGreaterThan(0);
 });
 
 test("keeps legacy ordering and missing metadata fallbacks", async ({ page }) => {
@@ -153,8 +192,8 @@ test("keeps legacy ordering and missing metadata fallbacks", async ({ page }) =>
         updated_at: "2026-08-02T00:00:00Z",
         next_update_at: "2026-08-03T00:00:00Z",
         videos: [
-          { vod_id: "older", detail_path: "data/vods/older.json", published_at: "2026-07-01T00:00:00Z" },
-          { vod_id: "newer", detail_path: "data/vods/newer.json", published_at: "2026-08-01T00:00:00Z" },
+          { provider: "youtube", vod_id: "older", detail_path: "data/vods/older.json", published_at: "2026-07-01T00:00:00Z" },
+          { provider: "youtube", vod_id: "newer", detail_path: "data/vods/newer.json", published_at: "2026-08-01T00:00:00Z" },
         ],
       }),
     });
@@ -163,6 +202,7 @@ test("keeps legacy ordering and missing metadata fallbacks", async ({ page }) =>
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
+        provider: "youtube",
         vod_id: "newer",
         title: "",
         published_at: "2026-08-01T00:00:00Z",
@@ -181,6 +221,7 @@ test("keeps legacy ordering and missing metadata fallbacks", async ({ page }) =>
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
+        provider: "youtube",
         vod_id: "older",
         title: "古い配信",
         published_at: "2026-07-01T00:00:00Z",
@@ -198,7 +239,7 @@ test("keeps legacy ordering and missing metadata fallbacks", async ({ page }) =>
   await expect(frame).toHaveAttribute("data-current-vod-id", "newer");
   await expect(frame).toHaveAttribute("data-current-start-sec", "20");
   await expect(page.locator(".time-chip")).toHaveText(["00:00:20", "00:00:40", "00:01:00"]);
-  await expect(page.locator(".highlight-copy > strong")).toHaveText(["1番目", "コメントが集中した場面", "3番目"]);
+  await expect(page.locator(".highlight-copy > strong")).toHaveText(["1番目", "見出し未生成", "3番目"]);
   await expect(page.locator(".stream-summary dd").nth(0)).toHaveText("―");
   await expect(page.locator(".stream-summary dd").nth(2)).toHaveText("00:01:30");
   await expect(page.locator(".stream-summary dd").nth(3)).toHaveText("―");
@@ -207,6 +248,32 @@ test("keeps legacy ordering and missing metadata fallbacks", async ({ page }) =>
 });
 
 test("page controls preserve the existing page query", async ({ page }, testInfo) => {
+  await page.route("**/data/vod_index.json", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    payload.videos = [4, 3, 2, 1].map((number) => ({
+      provider: "youtube",
+      vod_id: `page-vod-${number}`,
+      detail_path: `/data/vods/page-vod-${number}.json`,
+      published_at: `2026-08-0${number}T00:00:00Z`,
+    }));
+    await route.fulfill({ response, json: payload });
+  });
+  await page.route("**/data/vods/page-vod-*.json", async (route) => {
+    const vodId = new URL(route.request().url()).pathname.split("/").pop()?.replace(".json", "") || "page-vod-1";
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        provider: "youtube",
+        vod_id: vodId,
+        title: `${vodId} の配信`,
+        published_at: "2026-08-01T00:00:00Z",
+        duration_sec: 120,
+        activity_map: { duration_sec: 120, buckets: [1, 2] },
+        items: [{ id: `${vodId}-10`, rank: 1, start_sec: 10, end_sec: 20, headline: "ページの見どころ" }],
+      }),
+    });
+  });
   await page.goto("/");
   const nextButton = page.getByRole("button", { name: /next|次/i }).last();
   await expect(nextButton).toBeVisible();
@@ -231,10 +298,10 @@ test("clamps an out-of-range page to the last available page", async ({ page }) 
       contentType: "application/json",
       body: JSON.stringify({
         videos: [
-          { vod_id: "4", detail_path: "data/vods/4.json", published_at: "2026-08-04T00:00:00Z" },
-          { vod_id: "3", detail_path: "data/vods/3.json", published_at: "2026-08-03T00:00:00Z" },
-          { vod_id: "2", detail_path: "data/vods/2.json", published_at: "2026-08-02T00:00:00Z" },
-          { vod_id: "1", detail_path: "data/vods/1.json", published_at: "2026-08-01T00:00:00Z" },
+          { provider: "youtube", vod_id: "4", detail_path: "data/vods/4.json", published_at: "2026-08-04T00:00:00Z" },
+          { provider: "youtube", vod_id: "3", detail_path: "data/vods/3.json", published_at: "2026-08-03T00:00:00Z" },
+          { provider: "youtube", vod_id: "2", detail_path: "data/vods/2.json", published_at: "2026-08-02T00:00:00Z" },
+          { provider: "youtube", vod_id: "1", detail_path: "data/vods/1.json", published_at: "2026-08-01T00:00:00Z" },
         ],
       }),
     });
@@ -243,6 +310,7 @@ test("clamps an out-of-range page to the last available page", async ({ page }) 
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
+        provider: "youtube",
         vod_id: "1",
         title: "最終ページの配信",
         published_at: "2026-08-01T00:00:00Z",

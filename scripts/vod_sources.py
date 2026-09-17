@@ -244,7 +244,22 @@ def fetch_latest_videos_from_twitchmetrics(limit: int) -> list[dict[str, str]]:
 
     return videos
 
-def fetch_chat_data(vod_id: str, cfg: FetchConfig) -> ChatFetchResult:
+def fetch_chat_data(
+    vod_id: str,
+    cfg: FetchConfig,
+    *,
+    provider: str = "twitch",
+    vod_url: str | None = None,
+) -> ChatFetchResult:
+    normalized_provider = str(provider or "twitch").strip().lower()
+    if normalized_provider == "youtube":
+        from youtube_sources import fetch_youtube_video
+
+        youtube_result = fetch_youtube_video(vod_url or vod_id)
+        return youtube_result.chat
+    if normalized_provider != "twitch":
+        raise ValueError(f"unsupported video provider: {provider}")
+
     downloader_bin = resolve_twitchdownloader_bin()
     if downloader_bin:
         try:

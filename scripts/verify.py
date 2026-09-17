@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -11,7 +12,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "frontend"
 NODE = shutil.which("node") or "node"
-SH = shutil.which("sh") or "sh"
+
+
+def shell_script_command(script: str) -> list[str]:
+    if os.name != "nt":
+        return ["sh", script]
+    git_bash = Path(r"C:\Program Files\Git\bin\bash.exe")
+    bash = str(git_bash) if git_bash.is_file() else (shutil.which("bash") or "bash")
+    return [bash, "-lc", f"sh {script}"]
 
 
 def run_command(label: str, command: Sequence[str], *, cwd: Path = ROOT) -> None:
@@ -64,7 +72,7 @@ def frontend_e2e() -> None:
 
 
 def public_build() -> None:
-    run_command("Public build", [SH, "scripts/build_public.sh"])
+    run_command("Public build", shell_script_command("scripts/build_public.sh"))
 
 
 def public_build_validation() -> None:

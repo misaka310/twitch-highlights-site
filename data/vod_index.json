@@ -1,7 +1,20 @@
 {
-  "updated_at": "2026-09-15T08:49:54+09:00",
-  "next_update_at": "2026-09-15T00:00:00+00:00",
+  "updated_at": "2026-09-17T10:13:41+09:00",
+  "next_update_at": "2026-09-18T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "930HUhvRKHc",
+      "vod_url": "https://www.youtube.com/watch?v=930HUhvRKHc",
+      "title": "【予告】ダスブラ模擬闘技場やるのでビルド育てる【エルデンリング/ELDEN RING Tarnished Edition】",
+      "published_at": "2026-09-15T00:00:00+00:00",
+      "thumbnail_url": "https://i.ytimg.com/vi/930HUhvRKHc/maxresdefault.jpg",
+      "duration_sec": 15630,
+      "count": 3,
+      "chat_total": 1433,
+      "comments_per_hour": 330.058,
+      "detail_path": "/data/vods/930HUhvRKHc.json",
+      "provider": "youtube"
+    },
     {
       "vod_id": "2873115795",
       "vod_url": "https://www.twitch.tv/videos/2873115795",
@@ -13,6 +26,19 @@
       "chat_total": 3429,
       "comments_per_hour": 900.131,
       "detail_path": "/data/vods/2873115795.json"
+    },
+    {
+      "vod_id": "WGTrmrSvZH0",
+      "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+      "title": "【修行】エルデンリングの本質を知る配信【エルデンリング/ELDEN RING Tarnished Edition】",
+      "published_at": "2026-09-13T00:00:00+00:00",
+      "thumbnail_url": "https://i.ytimg.com/vi/WGTrmrSvZH0/maxresdefault.jpg",
+      "duration_sec": 13679,
+      "count": 3,
+      "chat_total": 1365,
+      "comments_per_hour": 359.237,
+      "detail_path": "/data/vods/WGTrmrSvZH0.json",
+      "provider": "youtube"
     },
     {
       "vod_id": "2872083252",
@@ -27,6 +53,19 @@
       "detail_path": "/data/vods/2872083252.json"
     },
     {
+      "vod_id": "pIjBzUM55qE",
+      "vod_url": "https://www.youtube.com/watch?v=pIjBzUM55qE",
+      "title": "【修行】行きて帰りし視聴者ぶっ倒し物語【エルデンリング/ELDEN RING Tarnished Edition】",
+      "published_at": "2026-09-12T00:00:00+00:00",
+      "thumbnail_url": "https://i.ytimg.com/vi/pIjBzUM55qE/maxresdefault.jpg",
+      "duration_sec": 31980,
+      "count": 3,
+      "chat_total": 2712,
+      "comments_per_hour": 305.291,
+      "detail_path": "/data/vods/pIjBzUM55qE.json",
+      "provider": "youtube"
+    },
+    {
       "vod_id": "2870333438",
       "vod_url": "https://www.twitch.tv/videos/2870333438",
       "title": "【同時視聴】フロムファンと見るニンダイ【Nintendo Direct 2026.9.9】",
@@ -39,6 +78,19 @@
       "detail_path": "/data/vods/2870333438.json"
     },
     {
+      "vod_id": "OKCaYdbt68Q",
+      "vod_url": "https://www.youtube.com/watch?v=OKCaYdbt68Q",
+      "title": "【侵入歓迎】しろがね愛好家による黄金律原理主義プレイ【エルデンリング/ELDEN RING Tarnished Edition】",
+      "published_at": "2026-09-10T00:00:00+00:00",
+      "thumbnail_url": "https://i.ytimg.com/vi/OKCaYdbt68Q/maxresdefault.jpg",
+      "duration_sec": 14698,
+      "count": 3,
+      "chat_total": 1395,
+      "comments_per_hour": 341.679,
+      "detail_path": "/data/vods/OKCaYdbt68Q.json",
+      "provider": "youtube"
+    },
+    {
       "vod_id": "2869469962",
       "vod_url": "https://www.twitch.tv/videos/2869469962",
       "title": "正座待機雑談→同時視聴【Nintendo Direct 2026.9.9】",
@@ -49,6 +101,19 @@
       "chat_total": 5360,
       "comments_per_hour": 1626.57,
       "detail_path": "/data/vods/2869469962.json"
+    },
+    {
+      "vod_id": "szA-n46-IfU",
+      "vod_url": "https://www.youtube.com/watch?v=szA-n46-IfU",
+      "title": "【同時視聴】フロムファンと見るニンダイ【Nintendo Direct 2026.9.9】",
+      "published_at": "2026-09-09T00:00:00+00:00",
+      "thumbnail_url": "https://i.ytimg.com/vi/szA-n46-IfU/maxresdefault.jpg",
+      "duration_sec": 11730,
+      "count": 3,
+      "chat_total": 1992,
+      "comments_per_hour": 611.355,
+      "detail_path": "/data/vods/szA-n46-IfU.json",
+      "provider": "youtube"
     },
     {
       "vod_id": "2868630900",
@@ -661,30 +726,6 @@
       "chat_total": 2651,
       "comments_per_hour": 1859.626,
       "detail_path": "/data/vods/2823752375.json"
-    },
-    {
-      "vod_id": "2822899683",
-      "vod_url": "https://www.twitch.tv/videos/2822899683",
-      "title": "夏はナイトレインの季節→覚悟決まったら【Outlast】",
-      "published_at": "2026-07-18T19:04:01+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/264cd23cb30612abcb60_dotitao_316194461554_1784369036//thumb/thumb0-320x180.jpg",
-      "duration_sec": null,
-      "count": 3,
-      "chat_total": 2664,
-      "comments_per_hour": 1051.694,
-      "detail_path": "/data/vods/2822899683.json"
-    },
-    {
-      "vod_id": "2822850288",
-      "vod_url": "https://www.twitch.tv/videos/2822850288",
-      "title": "ダイジェスト：どうも、ナイトレインコーチング教室美人講師のドチタオです。【ナイトレイン/ELDEN RING NIGHTREIGN】※投げ銭禁止",
-      "published_at": "2026-07-18T16:36:24+09:00",
-      "thumbnail_url": "https://static-cdn.jtvnw.net/cf_vods/d3vd9lfkzbru3h/b73374c7af016d3ef261_dotitao_79973973386_6755559792//thumb/thumb2822850288-320x180.jpg",
-      "duration_sec": null,
-      "count": 1,
-      "chat_total": 167,
-      "comments_per_hour": 927.778,
-      "detail_path": "/data/vods/2822850288.json"
     }
   ]
 }

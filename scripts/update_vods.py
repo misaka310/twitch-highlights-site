@@ -11,6 +11,8 @@ from typing import Any, Iterable, Mapping
 
 from project_config import load_project_config
 import vod_sources as vod_source
+from youtube_sources import fetch_youtube_video
+from youtube_update import run_youtube_mode
 from vod_sources import (  # noqa: F401
     ChatFetchResult,
     FetchConfig,
@@ -128,6 +130,7 @@ __all__ = (
     'parse_twitchdownloader_chat_payload',
     'post_gql',
     'resolve_twitchdownloader_bin',
+    'fetch_youtube_video',
     'BASE_TAG_RULES',
     'CLOSING_CHATTER_PATTERNS',
     'CLOSING_CHATTER_REGEX',
@@ -194,7 +197,6 @@ __all__ = (
     'write_json_payload',
 )
 
-
 ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
 PROJECT_CONFIG = load_project_config(env={})
 CHANNEL = PROJECT_CONFIG.twitch_channel_login
@@ -203,7 +205,6 @@ TWITCHMETRICS_URL = PROJECT_CONFIG.twitchmetrics_url
 TWITCH_API_CLIENT_ID = ""
 TWITCH_API_CLIENT_SECRET = ""
 TWITCH_GQL_CLIENT_ID = vod_source.DEFAULT_TWITCH_GQL_CLIENT_ID
-
 
 def load_local_env(path: Path) -> None:
     if not path.exists():
@@ -276,6 +277,7 @@ class CliArgs:
     backfill_days: int
     backfill_limit: int | None
     force_reanalyze: bool
+    youtube_url: str | None
 
 
 @dataclass
@@ -289,12 +291,22 @@ class BackfillSummary:
     failed_vod_ids: list[str] = field(default_factory=list)
     analyzed_details: list[dict[str, int | str]] = field(default_factory=list)
 
-
 def main() -> None:
     load_local_env(ENV_PATH)
     configure_runtime_environment(os.environ)
     args = parse_cli_args()
     now = datetime.now().astimezone()
+    if args.youtube_url:
+        run_youtube_mode(
+            now,
+            args.youtube_url,
+            analyze_video_entry=analyze_video_entry,
+            load_processed_cache=load_processed_cache,
+            write_processed_cache=write_processed_cache,
+            write_public_data=write_public_data,
+            output_path=OUT_PATH,
+        )
+        return
     if args.backfill:
         run_backfill_mode(now, args)
         return
@@ -321,6 +333,11 @@ def parse_cli_args() -> CliArgs:
         action="store_true",
         help="Force reanalysis for all scoped VODs (backfill mode only).",
     )
+    parser.add_argument(
+        "--youtube-url",
+        default=None,
+        help="Fetch and analyze one YouTube archive through the configured Oracle command.",
+    )
     parsed = parser.parse_args()
     if parsed.backfill_days <= 0:
         parser.error("--backfill-days must be a positive integer")
@@ -333,13 +350,15 @@ def parse_cli_args() -> CliArgs:
             parser.error("--force-reanalyze requires --backfill")
         if parsed.backfill_days != BACKFILL_DEFAULT_DAYS:
             parser.error("--backfill-days requires --backfill")
+    if parsed.youtube_url and parsed.backfill:
+        parser.error("--youtube-url cannot be combined with --backfill")
     return CliArgs(
         backfill=parsed.backfill,
         backfill_days=parsed.backfill_days,
         backfill_limit=parsed.backfill_limit,
         force_reanalyze=parsed.force_reanalyze,
+        youtube_url=str(parsed.youtube_url).strip() if parsed.youtube_url else None,
     )
-
 
 def run_normal_mode(now: datetime) -> None:
     target_count = 3
@@ -653,6 +672,7 @@ def normalize_cached_video(video: dict[str, Any]) -> dict[str, Any] | None:
         "title": video.get("title", ""),
         "published_at": video.get("published_at", ""),
         "thumbnail_url": video.get("thumbnail_url", ""),
+        "duration_sec": video.get("duration_sec"),
         "count": int(video.get("count") or len(items)),
         "chat_total": normalize_chat_total(video.get("chat_total")),
         "comments_per_hour": normalize_comments_per_hour(video.get("comments_per_hour")),
@@ -661,6 +681,9 @@ def normalize_cached_video(video: dict[str, Any]) -> dict[str, Any] | None:
         "analysis_version": video.get("analysis_version", ANALYSIS_VERSION),
         "analyzed_at": video.get("analyzed_at") or video.get("updated_at") or "",
     }
+    provider = str(video.get("provider") or "").strip().lower()
+    if provider and provider != "twitch":
+        normalized["provider"] = provider
     return normalized
 
 
@@ -677,11 +700,31 @@ def resolve_video_entry(
     return analyzed_video
 
 
-def analyze_video_entry(video: dict[str, str], now: datetime) -> tuple[dict[str, Any] | None, str]:
+def analyze_video_entry(
+    video: dict[str, str],
+    now: datetime,
+    *,
+    chat_data_override: ChatFetchResult | None = None,
+    metadata_override: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any] | None, str]:
     vod_id = video["vod_id"]
     print(f"analyze {vod_id}")
     try:
-        chat_data = fetch_chat_data(vod_id, FetchConfig())
+        provider = str(video.get("provider") or "twitch").strip().lower()
+        resolved_video: dict[str, Any] = dict(video)
+        if metadata_override:
+            resolved_video.update(metadata_override)
+        if provider == "youtube" and chat_data_override is None:
+            youtube_result = fetch_youtube_video(str(resolved_video.get("vod_url") or vod_id))
+            resolved_video.update(youtube_result.video)
+            chat_data = youtube_result.chat
+        else:
+            chat_data = chat_data_override or fetch_chat_data(
+                vod_id,
+                FetchConfig(),
+                provider=provider,
+                vod_url=str(resolved_video.get("vod_url") or ""),
+            )
         comments = chat_data.comments
         chat_total = len(comments)
         activity_map = build_activity_map(comments, DetectConfig(), chat_data.duration_sec)
@@ -696,6 +739,11 @@ def analyze_video_entry(video: dict[str, str], now: datetime) -> tuple[dict[str,
             DetectConfig(),
             total_duration_sec=comments_per_hour_duration_sec,
         )
+        if provider == "youtube":
+            for item in items:
+                start_sec = parse_int(item.get("start_sec"))
+                if start_sec is not None:
+                    item["watch_url"] = build_youtube_watch_url(vod_id, start_sec)
     except Exception as exc:
         print(f"warn: skip {vod_id} ({exc})")
         return None, "failed"
@@ -704,12 +752,12 @@ def analyze_video_entry(video: dict[str, str], now: datetime) -> tuple[dict[str,
         print(f"warn: skip {vod_id} (no detectable segments)")
         return None, "skipped"
 
-    return {
+    analyzed = {
         "vod_id": vod_id,
-        "vod_url": video["vod_url"],
-        "title": video["title"],
-        "published_at": video["published_at"],
-        "thumbnail_url": video["thumbnail_url"],
+        "vod_url": resolved_video.get("vod_url") or video["vod_url"],
+        "title": resolved_video.get("title") or video.get("title") or "",
+        "published_at": resolved_video.get("published_at") or video.get("published_at") or "",
+        "thumbnail_url": resolved_video.get("thumbnail_url") or video.get("thumbnail_url") or "",
         "duration_sec": comments_per_hour_duration_sec,
         "count": len(items),
         "chat_total": chat_total,
@@ -718,7 +766,14 @@ def analyze_video_entry(video: dict[str, str], now: datetime) -> tuple[dict[str,
         "activity_map": activity_map,
         "analysis_version": ANALYSIS_VERSION,
         "analyzed_at": now.isoformat(timespec="seconds"),
-    }, "analyzed"
+    }
+    if provider and provider != "twitch":
+        analyzed["provider"] = provider
+    return analyzed, "analyzed"
+
+
+def build_youtube_watch_url(vod_id: str, start_sec: int) -> str:
+    return f"https://www.youtube.com/watch?v={vod_id}&t={max(0, int(start_sec))}s"
 
 
 def is_reusable_cached_video(video: dict[str, Any] | None) -> bool:
@@ -767,6 +822,9 @@ def merge_video_metadata(latest: dict[str, str], cached: dict[str, Any]) -> dict
         "analysis_version": cached.get("analysis_version", ANALYSIS_VERSION),
         "analyzed_at": cached.get("analyzed_at", ""),
     }
+    provider = str(latest.get("provider") or cached.get("provider") or "").strip().lower()
+    if provider and provider != "twitch":
+        merged["provider"] = provider
     return merged
 
 

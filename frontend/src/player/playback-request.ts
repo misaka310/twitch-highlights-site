@@ -19,5 +19,6 @@ export function createPlaybackRequest(
     autoplay: options.autoplay !== false,
     muted: options.muted !== false,
     triggeredByUser: options.triggeredByUser === true,
+    ...(options.provider ? { provider: options.provider } : {}),
   };
 }

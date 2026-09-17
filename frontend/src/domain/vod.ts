@@ -10,6 +10,8 @@ export type HighlightSegment = {
   screenshot_url?: string;
 };
 
+export type VodProvider = "twitch" | "youtube";
+
 export type ActivityMapData = {
   bucket_sec?: number;
   duration_sec?: number;
@@ -19,9 +21,11 @@ export type ActivityMapData = {
 
 export type VodData = {
   vod_id: string;
+  provider?: VodProvider;
   vod_url?: string;
   title: string;
   published_at: string;
+  thumbnail_url?: string;
   duration_sec?: number;
   chat_total?: number;
   comments_per_hour?: number;
@@ -31,6 +35,8 @@ export type VodData = {
 
 export type VodIndexEntry = {
   vod_id: string;
+  provider?: VodProvider;
+  vod_url?: string;
   detail_path: string;
   title?: string;
   published_at?: string;

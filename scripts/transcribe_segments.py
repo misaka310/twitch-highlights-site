@@ -922,28 +922,29 @@ def _apply_headline_post_filter_fallback(
             generation_reason="fallback_after_post_filter",
         )
 
-    safe_headline = build_tag_based_fallback_headline(target.item.get("tags"))
     print(
-        "info: extractive fallback rejected; using tag fallback "
+        "info: content headline unavailable; leaving headline empty "
         f"label={label} reasons={fallback_validation.reasons} headline={headline.text} "
-        f"fallback={safe_headline}"
+        "reason=content_headline_unavailable"
     )
     return HeadlineGenerationOutcome(
         headline=HeadlineResult(
-            text=safe_headline,
+            text="",
             model=LOCAL_HEADLINE_MODEL,
-            source="tags",
-            generation_mode="fallback_tag",
+            source="none",
+            generation_mode="skipped_content_validation",
             confidence="low",
             notes=f"extractive_post_filter:{','.join(fallback_validation.reasons)}",
         ),
-        generation_reason="fallback_tag_after_post_filter",
+        generation_reason="content_headline_unavailable",
     )
 
 
 def _resolve_headline_status(headline: HeadlineResult, source_validation: SourceValidationResult) -> str:
-    if headline.generation_mode in {"fallback_extractive", "fallback_tag"}:
+    if headline.generation_mode == "fallback_extractive":
         return headline.generation_mode
+    if headline.generation_mode == "skipped_content_validation":
+        return "skipped_content_validation"
     if not source_validation.accepted or headline.generation_mode in {"weak_llm", "weak_generated"}:
         return "weak_generated"
     return "ok"
@@ -1834,6 +1835,7 @@ def download_segment_media(vod_url: str, start_sec: int, end_sec: int, work_dir:
         work_dir=work_dir,
         python_executable=sys.executable,
         timeout_sec=TRANSCRIPT_DOWNLOAD_TIMEOUT_SEC,
+        video_required=SEGMENT_SCREENSHOT_GENERATION_ENABLED,
     )
 
 

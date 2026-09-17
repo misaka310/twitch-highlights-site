@@ -114,3 +114,9 @@
 - `public/` は生成物であり、直接修正しない。
 - 公開UIの別実装や同期経路を追加せず、`frontend/`へ集約する。
 - UI変更時は `AGENTS.md` と `docs/PUBLIC_SITE_SPEC.md` を先に確認する。
+
+## YouTube provider
+
+- `scripts/youtube_sources.py` がOracle VM経由のYouTube live_chat取得とvideoOffsetTimeMsecの正規化を担う。
+- `scripts/vod_sources.py` はTwitchとYouTubeの取得境界を統一し、`vod_highlights.py`の集計アルゴリズムは共有する。
+- `frontend/src/player/` はproviderごとのSDKアダプタを共通の再生要求へ接続する。
