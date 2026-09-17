@@ -7,8 +7,33 @@ chat z-score detector, and cuts only the selected highlight intervals.
 
 The selected WAV and WEBP files are sent to one short-lived OCI Object Storage
 object through a Pre-Authenticated Request (PAR). GitHub Actions reads that
-object, runs Whisper and the public-data checks, and removes the object after
-processing. The workflow never runs `yt-dlp` against YouTube.
+object, runs Whisper and the public-data checks, and OCI Object Lifecycle
+Management removes the object within one day. The workflow never runs
+`yt-dlp` against YouTube.
+
+## Applied OCI settings (2026-09-17)
+
+The following settings were applied to the YouTube-only resources. The
+existing `shareclip` bucket is unrelated and must not be used by this flow.
+
+- Region: `ap-osaka-1` (Japan Central (Osaka))
+- Compartment: `kiralab` (root)
+- Bucket: `youtube-material-upload` (private, Standard tier)
+- Object: `youtube-material/latest.tar.gz`
+- Upload PAR: `youtube-material-upload-par`, object write/overwrite, expires
+  2027-03-17 07:00 UTC
+- Read PAR: `youtube-material-read-par`, object read, expires 2027-03-17
+  07:00 UTC
+- Lifecycle rule: `delete-youtube-material-after-1-day`, enabled, delete
+  Objects after 1 day, inclusion prefix `youtube-material/`
+- IAM policy: `YouTubeMaterialLifecyclePolicy`, limited by
+  `target.bucket.name='youtube-material-upload'` to the Object Storage service
+  in `ap-osaka-1`
+
+PAR URLs are intentionally not recorded in the repository or this document.
+They are bearer credentials and must be stored only in the Oracle environment
+file and the GitHub Actions secret described below. PARs are reusable until
+their expiration; rotate both URLs together before 2027-03-17 07:00 UTC.
 
 ## Install on Oracle
 
