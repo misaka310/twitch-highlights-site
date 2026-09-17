@@ -200,8 +200,10 @@ class YoutubeSourceTests(unittest.TestCase):
         config = YoutubeOracleConfig(
             host="64.110.102.170",
             user="ubuntu",
-            key_path=Path(r"C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key"),
-            script_path=Path(r"C:\00_dev\_system\tmp\oracle_livechat.sh"),
+            # The runner is mocked here, so use this tracked test file instead
+            # of requiring the developer's private key and external script.
+            key_path=Path(__file__),
+            script_path=Path(__file__),
         )
         calls = []
 
