@@ -1,0 +1,13 @@
+[Unit]
+Description=Acquire selected YouTube highlight material for GitHub Actions
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/opt/youtube-highlight/repository
+EnvironmentFile=-/etc/youtube-highlight/youtube.env
+ExecStart=/usr/bin/python3 /opt/youtube-highlight/repository/scripts/oracle_youtube_job.py
+NoNewPrivileges=true
+PrivateTmp=true

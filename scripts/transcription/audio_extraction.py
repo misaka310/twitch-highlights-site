@@ -4,16 +4,16 @@ import subprocess
 from pathlib import Path
 
 
-def download_segment_media(
+def build_download_command(
     *,
     vod_url: str,
     start_label: str,
     end_label: str,
-    work_dir: Path,
+    output_template: str,
     python_executable: str,
-    timeout_sec: int,
-) -> Path:
-    output_template = work_dir / "clip.%(ext)s"
+    youtube_format: str | None,
+    force_ipv4: bool = False,
+) -> list[str]:
     command = [
         python_executable,
         "-m",
@@ -25,9 +25,48 @@ def download_segment_media(
         "--download-sections",
         f"*{start_label}-{end_label}",
         "-o",
-        str(output_template),
-        vod_url,
+        output_template,
     ]
+    if force_ipv4:
+        command.insert(3, "--force-ipv4")
+    if youtube_format:
+        command.extend(["-f", youtube_format])
+    command.append(vod_url)
+    return command
+
+
+def download_segment_media(
+    *,
+    vod_url: str,
+    start_label: str,
+    end_label: str,
+    work_dir: Path,
+    python_executable: str,
+    timeout_sec: int,
+    video_required: bool = True,
+) -> Path:
+    output_template = work_dir / "clip.%(ext)s"
+    is_youtube = "youtube.com/" in vod_url.lower() or "youtu.be/" in vod_url.lower()
+    command = build_download_command(
+        vod_url=vod_url,
+        start_label=start_label,
+        end_label=end_label,
+        output_template=str(output_template),
+        python_executable=python_executable,
+        youtube_format=(
+            (
+                (
+                    "worstvideo[protocol=https]+worstaudio[protocol=https]/"
+                    "worst[protocol=https]/worst"
+                )
+                if video_required
+                else "worstaudio[protocol=https]/bestaudio[protocol=https]"
+            )
+            if is_youtube
+            else None
+        ),
+        force_ipv4=is_youtube,
+    )
     try:
         completed = subprocess.run(
             command,

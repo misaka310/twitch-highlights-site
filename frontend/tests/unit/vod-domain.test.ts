@@ -11,6 +11,7 @@ import { formatChatVolume, formatClock, localizeReason } from "../../src/lib/for
 import { loadVodPage } from "../../src/hooks/use-vod-page.js";
 import {
   normalizeDataPath,
+  normalizeAssetPath,
   orderSegments,
   pageUrl,
   parsePageSearch,
@@ -21,6 +22,13 @@ test("normalizes public data paths without changing canonical paths", () => {
   assert.equal(normalizeDataPath("/data/vods/1.json"), "/data/vods/1.json");
   assert.equal(normalizeDataPath("data/vods/1.json"), "/data/vods/1.json");
   assert.equal(normalizeDataPath("vods/1.json"), "/data/vods/1.json");
+});
+
+test("preserves remote thumbnail URLs for image fallbacks", () => {
+  assert.equal(
+    normalizeAssetPath("https://i.ytimg.com/vi/930HUhvRKHc/maxresdefault.jpg"),
+    "https://i.ytimg.com/vi/930HUhvRKHc/maxresdefault.jpg",
+  );
 });
 
 test("orders segments by rank and derives duration with existing precedence", () => {
@@ -50,16 +58,17 @@ test("clamps out-of-range VOD pages to the last available page", async () => {
     if (path === "/data/vod_index.json") {
       return Response.json({
         videos: [
-          { vod_id: "4", detail_path: "data/vods/4.json", published_at: "2026-08-04T00:00:00Z" },
-          { vod_id: "3", detail_path: "data/vods/3.json", published_at: "2026-08-03T00:00:00Z" },
-          { vod_id: "2", detail_path: "data/vods/2.json", published_at: "2026-08-02T00:00:00Z" },
-          { vod_id: "1", detail_path: "data/vods/1.json", published_at: "2026-08-01T00:00:00Z" },
+          { provider: "twitch", vod_id: "legacy", detail_path: "data/vods/legacy.json", published_at: "2026-08-05T00:00:00Z" },
+          { provider: "youtube", vod_id: "4", detail_path: "data/vods/4.json", published_at: "2026-08-04T00:00:00Z" },
+          { provider: "youtube", vod_id: "3", detail_path: "data/vods/3.json", published_at: "2026-08-03T00:00:00Z" },
+          { provider: "youtube", vod_id: "2", detail_path: "data/vods/2.json", published_at: "2026-08-02T00:00:00Z" },
+          { provider: "youtube", vod_id: "1", detail_path: "data/vods/1.json", published_at: "2026-08-01T00:00:00Z" },
         ],
       });
     }
     if (path === "/site-config.json") return Response.json({ site: { name: "Example" } });
     if (path === "/data/vods/1.json") {
-      return Response.json({ vod_id: "1", title: "last page", published_at: "2026-08-01T00:00:00Z" });
+      return Response.json({ provider: "youtube", vod_id: "1", title: "last page", published_at: "2026-08-01T00:00:00Z" });
     }
     return new Response("not found", { status: 404 });
   };
@@ -78,15 +87,15 @@ test("keeps the page usable when one VOD detail payload fails", async () => {
     if (path === "/data/vod_index.json") {
       return Response.json({
         videos: [
-          { vod_id: "2", detail_path: "data/vods/2.json", published_at: "2026-08-02T00:00:00Z" },
-          { vod_id: "1", detail_path: "data/vods/1.json", published_at: "2026-08-01T00:00:00Z" },
+          { provider: "youtube", vod_id: "2", detail_path: "data/vods/2.json", published_at: "2026-08-02T00:00:00Z" },
+          { provider: "youtube", vod_id: "1", detail_path: "data/vods/1.json", published_at: "2026-08-01T00:00:00Z" },
         ],
       });
     }
     if (path === "/site-config.json") return Response.json({ site: { name: "Example" } });
     if (path === "/data/vods/2.json") return new Response("not found", { status: 404 });
     if (path === "/data/vods/1.json") {
-      return Response.json({ vod_id: "1", title: "healthy VOD", published_at: "2026-08-01T00:00:00Z" });
+      return Response.json({ provider: "youtube", vod_id: "1", title: "healthy VOD", published_at: "2026-08-01T00:00:00Z" });
     }
     return new Response("not found", { status: 404 });
   };
@@ -94,6 +103,33 @@ test("keeps the page usable when one VOD detail payload fails", async () => {
   const result = await loadVodPage(1, fetcher as typeof fetch);
 
   assert.deepEqual(result.vods.map((vod) => vod.vod_id), ["1"]);
+  assert.equal(result.totalCount, 2);
+});
+
+test("keeps Twitch and YouTube entries in the public page", async () => {
+  const fetcher = async (input: string | URL | Request): Promise<Response> => {
+    const path = String(input);
+    if (path === "/data/vod_index.json") {
+      return Response.json({
+        videos: [
+          { provider: "twitch", vod_id: "twitch-1", detail_path: "data/vods/twitch-1.json", published_at: "2026-08-03T00:00:00Z" },
+          { provider: "youtube", vod_id: "youtube-1", detail_path: "data/vods/youtube-1.json", published_at: "2026-08-02T00:00:00Z" },
+        ],
+      });
+    }
+    if (path === "/site-config.json") return Response.json({});
+    if (path === "/data/vods/twitch-1.json") {
+      return Response.json({ provider: "twitch", vod_id: "twitch-1", title: "Twitch VOD", published_at: "2026-08-03T00:00:00Z" });
+    }
+    if (path === "/data/vods/youtube-1.json") {
+      return Response.json({ provider: "youtube", vod_id: "youtube-1", title: "YouTube VOD", published_at: "2026-08-02T00:00:00Z" });
+    }
+    return new Response("not found", { status: 404 });
+  };
+
+  const result = await loadVodPage(1, fetcher as typeof fetch);
+
+  assert.deepEqual(result.vods.map((vod) => vod.vod_id), ["twitch-1", "youtube-1"]);
   assert.equal(result.totalCount, 2);
 });
 

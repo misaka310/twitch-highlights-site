@@ -1,4 +1,11 @@
-import type { HighlightSegment, VodData } from "../domain/vod.js";
+import type { HighlightSegment, VodData, VodProvider } from "../domain/vod.js";
+
+export function getVodProvider(vod: { vod_id?: string; provider?: string; vod_url?: string } | null | undefined): VodProvider {
+  if (String(vod?.provider || "").trim().toLowerCase() === "youtube") return "youtube";
+  const url = String(vod?.vod_url || "").trim().toLowerCase();
+  if (url.includes("youtube.com/") || url.includes("youtu.be/")) return "youtube";
+  return "twitch";
+}
 
 export function normalizeDataPath(path: string): string {
   const value = String(path || "").trim();
@@ -8,7 +15,9 @@ export function normalizeDataPath(path: string): string {
 }
 
 export function normalizeAssetPath(path = ""): string {
-  return normalizeDataPath(path);
+  const value = String(path || "").trim();
+  if (/^https?:\/\//i.test(value)) return value;
+  return normalizeDataPath(value);
 }
 
 export function orderSegments(items?: HighlightSegment[]): HighlightSegment[] {

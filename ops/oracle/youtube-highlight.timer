@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the YouTube highlight material handoff every morning
+
+[Timer]
+OnCalendar=*-*-* 06:07:00 Asia/Tokyo
+Persistent=true
+Unit=youtube-highlight.service
+
+[Install]
+WantedBy=timers.target
