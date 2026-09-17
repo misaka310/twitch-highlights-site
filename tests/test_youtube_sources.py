@@ -200,8 +200,10 @@ class YoutubeSourceTests(unittest.TestCase):
         config = YoutubeOracleConfig(
             host="<ORACLE_HOST>",
             user="ubuntu",
-            key_path=Path(r"<SSH_KEY_PATH>"),
-            script_path=Path(r"<ORACLE_SCRIPT_PATH>"),
+            # The runner is mocked here, so use this tracked test file instead
+            # of requiring the developer's private key and external script.
+            key_path=Path(__file__),
+            script_path=Path(__file__),
         )
         calls = []
 
