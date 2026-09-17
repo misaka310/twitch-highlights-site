@@ -27,10 +27,10 @@ export function loadSiteConfig(rootDir, env = process.env) {
 
   return {
     site: {
-      name: envOrConfig(env, "SITE_NAME", site.name) || "Twitch Highlights",
+      name: envOrConfig(env, "SITE_NAME", site.name) || "YouTube Highlights",
       description:
         envOrConfig(env, "SITE_DESCRIPTION", site.description) ||
-        "Twitch VODのコメント量から見どころを表示する非公式サイトです。",
+        "YouTubeライブアーカイブのコメント量から見どころを表示する非公式サイトです。",
       base_url: envOrConfig(env, "SITE_BASE_URL", site.base_url).replace(/\/+$/, ""),
       language: envOrConfig(env, "SITE_LANGUAGE", site.language) || "ja",
       analytics: {

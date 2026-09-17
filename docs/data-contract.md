@@ -4,7 +4,7 @@
 
 providerがyoutubeのVODでは、vod_idとvod_urlがYouTubeの公開再生対象を指す。Twitchの既存データではproviderを省略し、Twitchを既定値として扱う。
 
-公開UIの表示対象はproviderを限定しない。TwitchとYouTubeのVODを同じ一覧・ページャー・VOD切替で扱い、providerに応じて再生経路を選ぶ。
+公開UIと`data/vods.json`・`data/vod_index.json`の表示対象はYouTubeだけとする。旧Twitch VODは内部キャッシュや回帰テストで互換保持しても、公開一覧・ページャー・VOD切替へ混ぜない。
 
 YouTube Oracle出力に含まれるvideoOffsetTimeMsecは取得時だけcontent_offset_secondsへ変換し、保存対象は集計後の数値と見どころだけに限定する。
 
@@ -54,7 +54,7 @@ YouTube live_chatの実取得は、確定済みOracle VM（`64.110.102.170` / `u
 
 ## `data/vods.json`
 
-最新3件をトップ画面へ表示する公開データです。各VODは次のフィールドだけを持ちます。
+YouTubeの最新3件をトップ画面へ表示する公開データです。各VODは次のフィールドだけを持ちます。旧Twitchキャッシュはこのファイルへ出力しません。
 
 - `provider`（YouTubeでは`youtube`、Twitchでは省略可）
 - `vod_id`
@@ -69,11 +69,11 @@ YouTube live_chatの実取得は、確定済みOracle VM（`64.110.102.170` / `u
 - `items`
 - `activity_map`
 
-`items[]` の `headline` は内部エンリッチメントの結果です。YouTubeで文字起こし不能などにより生成できない場合、公開UIは見出し未生成として扱い、`reason` を表示用見出しへ変換しません。既存Twitchデータは互換維持のため、`headline` 欠損時に従来の `reason` 整形表示を許容します。YouTubeの `headline` が欠損する項目は公開準備未完了として扱い、生成済み `headline` は公開品質検証を通過している必要があります。
+`items[]` の `headline` は内部エンリッチメントの結果です。YouTubeで文字起こし不能などにより生成できない場合、公開UIは見出し未生成として扱い、`reason` を表示用見出しへ変換しません。YouTubeの `headline` が欠損する項目は公開準備未完了として扱い、生成済み `headline` は公開品質検証を通過している必要があります。
 
 ## `data/vod_index.json`
 
-公開期間内のVOD一覧です。各行は次のフィールドだけを持ちます。
+公開期間内のYouTube VOD一覧です。各行は次のフィールドだけを持ちます。旧Twitchキャッシュは除外します。
 
 - `provider`（YouTubeでは`youtube`、Twitchでは省略可）
 - `vod_id`

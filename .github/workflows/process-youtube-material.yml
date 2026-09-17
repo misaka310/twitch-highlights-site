@@ -102,6 +102,21 @@ jobs:
           python scripts/check_public_build.py
           python -m unittest tests.test_privacy_retention -v
 
+      - name: Verify YouTube-only public feed
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for path in (Path("data/vods.json"), Path("data/vod_index.json")):
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              videos = payload.get("videos") or []
+              invalid = [str(video.get("vod_id") or "unknown") for video in videos if video.get("provider") != "youtube"]
+              if invalid:
+                  raise SystemExit(f"YouTube-only public feed contains non-YouTube VODs: {invalid[:3]}")
+          print("YouTube-only public feed verified")
+          PY
+
       - name: Publish through a checked pull request
         env:
           GH_TOKEN: ${{ github.token }}

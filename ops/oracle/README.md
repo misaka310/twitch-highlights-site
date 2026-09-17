@@ -84,8 +84,6 @@ status and counts; it does not print cookies, keys, chat text, or PAR URLs.
 If yt-dlp returns `yt_dlp_failure` after creating a non-empty live-chat JSON,
 the job keeps that artifact and validates it before continuing; an absent or
 empty artifact remains a hard failure.
-<<<<<<< HEAD
-
 ## Refreshing YouTube authentication
 
 The production cookie file is `/home/ubuntu/youtube-cookies.txt` on Oracle and
@@ -95,8 +93,6 @@ Oracle browser, replace the file, and rerun the one-shot test before starting
 the service. The Windows Chrome cookie export is not a production fallback;
 the service must use the Oracle VM's current login session. Never put the
 cookie file, browser profile, or SSH key in the repository.
-=======
->>>>>>> origin/main
 
 ## GitHub Actions secrets
 

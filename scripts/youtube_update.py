@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 
+from vod_serialization import filter_youtube_videos
 from youtube_sources import YoutubeFetchResult, fetch_youtube_video
 
 
@@ -43,7 +44,7 @@ def run_youtube_mode(
     }
     cached_by_vod_id[analyzed_video["vod_id"]] = analyzed_video
     write_processed_cache(cached_by_vod_id.values(), now)
-    write_public_data(cached_by_vod_id.values(), now)
+    write_public_data(filter_youtube_videos(cached_by_vod_id.values()), now)
     print(
         "youtube mode:"
         f" vod_id={analyzed_video['vod_id']}"
