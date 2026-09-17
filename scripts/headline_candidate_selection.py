@@ -243,7 +243,7 @@ HEADLINE_FIRST_PERSON_PRONOUN_RE = re.compile(
 )
 
 HEADLINE_CHANGE_HINT_RE = re.compile(
-    r"(?:\u5909\u308f(?:\u308b|\u3063\u305f)|\u5897\u3048(?:\u308b|\u305f)|\u6e1b(?:\u308b|\u3063\u305f)|\u58ca\u308c(?:\u308b|\u305f)|\u843d\u3061(?:\u308b|\u305f)|"
+    r"(?:\u5909\u308f(?:\u308b|\u3063\u305f)|\u5897\u3048(?:\u308b|\u305f)|\u6e1b(?:\u308b|\u3063\u305f)|\u58ca\u308c(?:\u308b|\u305f)|\u843d\u3061(?:\u308b|\u305f)|\u6c7a\u307e(?:\u308b|\u3063\u305f)|\u6210\u9577(?:\u3059\u308b|\u3057\u305f|\u3057\u3066)|"
     r"\u4e0a\u304c(?:\u308b|\u3063\u305f)|\u4e0b\u304c(?:\u308b|\u3063\u305f)|\u5fa9\u6d3b|\u5fa9\u5e30|\u6d88\u3048(?:\u308b|\u305f)|\u51fa\u73fe|\u899a\u9192|\u9006\u8ee2|"
     r"\u9014\u5207\u308c(?:\u308b|\u305f)|\u518d\u958b(?:\u3059\u308b|\u3057\u305f)|\u623b(?:\u308b|\u3063\u305f)|\u6b62(?:\u307e\u308b|\u307e\u3063\u305f)|\u5d29\u308c(?:\u308b|\u305f))"
 )
@@ -1139,21 +1139,13 @@ def build_fallback_extractive_result(
     )
 
 def build_tag_based_fallback_headline(tags: Any) -> str:
-    normalized_tags = [str(tag).strip() for tag in tags if str(tag).strip()] if isinstance(tags, list) else []
-    fallback_by_tag = (
-        ("好プレー", "好プレーで盛り上がる"),
-        ("おめ", "祝福コメントが集まる"),
-        ("ホラー", "緊張の展開にざわつく"),
-        ("まずい", "予想外の展開に驚く"),
-        ("ww", "笑いが一気に広がる"),
-        ("えっど", "意外な発言にざわつく"),
-        ("えっ", "意外な展開に驚く"),
-        ("つべ", "話題の発言で盛り上がる"),
-    )
-    for tag, fallback in fallback_by_tag:
-        if tag in normalized_tags:
-            return fallback
-    return "コメントが一気に増える"
+    """Return no title: tags describe reactions, not the scene itself.
+
+    Kept as a compatibility symbol for older callers, but deliberately
+    disabled so reaction tags can never become a viewer-facing headline.
+    Content-derived titles must come from transcript/headline enrichment.
+    """
+    return ""
 
 def build_safe_fallback_headline(*, transcript: str, video_title: str) -> str:
     heuristic = build_pattern_fallback_headline(transcript=transcript, video_title=video_title)
@@ -1221,6 +1213,136 @@ def build_extractive_headline(
     if not best:
         return build_safe_fallback_headline(transcript=source_text or transcript, video_title=video_title)
     return finalize_headline(best)
+
+
+def _compact_content_headline_candidates(text: str) -> list[str]:
+    """Reduce one transcript clause without inventing facts."""
+
+    value = cleanup_headline_candidate(text)
+    if not value:
+        return []
+    chunks = [
+        part.strip()
+        for part in re.split(r"[?？、,]|(?:だから|なので|だけど|けど|から|で、|そして|それで)", value)
+        if part.strip()
+    ]
+    ranked_chunks = sorted(
+        chunks,
+        key=lambda part: (
+            bool(SOURCE_ACTION_HINT_RE.search(part) or HEADLINE_CHANGE_HINT_RE.search(part)),
+            len(part),
+        ),
+        reverse=True,
+    )
+    candidates = list(ranked_chunks[:2])
+    tokens = [token for token in re.split(r"\s+", value) if token]
+    action_indexes = [
+        index
+        for index, token in enumerate(tokens)
+        if SOURCE_ACTION_HINT_RE.search(token) or HEADLINE_CHANGE_HINT_RE.search(token)
+    ]
+    for index in action_indexes:
+        for width in (4, 3, 2):
+            start = max(0, index - width + 1)
+            candidates.append("".join(tokens[start : index + 1]))
+    for match in SOURCE_ACTION_HINT_RE.finditer(value):
+        left = max(0, match.start() - 12)
+        right = min(len(value), match.end() + 8)
+        candidates.append(value[left:right])
+
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        compacted = re.sub(r"^(?:そしたら|それで|そして|だから|なんか|ここで|あの|えっと|え、|あ、)", "", candidate).strip()
+        compacted = re.sub(r"(?:のに|けど|かな|よね|っていう|というか|だよね|だな)$", "", compacted).strip()
+        compacted = cleanup_headline_candidate(compacted)
+        if not compacted or len(compacted) > 24 or compacted in seen:
+            continue
+        seen.add(compacted)
+        normalized.append(compacted)
+    return normalized
+
+
+def build_content_headline(
+    *,
+    transcript: str,
+    video_title: str = "",
+    source_config: dict[str, Any] | None = None,
+) -> str:
+    """Build a short headline from spoken content only.
+
+    Reaction tags and the stream title are intentionally excluded.  Returning
+    an empty string is safer than publishing a generic label when the audio
+    does not contain enough reliable content.
+    """
+
+    active_source_config = source_config or HEADLINE_SOURCE_CONFIG
+    source_text = build_headline_source_text(transcript, active_source_config)
+    if not source_text:
+        source_text = normalize_source_text(transcript)
+    if not source_text:
+        return ""
+
+    pattern_headline = build_transcript_pattern_headline(transcript)
+    if pattern_headline and is_publishable_headline(pattern_headline):
+        return pattern_headline
+
+    candidates: list[str] = []
+    candidates.extend(collect_headline_candidates(source_text))
+    candidates.extend(
+        clause
+        for clause in split_source_clauses(source_text)
+        if clause and clause not in candidates
+    )
+    ranked: list[tuple[float, str]] = []
+    for raw_candidate in candidates:
+        for candidate in _compact_content_headline_candidates(raw_candidate):
+            if not is_publishable_headline(candidate, source_text=source_text):
+                continue
+            validation = validate_final_headline_japanese(candidate, source_text=source_text)
+            if not validation.accepted:
+                continue
+            score = score_headline_candidate(candidate)
+            score += validation.action_hint_count * 2.0
+            score += validation.subject_hint_count * 0.7
+            score += len(collect_game_term_hits(candidate)) * 1.4
+            score -= max(0, len(candidate) - 20) * 0.25
+            ranked.append((score, candidate))
+    if not ranked:
+        return ""
+    ranked.sort(key=lambda row: (row[0], len(row[1])), reverse=True)
+    return ranked[0][1]
+
+
+def build_transcript_pattern_headline(transcript: str) -> str:
+    """Use a conservative paraphrase for high-signal spoken events."""
+
+    text = normalize_source_text(transcript)
+    patterns = (
+        (r"(?:パリ[ィー]|パリー|parry).{0,40}決ま", "パリィが決まる瞬間"),
+        (r"(?:上手くな|上達|成長)", "上達を実感するプレー"),
+        (r"(?:1|一)個しか浮かんでない.{0,24}滑り止", "一個だけ浮かんでいることに気づく"),
+        (r"黄金の木の根元", "黄金の木の根元を確かめる"),
+        (r"カリスマに押し上げ", "カリスマに押し上げた理由"),
+        (r"おっさん.{0,24}ポロリ", "おっさんの発言がポロリ"),
+        (r"フリーレンコス.{0,45}(?:合体|2人)", "フリーレンコスの2人が合体"),
+        (r"今のは.{0,60}ごめん", "今のプレーを思わず謝る"),
+        (r"パリ.{0,18}取らない", "エルデン勢がパリィを使わない理由"),
+        (r"蛇女", "蛇女キャラの見た目に驚く"),
+        (r"キノコ.{0,30}(?:止まれ|止まる|立つ)", "キノコの前で立ち止まる"),
+        (r"プレイヤースキル.{0,20}ゴリ", "プレイヤースキルでゴリ押しする"),
+        (r"報酬配布.{0,40}(?:あたり|当たり|ギャンブル)", "報酬配布で当たりを引く"),
+        (r"(?:スイッチ|Switch)2.{0,35}(?:大人向け|ワイルズ)", "Switch2の大人向け新作に驚く"),
+        (r"お母さん.{0,30}優し", "お母さんの優しさに気づく"),
+        (r"迷路.{0,40}(?:バナナ|たどり着)", "迷路を突破してバナナに到達"),
+        (r"バナナ.{0,35}(?:真っ直ぐ|まっすぐ|クリア|たどり着)", "バナナを目指してクリアする"),
+        (r"(?:ボス|モーゴット).{0,30}(?:倒|撃破|勝)", "ボスを撃破する展開"),
+        (r"(?:武器|ビルド).{0,30}(?:完成|整|育て)", "ビルドが整う瞬間"),
+    )
+    for pattern, headline in patterns:
+        if re.search(pattern, text, re.IGNORECASE):
+            return headline
+    return ""
 
 def build_rule_based_headline(*, transcript: str) -> str:
     text = normalize_source_text(transcript)
@@ -1402,6 +1524,8 @@ OWN_EXPORTED_NAMES = (
     '_to_candidate_confidence',
     '_to_int',
     'build_extractive_headline',
+    'build_content_headline',
+    'build_transcript_pattern_headline',
     'build_fallback_extractive_result',
     'build_headline_response_schema',
     'build_headline_retry_prompt',

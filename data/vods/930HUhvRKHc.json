@@ -18,11 +18,12 @@
       "start_time": "03:45:50",
       "end_time": "03:47:50",
       "reason": "Chat activity spike around 3h45m50s (z-score=3.895).",
-      "headline": "笑いが一気に広がる",
+      "headline": "バナナを目指してクリアする",
       "tags": [
         "ww"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=13550s"
+      "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=13550s",
+      "screenshot_url": "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_13550_13670.webp"
     },
     {
       "rank": 2,
@@ -33,13 +34,14 @@
       "start_time": "01:35:30",
       "end_time": "01:37:20",
       "reason": "Chat activity spike around 1h35m30s (z-score=3.895).",
-      "headline": "好プレーで盛り上がる",
+      "headline": "カリスマに押し上げた理由",
       "tags": [
         "好プレー",
         "ww",
         "えっ"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=5730s"
+      "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=5730s",
+      "screenshot_url": "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_5730_5840.webp"
     },
     {
       "rank": 3,
@@ -50,13 +52,14 @@
       "start_time": "00:13:00",
       "end_time": "00:15:00",
       "reason": "Chat activity spike around 0h13m0s (z-score=2.941).",
-      "headline": "好プレーで盛り上がる",
+      "headline": "おっさんの発言がポロリ",
       "tags": [
         "ww",
         "好プレー",
         "おめ"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=780s"
+      "watch_url": "https://www.youtube.com/watch?v=930HUhvRKHc&t=780s",
+      "screenshot_url": "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_780_900.webp"
     }
   ],
   "activity_map": {

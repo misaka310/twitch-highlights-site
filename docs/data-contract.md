@@ -4,11 +4,11 @@
 
 providerがyoutubeのVODでは、vod_idとvod_urlがYouTubeの公開再生対象を指す。Twitchの既存データではproviderを省略し、Twitchを既定値として扱う。
 
-公開UIの表示対象はYouTubeに限定する。Twitchデータは既存キャッシュと互換用の入力として保持できるが、公開UIの一覧・ページャー・VOD切替には含めない。
+公開UIの表示対象はproviderを限定しない。TwitchとYouTubeのVODを同じ一覧・ページャー・VOD切替で扱い、providerに応じて再生経路を選ぶ。
 
 YouTube Oracle出力に含まれるvideoOffsetTimeMsecは取得時だけcontent_offset_secondsへ変換し、保存対象は集計後の数値と見どころだけに限定する。
 
-YouTube live_chatの実取得は、確定済みOracle VM（`64.110.102.170` / `ubuntu`）へSSHし、既存のOracle取得スクリプトを実行する経路だけを許可する。ローカルyt-dlpの直接実行結果をOracle取得結果として扱わず、Oracleスクリプトのログと一時TSVはメモリ上で解析する。一時TSVのコメント本文は区間タグとYouTube用の見出しフォールバックを作るためだけに使い、公開データへ保存しない。
+YouTube live_chatの実取得は、確定済みOracle VM（`64.110.102.170` / `ubuntu`）へSSHし、既存のOracle取得スクリプトを実行する経路だけを許可する。ローカルyt-dlpの直接実行結果をOracle取得結果として扱わず、Oracleスクリプトのログと一時TSVはメモリ上で解析する。一時TSVのコメント本文は見どころ判定中だけに使い、公開データへ保存しない。反応タグだけから見出しを生成してはならず、見出しは後段のWhisper/内容エンリッチメント結果から作る。
 
 ## 原則
 
@@ -69,7 +69,7 @@ YouTube live_chatの実取得は、確定済みOracle VM（`64.110.102.170` / `u
 - `items`
 - `activity_map`
 
-`items[]` の `headline` は内部エンリッチメントの結果であり、文字起こし不能などで生成できない場合は欠損を許容します。その場合、公開UIは `reason` を表示用見出しへ変換して使用します。`headline` と `reason` の両方が欠損して表示用見出しを解決できない項目は公開準備未完了として扱います。生成済み `headline` が存在する場合は公開品質検証を通過している必要があります。
+`items[]` の `headline` は内部エンリッチメントの結果です。YouTubeで文字起こし不能などにより生成できない場合、公開UIは見出し未生成として扱い、`reason` を表示用見出しへ変換しません。既存Twitchデータは互換維持のため、`headline` 欠損時に従来の `reason` 整形表示を許容します。YouTubeの `headline` が欠損する項目は公開準備未完了として扱い、生成済み `headline` は公開品質検証を通過している必要があります。
 
 ## `data/vod_index.json`
 

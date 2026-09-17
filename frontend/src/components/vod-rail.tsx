@@ -47,6 +47,7 @@ export function VodRail({
             <Tabs tabs={tabItems} value={activeVod.vod_id} onValueChange={onSelectVod} />
             <HighlightList
               vodId={activeVod.vod_id}
+              provider={activeVod.provider}
               vodThumbnailUrl={activeVod.thumbnail_url}
               segments={segments}
               activeSegmentId={activeSegmentId}

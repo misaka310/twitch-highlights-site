@@ -41,26 +41,34 @@ PR作成、対象SHAの検証、head SHA確認、squash mergeは`.github/scripts
 
 ## 定期VOD更新
 
-YouTubeの実データ生成は、通常の自動更新とは分離した明示CLIで行う。確定済みのOracle VM（`64.110.102.170`、`ubuntu`）へ、指定SSH鍵で接続し、既存のOracle取得スクリプトを`bash -s`で実行する。ローカル直接取得へフォールバックしない。YouTube生成と検証が完了するまで、subscriber-only対応で停止中の自動更新を再開しない。
+YouTubeの本番取得経路は確定済みのOracle VM（`64.110.102.170`、`ubuntu`）だけとする。OracleはYouTube live_chatの取得、コメント時刻抽出、既存の10秒bucket/z-scoreによる見どころ決定、選択区間の音声・軽量映像の切り出しまでを担当する。GitHub ActionsはYouTubeへ直接アクセスせず、OCI Object Storageの一時PARオブジェクトを受け取ってWhisper、見出し、サムネイル、検証、checked PR公開を担当する。Renderは`main`更新後の静的サイト公開を担当する。
+
+Oracleで確認済みの取得スクリプトは`C:\00_dev\_system\tmp\oracle_livechat.sh`であり、`C:\00_dev\_tmp\oracle\_livechat.sh`は使用しない。指定SSH鍵は`C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key`、Oracle上の実行ファイルは`/home/ubuntu/yt-dlp`、`/home/ubuntu/.local/bin/deno`、Cookieは`/home/ubuntu/youtube-cookies.txt`である。鍵とCookieの内容は表示・commitしない。
 
 ```powershell
 $env:YOUTUBE_ORACLE_HOST = '64.110.102.170'
 $env:YOUTUBE_ORACLE_USER = 'ubuntu'
 $env:YOUTUBE_ORACLE_KEY_PATH = 'C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key'
-$env:YOUTUBE_ORACLE_SCRIPT_PATH = 'C:\00_dev\_tmp\oracle\_livechat.sh'
+$env:YOUTUBE_ORACLE_SCRIPT_PATH = 'C:\00_dev\_system\tmp\oracle_livechat.sh'
 python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGTrmrSvZH0'
 ```
 
-- `.github/workflows/update-vods.yml` は毎日 **06:07 JST** に処理を開始し、**09:00 JSTまでの公開反映**を目標とする。
-- GitHub ActionsのcronはUTCなので、正本は `7 21 * * *` とする。毎時0分を避けて開始遅延を抑える。
+- Oracleの`ops/oracle/youtube-highlight.timer`は毎日**06:07 JST**に起動し、Actionsの`process-youtube-material.yml`へ`repository_dispatch`を送る。GitHub ActionsのcronはYouTube取得経路に使わない。
+- 既存`.github/workflows/update-vods.yml`のschedule宣言は互換検査のため残すが、現在の`if: github.event_name == 'workflow_dispatch'`による停止を無条件に解除しない。
 - GitHub側の混雑により実際の開始・完了が遅れることはある。画面の「次回更新予定」は処理開始時刻ではなく、公開反映目標の09:00 JSTを表示する。
 - 手動更新は `workflow_dispatch` で `main` を指定する。
 - `data/vods.json` は公開トップ用の最新3件、`data/vod_index.json` は保持期間内の一覧を持つ。
 - 更新データは `automation/update-vods` ブランチとPRを経由し、公開準備チェック成功後にmainへマージする。
-- Whisperで文字起こしできない区間など、見出し生成だけが成立しない見どころは `headline` 欠損を許容し、既存の `reason` を公開UIの表示見出しフォールバックとして使用する。`headline` 欠損だけでVOD更新全体を停止しない。
-- YouTube更新では、Oracleから一時取得したチャット本文で既存タグを判定し、Whisperを実行しない更新経路でもタグベースの `headline` を生成する。本文は解析後に破棄し、公開データへ保存しない。
+- YouTubeでWhisperの内容を確定できない区間は `headline` 欠損のまま扱い、反応タグや既存の `reason` を公開UIの表示見出しへフォールバックしない。既存Twitchデータは互換維持のため従来の `reason` 表示を許容する。
+- YouTube更新では、タグを見出しへ変換しない。公開用の `headline` は、Oracleから取得した見どころ区間の音声・映像を後段のWhisper/見出し生成へ渡して作る。素材や文字起こしを取得できない項目は `headline` を欠損のまま扱い、反応タグを見出しに見せかけない。
 - YouTubeの内部音声解析は、スクリーンショット不要時はHTTPS音声のみ、必要時はHTTPSの軽量映像・音声を選ぶ。Twitchの区間取得フォーマットは変更しない。
-- 公開準備チェックは、生成済み `headline` の品質、表示用見出し源（`headline` または `reason`）の存在、見どころサムネイルの存在を検証する。表示用見出し源まで欠損する場合や、生成済み見出しが品質基準を満たさない場合は従来どおり失敗させる。
+- 公開準備チェックは、生成済み `headline` の品質と見どころサムネイルの存在を検証する。見出しが欠損する場合や、生成済み見出しが品質基準を満たさない場合は従来どおり失敗させる。
+
+### Oracle → Actions 一時素材
+
+受け渡しはOCI Object Storageの短命オブジェクトとPre-Authenticated Request（PAR）を使う。Oracleは`YOUTUBE_ORACLE_BUNDLE_UPLOAD_URL`へ選択区間だけをPUTし、Actionsは`YOUTUBE_ORACLE_BUNDLE_READ_URL`で取得する。処理後は`YOUTUBE_ORACLE_BUNDLE_DELETE_URL`で削除し、削除権限を分離する場合はOCIの1日以内のlifecycle ruleを必須にする。bundleには公開メタデータ、offset-onlyの時刻一覧、選択区間ごとのWAV/WEBPだけを入れ、raw chat、ユーザー名、メッセージ、文字起こしは入れない。
+
+Oracleのsystemd service/timerテンプレートとインストール手順は`ops/oracle/README.md`に置く。Discord通知はOracle側の`DISCORD_WEBHOOK_URL`だけで行い、Cookie認証失敗、bot/challenge、Oracle runtime、yt-dlp/Deno、live_chat 0件、一時ネットワーク障害を分類し、同一連続失敗は一度だけ通知する。復旧時は一度だけ復旧通知を送る。
 
 ## GITHUB_TOKENと連鎖実行
 

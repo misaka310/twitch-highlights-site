@@ -133,9 +133,9 @@ export function useInteractivePlayer({
       onLoaded: () => {
         if (desiredRef.current?.requestId !== request.requestId || playerReadyRef.current) return;
         setUiState(
-          request.autoplay ? "playing" : "ready",
+          "ready",
           request,
-          request.autoplay ? "再生中" : "待機中",
+          request.autoplay ? "再生準備完了" : "待機中",
           "iframe",
         );
       },
@@ -156,14 +156,14 @@ export function useInteractivePlayer({
     lastSeekAtRef.current = Date.now();
     lastKnownPositionRef.current = request.startSec;
     safeSeek(player, request.startSec);
-    if (request.autoplay) safePlay(player);
     onPositionChange(request.startSec);
     setUiState(
-      request.autoplay ? "playing" : "ready",
+      "ready",
       request,
-      request.autoplay ? "再生中" : "待機中",
+      request.autoplay ? "再生準備完了" : "待機中",
       "interactive",
     );
+    if (request.autoplay) safePlay(player);
     window.setTimeout(syncCurrentTime, 180);
     window.setTimeout(syncCurrentTime, 520);
     window.setTimeout(syncCurrentTime, 1100);
@@ -250,14 +250,14 @@ export function useInteractivePlayer({
             seekInteractivePlayer(latest);
             return;
           }
-          if (latest.autoplay) safePlay(player);
           onPositionChange(latest.startSec);
           setUiState(
-            latest.autoplay ? "playing" : "ready",
+            "ready",
             latest,
-            latest.autoplay ? "再生中" : "待機中",
+            latest.autoplay ? "再生準備完了" : "待機中",
             "interactive",
           );
+          if (latest.autoplay) safePlay(player);
         },
         onStateChange: (event) => {
           if (playerRef.current !== player) return;
@@ -372,14 +372,14 @@ export function useInteractivePlayer({
         seekInteractivePlayer(latest);
         return;
       }
-      if (latest.autoplay) safePlay(player);
       onPositionChange(latest.startSec);
       setUiState(
-        latest.autoplay ? "playing" : "ready",
+        "ready",
         latest,
-        latest.autoplay ? "再生中" : "待機中",
+        latest.autoplay ? "再生準備完了" : "待機中",
         "interactive",
       );
+      if (latest.autoplay) safePlay(player);
     });
 
     addPlayerListener(player, playEvent, () => {

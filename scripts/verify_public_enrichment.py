@@ -47,6 +47,7 @@ def collect_public_enrichment_failures(payload: dict[str, Any], *, root: Path = 
         for item in items[:3]:
             segment_id = str(item.get("id") or "unknown")
             headline = str(item.get("headline") or "").strip()
+            provider = str(video.get("provider") or "twitch").strip().lower()
             reason = str(item.get("reason") or "").strip()
             screenshot_url = str(item.get("screenshot_url") or "").strip()
             if headline:
@@ -54,8 +55,8 @@ def collect_public_enrichment_failures(payload: dict[str, Any], *, root: Path = 
                 if not is_publishable_headline(headline):
                     reasons = ",".join(validation.reasons) or "publish_quality"
                     failures.append(f"segment_id={segment_id}: invalid headline ({reasons})")
-            elif not reason:
-                failures.append(f"segment_id={segment_id}: display title source missing")
+            elif provider == "youtube" or not reason:
+                failures.append(f"segment_id={segment_id}: headline missing")
 
             if not screenshot_url:
                 failures.append(f"segment_id={segment_id}: screenshot_url missing")

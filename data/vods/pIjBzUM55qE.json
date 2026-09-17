@@ -18,13 +18,14 @@
       "start_time": "04:32:10",
       "end_time": "04:36:00",
       "reason": "Chat activity spike around 4h32m10s (z-score=3.988).",
-      "headline": "好プレーで盛り上がる",
+      "headline": "蛇女キャラの見た目に驚く",
       "tags": [
         "ww",
         "ホラー",
         "好プレー"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=pIjBzUM55qE&t=16330s"
+      "watch_url": "https://www.youtube.com/watch?v=pIjBzUM55qE&t=16330s",
+      "screenshot_url": "/data/segment-thumbnails/pIjBzUM55qE/pIjBzUM55qE_16330_16560.webp"
     },
     {
       "rank": 2,
@@ -35,12 +36,13 @@
       "start_time": "02:59:20",
       "end_time": "03:02:30",
       "reason": "Chat activity spike around 2h59m20s (z-score=4.948).",
-      "headline": "好プレーで盛り上がる",
+      "headline": "キノコの前で立ち止まる",
       "tags": [
         "は",
         "好プレー"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=pIjBzUM55qE&t=10760s"
+      "watch_url": "https://www.youtube.com/watch?v=pIjBzUM55qE&t=10760s",
+      "screenshot_url": "/data/segment-thumbnails/pIjBzUM55qE/pIjBzUM55qE_10760_10950.webp"
     },
     {
       "rank": 3,
@@ -51,13 +53,14 @@
       "start_time": "03:15:30",
       "end_time": "03:17:00",
       "reason": "Chat activity spike around 3h15m30s (z-score=6.869).",
-      "headline": "好プレーで盛り上がる",
+      "headline": "プレイヤースキルでゴリ押しする",
       "tags": [
         "おめ",
         "好プレー",
         "えっ"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=pIjBzUM55qE&t=11730s"
+      "watch_url": "https://www.youtube.com/watch?v=pIjBzUM55qE&t=11730s",
+      "screenshot_url": "/data/segment-thumbnails/pIjBzUM55qE/pIjBzUM55qE_11730_11820.webp"
     }
   ],
   "activity_map": {

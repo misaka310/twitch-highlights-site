@@ -18,13 +18,14 @@
       "start_time": "02:47:10",
       "end_time": "02:50:10",
       "reason": "Chat activity spike around 2h47m10s (z-score=5.267).",
-      "headline": "好プレーで盛り上がる",
+      "headline": "フリーレンコスの2人が合体",
       "tags": [
         "ww",
         "ホラー",
         "好プレー"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=OKCaYdbt68Q&t=10030s"
+      "watch_url": "https://www.youtube.com/watch?v=OKCaYdbt68Q&t=10030s",
+      "screenshot_url": "/data/segment-thumbnails/OKCaYdbt68Q/OKCaYdbt68Q_10030_10210.webp"
     },
     {
       "rank": 2,
@@ -35,13 +36,14 @@
       "start_time": "02:58:00",
       "end_time": "02:59:20",
       "reason": "Chat activity spike around 2h58m0s (z-score=7.008).",
-      "headline": "笑いが一気に広がる",
+      "headline": "今のプレーを思わず謝る",
       "tags": [
         "ww",
         "は",
         "あ"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=OKCaYdbt68Q&t=10680s"
+      "watch_url": "https://www.youtube.com/watch?v=OKCaYdbt68Q&t=10680s",
+      "screenshot_url": "/data/segment-thumbnails/OKCaYdbt68Q/OKCaYdbt68Q_10680_10760.webp"
     },
     {
       "rank": 3,
@@ -52,13 +54,14 @@
       "start_time": "01:36:00",
       "end_time": "01:37:40",
       "reason": "Chat activity spike around 1h36m0s (z-score=4.397).",
-      "headline": "好プレーで盛り上がる",
+      "headline": "エルデン勢がパリィを使わない理由",
       "tags": [
         "ww",
         "好プレー",
         "えっ"
       ],
-      "watch_url": "https://www.youtube.com/watch?v=OKCaYdbt68Q&t=5760s"
+      "watch_url": "https://www.youtube.com/watch?v=OKCaYdbt68Q&t=5760s",
+      "screenshot_url": "/data/segment-thumbnails/OKCaYdbt68Q/OKCaYdbt68Q_5760_5860.webp"
     }
   ],
   "activity_map": {

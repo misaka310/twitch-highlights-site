@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -18,9 +20,21 @@ def build_manifest() -> dict[str, str]:
     return manifest
 
 
+def build_public() -> None:
+    """Use the repository shell explicitly on Windows as well as Unix."""
+
+    if os.name != "nt":
+        command = ["sh", "scripts/build_public.sh"]
+    else:
+        git_bash = Path(r"C:\Program Files\Git\bin\bash.exe")
+        bash = str(git_bash) if git_bash.is_file() else (shutil.which("bash") or "bash")
+        command = [bash, "-lc", "sh scripts/build_public.sh"]
+    subprocess.run(command, cwd=ROOT, check=True)
+
+
 def main() -> None:
     first = build_manifest()
-    subprocess.run(["sh", "scripts/build_public.sh"], cwd=ROOT, check=True)
+    build_public()
     second = build_manifest()
     if first != second:
         first_keys = set(first)

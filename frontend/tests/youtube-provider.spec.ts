@@ -67,6 +67,7 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   expect(initial.mounts[0]).toMatchObject({ videoId: firstVod.vod_id, autoplay: 0, start: 20 });
   expect(initial.plays).toBe(0);
   expect(initial.muted.at(-1)).toBe(true);
+  await expect(frame).toHaveAttribute("data-player-status", "ready");
 
   await page.locator(".highlight-item").first().click();
   await expect(frame).toHaveAttribute("data-current-start-sec", "20");
@@ -75,6 +76,7 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   await page.locator(".highlight-item").nth(1).click();
   await expect(frame).toHaveAttribute("data-expected-autoplay", "true");
   await expect(frame).toHaveAttribute("data-expected-muted", "false");
+  await expect(frame).toHaveAttribute("data-player-status", "playing");
   await expect(frame).toHaveAttribute("data-current-start-sec", "60");
   const afterHighlight = await getFakeYoutubeLog(page);
   expect(afterHighlight.mounts).toHaveLength(1);
