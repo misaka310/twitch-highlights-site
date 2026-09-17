@@ -82,6 +82,7 @@ class YoutubeHandoffTests(unittest.TestCase):
         timer = (ROOT / "ops" / "oracle" / "youtube-highlight.timer").read_text(encoding="utf-8")
         service = (ROOT / "ops" / "oracle" / "youtube-highlight.service").read_text(encoding="utf-8")
         self.assertNotIn("yt-dlp", workflow)
+        self.assertNotIn("YOUTUBE_ORACLE_BUNDLE_DELETE_URL", workflow)
         self.assertIn("repository_dispatch", workflow)
         self.assertIn("OnCalendar=*-*-* 06:07:00 Asia/Tokyo", timer)
         self.assertIn("EnvironmentFile=-/etc/youtube-highlight/youtube.env", service)

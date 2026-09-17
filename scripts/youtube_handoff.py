@@ -314,23 +314,10 @@ def download_bundle_from_url(read_url: str, bundle_path: Path) -> None:
     Path(bundle_path).write_bytes(payload)
 
 
-def delete_bundle_from_url(delete_url: str) -> None:
-    url = str(delete_url or "").strip()
-    if not url:
-        return
-    if not url.lower().startswith("https://"):
-        raise ValueError("bundle delete URL must use HTTPS")
-    request_obj = request.Request(url, method="DELETE")
-    with request.urlopen(request_obj, timeout=60) as response:
-        if int(getattr(response, "status", 200)) >= 300:
-            raise RuntimeError("bundle delete failed")
-
-
 __all__ = [
     "MATERIAL_BUNDLE_VERSION",
     "build_material_manifest",
     "create_material_bundle",
-    "delete_bundle_from_url",
     "download_bundle_from_url",
     "extract_material_bundle",
     "upload_bundle_to_url",

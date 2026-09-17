@@ -27,17 +27,18 @@ only on the VM; never commit this file:
 ```text
 YOUTUBE_ORACLE_VIDEO_URL=https://www.youtube.com/watch?v=...
 YOUTUBE_ORACLE_BUNDLE_UPLOAD_URL=https://objectstorage.../par/...
-YOUTUBE_ORACLE_BUNDLE_DELETE_URL=https://objectstorage.../par/...
 YOUTUBE_ORACLE_GITHUB_TOKEN=...
 YOUTUBE_ORACLE_GITHUB_REPOSITORY=owner/repository
 DISCORD_WEBHOOK_URL=...
 ```
 
 The PAR used for upload must be scoped to the single temporary object and
-permit the Oracle `PUT`; the read PAR is stored separately in GitHub. If the
-provider permits object deletion through a PAR, set the delete URL as well.
-Otherwise enable an OCI lifecycle rule that deletes the object within one
-day. The GitHub token must be limited to this repository's
+permit the Oracle `PUT` and overwrite of that object; the read PAR is stored
+separately in GitHub. Each PAR can be reused until its expiration, so they do
+not need to be recreated daily. A six-month lifetime is acceptable for this
+fixed, narrowly scoped object; rotate both PARs before they expire. OCI
+pre-authenticated requests cannot delete objects, so configure an OCI
+lifecycle rule that deletes the temporary object within one day. The GitHub token must be limited to this repository's
 `repository_dispatch` operation.
 
 Install and enable the timer:
@@ -59,7 +60,6 @@ status and counts; it does not print cookies, keys, chat text, or PAR URLs.
 Add these repository Actions secrets:
 
 - `YOUTUBE_ORACLE_BUNDLE_READ_URL`: read-only PAR for the temporary object.
-- `YOUTUBE_ORACLE_BUNDLE_DELETE_URL`: optional delete PAR for that object.
 
 The workflow is triggered by the Oracle `repository_dispatch` event
 `youtube-material-ready`. Its normal checked-PR publication path remains
