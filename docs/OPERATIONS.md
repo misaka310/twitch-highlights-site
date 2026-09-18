@@ -37,7 +37,7 @@ npm run verify:live
 7. Render上のHTML、公開データ、PC・スマホ表示を確認し、必要な変更では `npm run verify:live` を通す。
 
 PR番号、run ID、コミットSHAをworkflowへ固定値として残さない。実行時に対象ブランチとhead SHAから解決し、マージ直前にもPR headが変わっていないことを確認する。
-PR作成、対象SHAの検証、head SHA確認、squash mergeは`.github/scripts/checked_pr_merge.py`を共通経路とする。通常のrelease PRは`pull_request` runを待ち、`automation/update-vods`はworkflow内tokenから承認待ちrunを参照できないため、3つの必須workflowを`workflow_dispatch`で対象SHAへ明示実行する。
+PR作成、対象SHAの検証、head SHA確認、squash mergeは`.github/scripts/checked_pr_merge.py`を共通経路とする。通常のrelease PRは`pull_request` runを待ち、Actionsが作成する自動更新PR（`automation/update-vods`、`automation/youtube-material-*`）は承認待ちrunで停止しないよう、3つの必須workflowを`workflow_dispatch`で対象SHAへ明示実行する。
 
 ## 定期VOD更新
 
@@ -60,6 +60,7 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 - 手動更新は `workflow_dispatch` で `main` を指定する。
 - `data/vods.json` は公開トップ用のYouTube最新3件、`data/vod_index.json` は保持期間内のYouTube一覧を持つ。既存キャッシュにTwitchが残っていても、YouTubeのActions処理が公開出力前に除外する。
 - YouTube更新データは `automation/youtube-material-*` ブランチとPRを経由し、公開準備チェック成功後にmainへマージする。旧Twitch更新workflowは停止中であり、公開出力へTwitchを戻さない。
+- YouTube更新PRの検証はActions botが作成したPRでも停止しないよう、`Frontend CI`、`Repository hygiene`、`Repo Launch Doctor`を`workflow_dispatch`で対象ブランチへ実行してから自動マージする。PRの`pull_request`イベント待ちは使わない（GitHub側の承認待ち`action_required`になり得るため）。
 - YouTubeでWhisperの内容を確定できない区間は `headline` 欠損のまま扱い、反応タグや既存の `reason` を公開UIの表示見出しへフォールバックしない。既存Twitchデータは互換維持のため従来の `reason` 表示を許容する。
 - YouTube更新では、タグを見出しへ変換しない。公開用の `headline` は、Oracleから取得した見どころ区間の音声・映像を後段のWhisper/見出し生成へ渡して作る。素材や文字起こしを取得できない項目は `headline` を欠損のまま扱い、反応タグを見出しに見せかけない。
 - YouTubeの内部音声解析は、スクリーンショット不要時はHTTPS音声のみ、必要時はHTTPSの軽量映像・音声を選ぶ。Twitchの区間取得フォーマットは変更しない。
