@@ -94,10 +94,10 @@ def repository_hygiene() -> None:
     run_command("Repository hygiene", [sys.executable, "scripts/check_repository_hygiene.py"])
 
 
-def live_twitch() -> None:
+def live_youtube() -> None:
     run_command(
-        "Live Twitch tests",
-        [NODE, "node_modules/@playwright/test/cli.js", "test", "--config=playwright.twitch.config.js"],
+        "Live YouTube tests",
+        [NODE, "node_modules/@playwright/test/cli.js", "test", "--config=playwright.youtube.config.js"],
     )
 
 
@@ -123,7 +123,7 @@ STEPS: dict[str, Callable[[], None]] = {
     "public-reproducibility": public_reproducibility,
     "public-e2e": public_e2e,
     "hygiene": repository_hygiene,
-    "live-twitch": live_twitch,
+    "live-youtube": live_youtube,
     "live-production": live_production,
     "live-data": live_data,
 }
@@ -142,7 +142,7 @@ STANDARD_SEQUENCE = (
 GROUPS = {
     "all": STANDARD_SEQUENCE,
     "public-checks": ("public-build-validation", "public-reproducibility"),
-    "live": ("live-twitch", "live-production", "live-data"),
+    "live": ("live-youtube", "live-production", "live-data"),
 }
 
 

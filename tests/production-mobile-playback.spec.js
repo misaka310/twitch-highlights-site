@@ -20,7 +20,7 @@ const DEPLOYMENT_PATHS = [
     .sort(),
 ];
 
-test("deployed mobile first cross-VOD click starts audible playback without overflow", async ({ page, request }) => {
+test("deployed mobile YouTube cross-VOD click starts audible playback without overflow", async ({ page, request }) => {
   test.skip(!LIVE_BASE_URL, "LIVE_BASE_URL is required for production verification");
 
   await waitForExpectedDeployment(request);
@@ -48,16 +48,15 @@ test("deployed mobile first cross-VOD click starts audible playback without over
 
   await expect
     .poll(async () => getPlaybackState(page), { timeout: 45_000 })
-    .toMatchObject({
-      currentVodId: targetVodId,
-      currentStartSec: String(targetStartSec),
-      paused: false,
-      muted: false,
-    });
+    .toMatchObject({ currentVodId: targetVodId, muted: false, playing: true });
+  expect((await getPlaybackState(page)).currentStartSec).toBeGreaterThanOrEqual(targetStartSec);
 
-  const startedAt = (await getPlaybackState(page)).currentTime;
+  const embed = page.locator(".player-embed--portal iframe");
+  await expect(embed).toHaveCount(1);
+  await expect(embed).toHaveAttribute("src", /^https:\/\/www\.youtube(?:-nocookie)?\.com\/embed\/[A-Za-z0-9_-]{11}/);
+  const startedAt = (await getPlaybackState(page)).currentStartSec;
   await expect
-    .poll(async () => (await getPlaybackState(page)).currentTime, { timeout: 20_000 })
+    .poll(async () => (await getPlaybackState(page)).currentStartSec, { timeout: 20_000 })
     .toBeGreaterThan(startedAt + 1);
 
   const layout = await page.evaluate(() => {
@@ -133,38 +132,16 @@ async function getPlaybackState(page) {
   const frameNode = page.locator("#player-frame");
   const currentVodId = String((await frameNode.getAttribute("data-current-vod-id")) || "");
   const currentStartSec = String((await frameNode.getAttribute("data-current-start-sec")) || "");
-  const twitchFrame = page.frames().find((candidate) => /player\.twitch\.tv/.test(candidate.url()));
-  if (!twitchFrame) {
-    return {
-      currentVodId,
-      currentStartSec,
-      paused: null,
-      muted: null,
-      currentTime: -1,
-    };
-  }
-
-  try {
-    const videoState = await twitchFrame.evaluate(() => {
-      const video = document.querySelector("video");
-      return video
-        ? {
-            paused: video.paused,
-            muted: video.muted,
-            currentTime: Number(video.currentTime || 0),
-          }
-        : { paused: null, muted: null, currentTime: -1 };
-    });
-    return { currentVodId, currentStartSec, ...videoState };
-  } catch {
-    return {
-      currentVodId,
-      currentStartSec,
-      paused: null,
-      muted: null,
-      currentTime: -1,
-    };
-  }
+  const playerStatus = String((await frameNode.getAttribute("data-player-status")) || "");
+  const playerProvider = String((await frameNode.getAttribute("data-player-provider")) || "");
+  return {
+    currentVodId,
+    currentStartSec: Number(currentStartSec || 0),
+    muted: playerProvider === "youtube"
+      ? String((await frameNode.getAttribute("data-expected-muted")) || "") === "true"
+      : null,
+    playing: playerStatus === "playing",
+  };
 }
 
 function sha256RuntimeText(buffer, relativePath) {

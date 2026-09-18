@@ -96,8 +96,8 @@
 ## プレイヤー
 
 - Reactツリー内には寸法を決める `.player-frame` を残す。
-- Twitchプレイヤー本体はbody直下のポータルへ置き、枠と位置・幅・高さを同期する。
-- 初期表示ではiframeを即時表示し、Twitch SDKの準備後にinteractive playerへ移行できる。
+- YouTubeプレイヤー本体はbody直下のポータルへ置き、枠と位置・幅・高さを同期する。
+- 初期表示ではiframeを即時表示し、YouTube IFrame APIの準備後にinteractive playerへ移行できる。
 - 同一VODの操作はinteractive playerをseekする。
 - 別VODでは必要に応じてplayerを再生成する。
 - SDKを利用できない場合はiframe表示を維持する。
