@@ -44,12 +44,28 @@ test("renders production layout and preserves same-VOD playback behavior", async
 
   await expect(page.locator(".highlight-item")).toHaveCount(3);
   await expect(page.locator(".highlight-item img")).toHaveCount(3);
+  const indexResponse = await page.request.get("/data/vod_index.json");
+  expect(indexResponse.ok()).toBe(true);
+  const indexPayload = (await indexResponse.json()) as {
+    videos: Array<{ detail_path?: string; published_at?: string }>;
+  };
+  const firstVod = indexPayload.videos[0];
+  expect(firstVod?.detail_path).toBeTruthy();
+  const detailResponse = await page.request.get(firstVod.detail_path!);
+  expect(detailResponse.ok()).toBe(true);
+  const firstDetail = (await detailResponse.json()) as {
+    items: Array<{ screenshot_url?: string }>;
+  };
+  const expectedScreenshot = firstDetail.items[0]?.screenshot_url;
+  expect(expectedScreenshot).toBeTruthy();
   await expect(page.locator(".highlight-item img").first()).toHaveAttribute(
     "src",
-    "/data/segment-thumbnails/930HUhvRKHc/930HUhvRKHc_13550_13670.webp",
+    expectedScreenshot!,
   );
-  await expect(page.getByText("Showing 1-3 of 5", { exact: true })).toBeVisible();
-  await expect(page.getByRole("tab").first()).toContainText("9/15");
+  await expect(page.getByText(`Showing 1-3 of ${indexPayload.videos.length}`, { exact: true })).toBeVisible();
+  const publishedDate = firstVod.published_at?.match(/-(\d{2})-(\d{2})/);
+  expect(publishedDate).not.toBeNull();
+  await expect(page.getByRole("tab").first()).toContainText(`${Number(publishedDate![1])}/${Number(publishedDate![2])}`);
   await expect(page.getByRole("tab").first()).not.toContainText("YouTube");
   await expect(page.getByRole("tab").first()).not.toContainText("Twitch");
   await expect(page.locator(".highlight-item").first()).toHaveClass(/is-selected/);
