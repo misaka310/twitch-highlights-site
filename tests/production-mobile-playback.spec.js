@@ -47,6 +47,12 @@ test("deployed mobile YouTube cross-VOD click starts audible playback without ov
   await button.click();
 
   await expect
+    .poll(async () => (await getPlaybackState(page)).playerStatus, { timeout: 45_000 })
+    .toMatch(/^(playing|error)$/);
+  if ((await page.locator("#player-frame").getAttribute("data-player-status")) === "error" && await hasBotChallenge(page)) {
+    test.skip(true, "YouTube bot challenge on the hosted runner");
+  }
+  await expect
     .poll(async () => getPlaybackState(page), { timeout: 45_000 })
     .toMatchObject({ currentVodId: targetVodId, muted: false, playing: true });
   expect((await getPlaybackState(page)).currentStartSec).toBeGreaterThanOrEqual(targetStartSec);
@@ -137,11 +143,21 @@ async function getPlaybackState(page) {
   return {
     currentVodId,
     currentStartSec: Number(currentStartSec || 0),
+    playerStatus,
     muted: playerProvider === "youtube"
       ? String((await frameNode.getAttribute("data-expected-muted")) || "") === "true"
       : null,
     playing: playerStatus === "playing",
   };
+}
+
+async function hasBotChallenge(page) {
+  for (const candidate of page.frames()) {
+    if (!/youtube\.com\/embed\//.test(candidate.url())) continue;
+    const bodyText = await candidate.locator("body").innerText().catch(() => "");
+    if (/sign in to confirm you.?re not a bot/i.test(bodyText)) return true;
+  }
+  return false;
 }
 
 function sha256RuntimeText(buffer, relativePath) {
