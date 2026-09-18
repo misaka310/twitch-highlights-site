@@ -14,6 +14,25 @@ import oracle_youtube_job  # noqa: E402
 
 
 class OracleYoutubeJobTests(unittest.TestCase):
+    def test_resolves_first_archive_from_streams_page(self):
+        with patch.object(
+            oracle_youtube_job,
+            "_run_ytdlp",
+            return_value=SimpleNamespace(stdout="2a_ATYeOiAQ\n"),
+        ) as run_ytdlp:
+            result = oracle_youtube_job._resolve_latest_stream_url(
+                "https://www.youtube.com/@dotitube/streams",
+                "/home/ubuntu/yt-dlp",
+                "/home/ubuntu/.local/bin/deno",
+                "/home/ubuntu/youtube-cookies.txt",
+            )
+
+        self.assertEqual(result, "https://www.youtube.com/watch?v=2a_ATYeOiAQ")
+        command = run_ytdlp.call_args.args[0]
+        self.assertIn("--flat-playlist", command)
+        self.assertIn("--playlist-end", command)
+        self.assertEqual(command[-1], "https://www.youtube.com/@dotitube/streams")
+
     def test_reads_live_chat_artifact_created_by_successful_ytdlp(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             work_dir = Path(raw_dir)
