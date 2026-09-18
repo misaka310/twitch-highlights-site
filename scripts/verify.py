@@ -132,17 +132,17 @@ STANDARD_SEQUENCE = (
     "lint",
     "frontend-unit",
     "python",
-    "frontend-e2e",
     "public-build",
     "public-build-validation",
     "public-reproducibility",
-    "public-e2e",
     "hygiene",
 )
 GROUPS = {
     "all": STANDARD_SEQUENCE,
     "public-checks": ("public-build-validation", "public-reproducibility"),
-    "live": ("live-youtube", "live-production", "live-data"),
+    "browser": ("frontend-e2e", "public-e2e"),
+    "live": ("live-data",),
+    "live-browser": ("live-youtube", "live-production"),
 }
 
 

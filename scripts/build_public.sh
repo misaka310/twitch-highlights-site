@@ -61,6 +61,14 @@ if [ -d data/segment-thumbnails ]; then
   cp -R data/segment-thumbnails/. public/data/segment-thumbnails/
 fi
 
+if [ -d data/captions ]; then
+  mkdir -p public/data/captions
+  find data/captions -maxdepth 1 -type f -name "*.json" | while IFS= read -r src_json; do
+    [ -n "$src_json" ] || continue
+    copy_json_without_bom "$src_json" "public/data/captions/$(basename "$src_json")"
+  done
+fi
+
 node scripts/export-site-config.mjs public/site-config.json
 "${PYTHON_BIN}" scripts/apply_site_metadata.py public/index.html public/site-config.json
 

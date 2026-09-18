@@ -19,6 +19,7 @@ class PublicBuildTests(unittest.TestCase):
         self.assertIn("public/data/vod_index.json", script)
         self.assertIn("public/data/vods/", script)
         self.assertIn("public/data/segment-thumbnails", script)
+        self.assertIn("public/data/captions", script)
         self.assertNotIn("processed_vods.json public", script)
         self.assertNotIn("data/transcripts", script)
 

@@ -21,7 +21,7 @@ npm run setup
 npm run verify
 ```
 
-実YouTubeプレイヤーとデプロイ済みRenderへ影響する変更だけ、通常ゲート成功後に`npm run verify:live`も実行します。
+デプロイ済みデータへ影響する変更は、通常ゲート成功後に非GUIの `npm run verify:live` も実行します。Playwrightによるブラウザ操作E2Eは標準ゲートに含めず、明示許可がある場合だけ `npm run verify:browser` / `npm run verify:live:browser` を実行します。
 
 `check_repository_hygiene.py` は、診断サマリー、一時mutation workflow、ローカル成果物がGit追跡対象へ入っていないことを検証します。
 

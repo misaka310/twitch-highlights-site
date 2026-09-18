@@ -23,6 +23,13 @@ from urllib import error, request
 from update_vods import analyze_video_entry
 from vod_sources import ChatFetchResult
 from youtube_handoff import build_material_manifest, create_material_bundle, upload_bundle_to_url
+from youtube_captions import (
+    CAPTIONS_SOURCE_AUTOMATIC,
+    CAPTIONS_SOURCE_MANUAL,
+    convert_json3_file,
+    pick_best_json3_file,
+    write_captions_payload,
+)
 from youtube_sources import parse_youtube_video_id
 
 
@@ -291,6 +298,58 @@ def _download_chat_and_metadata(video_url: str, work_dir: Path, ytdlp: str, deno
     return _metadata(metadata_result, video_id, video_url), comments
 
 
+def _download_captions(
+    video_url: str,
+    work_dir: Path,
+    ytdlp: str,
+    deno: str,
+    cookies: str,
+) -> Path | None:
+    video_id = parse_youtube_video_id(video_url)
+    output_template = str(work_dir / "captions.%(ext)s")
+    attempts = (
+        ("--write-subs", CAPTIONS_SOURCE_MANUAL),
+        ("--write-auto-subs", CAPTIONS_SOURCE_AUTOMATIC),
+    )
+    for write_flag, source in attempts:
+        for stale in work_dir.glob("captions*.json3"):
+            stale.unlink(missing_ok=True)
+        try:
+            _run_ytdlp(
+                _yt_dlp_base(ytdlp, deno, cookies)
+                + [
+                    "--skip-download",
+                    "--ignore-no-formats",
+                    write_flag,
+                    "--sub-langs",
+                    "ja-orig,ja,ja-JP",
+                    "--sub-format",
+                    "json3",
+                    "-o",
+                    output_template,
+                    video_url,
+                ],
+                timeout=180,
+            )
+        except OracleJobFailure:
+            continue
+        subtitle_file, language_source = pick_best_json3_file(sorted(work_dir.glob("captions*.json3")))
+        if subtitle_file is None:
+            continue
+        payload = convert_json3_file(
+            video_id=video_id,
+            json3_path=subtitle_file,
+            language_source=language_source,
+            source=source,
+        )
+        if not payload.get("cues"):
+            continue
+        destination = work_dir / "captions.json"
+        write_captions_payload(destination, payload, expected_video_id=video_id)
+        return destination
+    return None
+
+
 def _cut_media(video_url: str, item: dict[str, Any], index: int, work_dir: Path, ytdlp: str, deno: str, cookies: str) -> tuple[Path, Path]:
     start = int(item["start_sec"])
     end = int(item["end_sec"])
@@ -444,6 +503,7 @@ def run(video_url: str) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix=f"job-{video_id}-", dir=work_root) as temp_dir:
         work_dir = Path(temp_dir)
         video, comments = _download_chat_and_metadata(video_url, work_dir, ytdlp, deno, cookies)
+        captions_file = _download_captions(video_url, work_dir, ytdlp, deno, cookies)
         analyzed, status = analyze_video_entry(
             video,
             dt.datetime.now().astimezone(),
@@ -460,7 +520,7 @@ def run(video_url: str) -> dict[str, Any]:
             media_files[f"clips/clip-{index}.webp"] = screenshot
         manifest = build_material_manifest(video, comments, items)
         bundle_path = work_dir / f"youtube-material-{video_id}.tar.gz"
-        create_material_bundle(bundle_path, manifest, media_files)
+        create_material_bundle(bundle_path, manifest, media_files, captions_file=captions_file)
         try:
             upload_bundle_to_url(bundle_path, upload_url)
         except (OSError, error.URLError, TimeoutError, RuntimeError) as exc:
@@ -470,6 +530,7 @@ def run(video_url: str) -> dict[str, Any]:
             "video_id": video_id,
             "chat_total": len(comments),
             "highlights": len(items),
+            "captions": bool(captions_file),
             "media_bytes": sum(path.stat().st_size for path in media_files.values()),
         }
 
@@ -504,6 +565,7 @@ def main() -> int:
             f" video_id={result['video_id']}"
             f" chat_offsets={result['chat_total']}"
             f" highlights={result['highlights']}"
+            f" captions={'yes' if result['captions'] else 'no'}"
             f" media_bytes={result['media_bytes']}"
         )
         return 0

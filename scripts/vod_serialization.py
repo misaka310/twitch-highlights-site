@@ -398,18 +398,22 @@ def collect_public_vod_id_set(videos: Iterable[dict[str, Any]]) -> set[str]:
 
 
 def cleanup_stale_segment_thumbnail_dirs(public_vod_ids: set[str]) -> list[str]:
-    if not SEGMENT_THUMBNAILS_DIR.exists():
-        return []
-
     removed_vod_ids: list[str] = []
-    for child in sorted(SEGMENT_THUMBNAILS_DIR.iterdir(), key=lambda path: path.name):
-        if not child.is_dir():
-            continue
-        vod_id = child.name.strip()
-        if not vod_id or vod_id in public_vod_ids:
-            continue
-        shutil.rmtree(child)
-        removed_vod_ids.append(vod_id)
+    if SEGMENT_THUMBNAILS_DIR.exists():
+        for child in sorted(SEGMENT_THUMBNAILS_DIR.iterdir(), key=lambda path: path.name):
+            if not child.is_dir():
+                continue
+            vod_id = child.name.strip()
+            if not vod_id or vod_id in public_vod_ids:
+                continue
+            shutil.rmtree(child)
+            removed_vod_ids.append(vod_id)
+
+    captions_dir = SEGMENT_THUMBNAILS_DIR.parent / "captions"
+    if captions_dir.is_dir():
+        for caption_path in captions_dir.glob("*.json"):
+            if caption_path.stem not in public_vod_ids:
+                caption_path.unlink()
     return removed_vod_ids
 
 

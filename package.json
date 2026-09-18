@@ -24,7 +24,9 @@
     "check:live": "python scripts/verify.py --step live-data",
     "check:repo-hygiene": "python scripts/verify.py --step hygiene",
     "verify": "python scripts/verify.py",
+    "verify:browser": "python scripts/verify.py --step browser",
     "verify:live": "python scripts/verify.py --step live",
+    "verify:live:browser": "python scripts/verify.py --step live-browser",
     "test:e2e": "python scripts/verify.py --step frontend-e2e"
   },
   "keywords": [],
