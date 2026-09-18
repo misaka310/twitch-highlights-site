@@ -16,13 +16,15 @@ npm run setup
 npm run verify
 ```
 
-このゲートはfrontendのtypecheck、lint、単体テスト、Pythonテスト、frontend E2E、`public/`生成・内容検証・同一環境での再生成一致、生成済み`public/`の静的配信E2E、repository hygieneを含む。実YouTubeやデプロイ済みRenderへ依存する検証は含めない。
+このゲートはfrontendのtypecheck、lint、単体テスト、Pythonテスト、`public/`生成・内容検証・同一環境での再生成一致、repository hygieneを含む。ブラウザ操作を伴うPlaywright E2Eは標準ゲートに含めず、ユーザーの明示許可がある場合だけ `npm run verify:browser` で実行する。実YouTubeやデプロイ済みRenderへ依存する検証は含めない。
 
-YouTubeプレイヤーまたは公開経路へ影響する変更は、通常ゲート成功後かつデプロイ完了後に次を独立実行する。
+YouTubeプレイヤーまたは公開経路へ影響する変更は、通常ゲート成功後かつデプロイ完了後に次の非GUIデータ検証を独立実行する。
 
 ```text
 npm run verify:live
 ```
+
+実YouTube/Renderをブラウザ操作で検証する場合は、ユーザーの明示許可があるときだけ `npm run verify:live:browser` を実行する。
 
 本番URLは`config/site.json`の`site.base_url`から解決し、`LIVE_BASE_URL`が指定された場合だけ上書きする。HTMLは配信基盤が除去する空行を無視して照合し、JavaScript・CSS・設定ファイルは内容hashを一致させる。検証対象URLが空の場合はskipせず設定エラーとして失敗させる。
 

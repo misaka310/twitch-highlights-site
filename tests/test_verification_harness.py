@@ -13,6 +13,9 @@ class VerificationHarnessTests(unittest.TestCase):
 
         self.assertEqual(scripts["setup"], "python scripts/setup_dependencies.py")
         self.assertEqual(scripts["verify"], "python scripts/verify.py")
+        self.assertEqual(scripts["verify:browser"], "python scripts/verify.py --step browser")
+        self.assertEqual(scripts["verify:live"], "python scripts/verify.py --step live")
+        self.assertEqual(scripts["verify:live:browser"], "python scripts/verify.py --step live-browser")
         self.assertNotIn("npm run typecheck:frontend &&", scripts["verify"])
 
     def test_setup_harness_uses_an_explicit_ignored_npm_cache(self):
@@ -41,6 +44,15 @@ class VerificationHarnessTests(unittest.TestCase):
         )
         for marker in required_markers:
             self.assertIn(marker, harness)
+
+    def test_standard_verification_does_not_auto_run_browser_e2e(self):
+        harness = (ROOT / "scripts" / "verify.py").read_text(encoding="utf-8")
+        standard = harness.split("STANDARD_SEQUENCE = (", 1)[1].split(")", 1)[0]
+        self.assertNotIn('"frontend-e2e"', standard)
+        self.assertNotIn('"public-e2e"', standard)
+        self.assertIn('"browser": ("frontend-e2e", "public-e2e")', harness)
+        self.assertIn('"live": ("live-data",)', harness)
+        self.assertIn('"live-browser": ("live-youtube", "live-production")', harness)
 
 
 if __name__ == "__main__":

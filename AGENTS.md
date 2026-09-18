@@ -50,7 +50,7 @@ npm run setup
 npm run verify
 ```
 
-`verify` はfrontendのtypecheck、lint、Node環境の単体テスト、Pythonテスト、frontend E2E、`public/`生成・内容検証・再現性検証、生成物E2E、repository hygieneを順に実行する。検証中に依存関係を自動インストールしない。
+`verify` はfrontendのtypecheck、lint、Node環境の単体テスト、Pythonテスト、`public/`生成・内容検証・再現性検証、repository hygieneを順に実行する。ブラウザ操作を伴うE2Eは含めない。明示許可がある場合だけ `npm run verify:browser` または `npm run verify:live:browser` を別途実行する。検証中に依存関係を自動インストールしない。
 
 Twitch実サービスまたはデプロイ済みRenderへ影響する変更は、通常ゲート成功後とデプロイ完了後に独立して次を実行する。
 
