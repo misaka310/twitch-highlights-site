@@ -18,7 +18,7 @@
     "test:frontend:e2e": "python scripts/verify.py --step frontend-e2e",
     "test:python": "python scripts/verify.py --step python",
     "test:public": "python scripts/verify.py --step public-e2e",
-    "test:live:twitch": "python scripts/verify.py --step live-twitch",
+    "test:live:youtube": "python scripts/verify.py --step live-youtube",
     "test:live:production": "python scripts/verify.py --step live-production",
     "check:public": "python scripts/verify.py --step public-checks",
     "check:live": "python scripts/verify.py --step live-data",

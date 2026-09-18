@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       run_live:
-        description: Run real Twitch and deployed production verification
+        description: Run real YouTube and deployed production verification
         required: false
         type: boolean
         default: false
@@ -110,7 +110,7 @@ jobs:
       - name: Build production publish directory
         run: npm run build:public
 
-      - name: Verify real Twitch and deployed production
+      - name: Verify real YouTube and deployed production
         run: npm run verify:live
 
       - name: Record successful production verification
