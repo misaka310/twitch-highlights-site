@@ -117,6 +117,10 @@ class CoreDataContractTests(unittest.TestCase):
             "WGTrmrSvZH0",
             uv.infer_vod_id_from_segment_id("WGTrmrSvZH0_11900_11980"),
         )
+        self.assertEqual(
+            "2a_ATYeOiAQ",
+            uv.infer_vod_id_from_segment_id("2a_ATYeOiAQ_4770_4850"),
+        )
         self.assertEqual("2873115795", uv.infer_vod_id_from_segment_id("2873115795_10_20"))
         self.assertEqual("", uv.infer_vod_id_from_segment_id("../outside_10_20"))
 
