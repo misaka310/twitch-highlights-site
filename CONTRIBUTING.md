@@ -21,7 +21,7 @@ npm run setup
 npm run verify
 ```
 
-本物のTwitchとデプロイ済みRenderへ影響する変更だけ、通常ゲート成功後に`npm run verify:live`も実行します。
+実YouTubeプレイヤーとデプロイ済みRenderへ影響する変更だけ、通常ゲート成功後に`npm run verify:live`も実行します。
 
 `check_repository_hygiene.py` は、診断サマリー、一時mutation workflow、ローカル成果物がGit追跡対象へ入っていないことを検証します。
 
