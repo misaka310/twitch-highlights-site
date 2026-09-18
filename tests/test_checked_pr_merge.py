@@ -67,11 +67,13 @@ class CheckedPullRequestMergeTests(unittest.TestCase):
         ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
         hygiene = (ROOT / ".github" / "workflows" / "repository-hygiene.yml").read_text(encoding="utf-8")
         update = (ROOT / ".github" / "workflows" / "update-vods.yml").read_text(encoding="utf-8")
+        youtube = (ROOT / ".github" / "workflows" / "process-youtube-material.yml").read_text(encoding="utf-8")
 
         self.assertIn("run_live:", ci)
         self.assertIn("inputs.run_live == true", ci)
         self.assertIn("workflow_dispatch:", hygiene)
         self.assertIn("--workflow-mode trusted-dispatch", update)
+        self.assertIn("--workflow-mode trusted-dispatch", youtube)
 
     def test_list_dispatched_run_ids_ignores_other_workflow_run_ids(self):
         # `gh run list --workflow <file>` can transiently include a run from a
