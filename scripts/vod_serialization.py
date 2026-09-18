@@ -287,7 +287,10 @@ def infer_vod_id_from_segment_id(segment_id: str) -> str:
     value = str(segment_id or "").strip()
     if not value:
         return ""
-    head, _, _ = value.partition("_")
+    match = re.fullmatch(r"(.+)_([0-9]+)_([0-9]+)", value)
+    if not match:
+        return ""
+    head = match.group(1)
     # Twitch IDs are numeric, while YouTube IDs are alphanumeric and may
     # contain '-' or '_'. Keep the whitelist tight because this value is also
     # used to resolve a local thumbnail path.
