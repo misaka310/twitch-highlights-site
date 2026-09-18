@@ -142,5 +142,5 @@ jobs:
             --title "Update YouTube highlight data" \
             --body "Publish Oracle-selected YouTube material after public-readiness verification." \
             --expected-base-sha "$expected_main_sha" \
-            --workflow-mode pull-request \
+            --workflow-mode trusted-dispatch \
             --merge-attempts 6
