@@ -13,6 +13,21 @@ function envOrConfig(env, key, value) {
   return asString(env[key]) || asString(value);
 }
 
+function optionalHttpUrl(value, label) {
+  const raw = asString(value);
+  if (!raw) return "";
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error(label + " must be an absolute HTTP(S) URL");
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    throw new Error(label + " must use HTTP(S)");
+  }
+  return parsed.toString();
+}
+
 export function loadSiteConfig(rootDir, env = process.env) {
   const configPath = join(rootDir, "config", "site.json");
   const source = JSON.parse(readFileSync(configPath, "utf8"));
@@ -33,6 +48,7 @@ export function loadSiteConfig(rootDir, env = process.env) {
         "YouTubeライブアーカイブのコメント量から見どころを表示する非公式サイトです。",
       base_url: envOrConfig(env, "SITE_BASE_URL", site.base_url).replace(/\/+$/, ""),
       language: envOrConfig(env, "SITE_LANGUAGE", site.language) || "ja",
+      feedback_url: optionalHttpUrl(envOrConfig(env, "SITE_FEEDBACK_URL", site.feedback_url), "SITE_FEEDBACK_URL"),
       analytics: {
         goatcounter_code: envOrConfig(env, "GOATCOUNTER_CODE", analytics.goatcounter_code),
       },

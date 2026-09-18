@@ -1,5 +1,6 @@
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -8,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import update_vods as uv
+import vod_serialization as vs
 
 
 VIDEO_FIELDS = {
@@ -111,6 +113,22 @@ class CoreDataContractTests(unittest.TestCase):
         ]
         with_bom = [str(path.relative_to(ROOT)) for path in paths if path.read_bytes().startswith(b"\xef\xbb\xbf")]
         self.assertEqual(with_bom, [])
+
+    def test_cleanup_removes_captions_outside_public_retention(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            original = vs.SEGMENT_THUMBNAILS_DIR
+            try:
+                vs.SEGMENT_THUMBNAILS_DIR = root / "segment-thumbnails"
+                captions = root / "captions"
+                captions.mkdir()
+                (captions / "keep.json").write_text("{}", encoding="utf-8")
+                (captions / "stale.json").write_text("{}", encoding="utf-8")
+                vs.cleanup_stale_segment_thumbnail_dirs({"keep"})
+                self.assertTrue((captions / "keep.json").is_file())
+                self.assertFalse((captions / "stale.json").exists())
+            finally:
+                vs.SEGMENT_THUMBNAILS_DIR = original
 
     def test_youtube_ids_resolve_segment_thumbnail_paths(self):
         self.assertEqual(

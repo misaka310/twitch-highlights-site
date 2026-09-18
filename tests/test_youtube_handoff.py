@@ -54,14 +54,31 @@ class YoutubeHandoffTests(unittest.TestCase):
             screenshot = root / "screenshot.webp"
             audio.write_bytes(b"wav")
             screenshot.write_bytes(b"webp")
+            captions = root / "captions.json"
+            captions.write_text(
+                json.dumps(
+                    {
+                        "video_id": "WGTrmrSvZH0",
+                        "source": "youtube_automatic_captions",
+                        "language": "ja",
+                        "language_source": "ja",
+                        "fetched_at": "2026-09-19T00:00:00Z",
+                        "cues": [{"start_sec": 0, "end_sec": 1, "text": "字幕"}],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
             bundle = root / "material.tar.gz"
             create_material_bundle(
                 bundle,
                 self._manifest(),
                 {"clips/clip-0.wav": audio, "clips/clip-0.webp": screenshot},
+                captions_file=captions,
             )
             extracted = extract_material_bundle(bundle, root / "out")
             self.assertEqual(extracted["video"]["vod_id"], "WGTrmrSvZH0")
+            self.assertTrue((root / "out" / "captions.json").is_file())
             self.assertTrue((root / "out" / "clips" / "clip-0.wav").is_file())
             self.assertTrue((root / "out" / "clips" / "clip-0.webp").is_file())
 
@@ -84,6 +101,7 @@ class YoutubeHandoffTests(unittest.TestCase):
         self.assertNotIn("yt-dlp", workflow)
         self.assertNotIn("YOUTUBE_ORACLE_BUNDLE_DELETE_URL", workflow)
         self.assertIn("repository_dispatch", workflow)
+        self.assertIn("data/captions", workflow)
         self.assertIn("OnCalendar=*-*-* 06:07:00 Asia/Tokyo", timer)
         self.assertIn("EnvironmentFile=-/etc/youtube-highlight/youtube.env", service)
 

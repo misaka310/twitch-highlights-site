@@ -101,5 +101,56 @@ class OracleYoutubeJobTests(unittest.TestCase):
         self.assertEqual(comments, [{"content_offset_seconds": 1.234}])
 
 
+    def test_downloads_public_youtube_captions_as_optional_json(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            work_dir = Path(raw_dir)
+
+            def fake_ytdlp(command, **_kwargs):
+                if "--write-subs" in command:
+                    (work_dir / "captions.ja.json3").write_text(
+                        json.dumps(
+                            {
+                                "events": [
+                                    {
+                                        "tStartMs": 1000,
+                                        "dDurationMs": 2000,
+                                        "segs": [{"utf8": "テスト字幕"}],
+                                    }
+                                ]
+                            },
+                            ensure_ascii=False,
+                        ),
+                        encoding="utf-8",
+                    )
+                return SimpleNamespace(stdout="")
+
+            with patch.object(oracle_youtube_job, "_run_ytdlp", side_effect=fake_ytdlp):
+                captions_path = oracle_youtube_job._download_captions(
+                    "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+                    work_dir,
+                    "/home/ubuntu/yt-dlp",
+                    "/home/ubuntu/.local/bin/deno",
+                    "/home/ubuntu/youtube-cookies.txt",
+                )
+
+            self.assertIsNotNone(captions_path)
+            payload = json.loads(Path(captions_path).read_text(encoding="utf-8"))
+            self.assertEqual(payload["source"], "youtube_manual_captions")
+            self.assertEqual(payload["cues"][0]["text"], "テスト字幕")
+
+    def test_missing_public_captions_is_non_fatal(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            work_dir = Path(raw_dir)
+            with patch.object(oracle_youtube_job, "_run_ytdlp", return_value=SimpleNamespace(stdout="")):
+                captions_path = oracle_youtube_job._download_captions(
+                    "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+                    work_dir,
+                    "/home/ubuntu/yt-dlp",
+                    "/home/ubuntu/.local/bin/deno",
+                    "/home/ubuntu/youtube-cookies.txt",
+                )
+        self.assertIsNone(captions_path)
+
+
 if __name__ == "__main__":
     unittest.main()

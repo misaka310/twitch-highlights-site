@@ -8,6 +8,7 @@ import {
   smoothBuckets,
 } from "../../src/lib/activity-geometry.js";
 import { formatChatVolume, formatClock, localizeReason } from "../../src/lib/formatters.js";
+import { resolveCaptionWindow } from "../../src/lib/captions.js";
 import { loadVodPage } from "../../src/hooks/use-vod-page.js";
 import {
   normalizeDataPath,
@@ -141,6 +142,23 @@ test("keeps display formatting and reason localization", () => {
     formatChatVolume({ vod_id: "1", title: "", published_at: "", chat_total: 1234, comments_per_hour: 56.7 }),
     "1,234件 / 時間あたり約57件",
   );
+});
+
+test("resolves previous current and next YouTube caption cues by playback position", () => {
+  const cues = [
+    { start_sec: 0, end_sec: 4.9, text: "前の字幕" },
+    { start_sec: 5, end_sec: 9.9, text: "今の字幕" },
+    { start_sec: 10, end_sec: 14.9, text: "次の字幕" },
+  ];
+  const active = resolveCaptionWindow(cues, 7);
+  assert.equal(active.previous?.text, "前の字幕");
+  assert.equal(active.current?.text, "今の字幕");
+  assert.equal(active.next?.text, "次の字幕");
+
+  const gap = resolveCaptionWindow(cues, 9.95);
+  assert.equal(gap.previous?.text, "今の字幕");
+  assert.equal(gap.current, null);
+  assert.equal(gap.next?.text, "次の字幕");
 });
 
 test("creates responsive activity geometry without reading browser globals", () => {
