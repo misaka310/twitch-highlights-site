@@ -63,6 +63,23 @@ class CheckedPullRequestMergeTests(unittest.TestCase):
         )
         self.assertEqual(parsed.workflow_mode, "trusted-dispatch")
 
+    def test_existing_pr_fallback_matches_head_ref_without_recreating(self):
+        with mock.patch.object(
+            checked_pr_merge,
+            "_json",
+            side_effect=[[], [{"number": 149, "headRefName": "release/youtube-captions-feedback"}]],
+        ), mock.patch.object(checked_pr_merge, "_stdout") as create:
+            number = checked_pr_merge._ensure_pull_request(
+                "owner/repo",
+                "release/youtube-captions-feedback",
+                "main",
+                "title",
+                "body",
+            )
+
+        self.assertEqual(number, 149)
+        create.assert_not_called()
+
     def test_trusted_automation_workflows_are_dispatchable_without_live_checks(self):
         ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
         hygiene = (ROOT / ".github" / "workflows" / "repository-hygiene.yml").read_text(encoding="utf-8")

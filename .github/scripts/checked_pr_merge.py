@@ -78,6 +78,31 @@ def _ensure_pull_request(repo: str, branch: str, base: str, title: str, body: st
     if isinstance(result, list) and result:
         return int(result[0]["number"])
 
+    # GitHub CLI can occasionally return an empty exact --head query inside
+    # Actions even when the PR already exists. Fall back to an open-PR scan
+    # and match the immutable head ref name before attempting creation.
+    fallback = _json(
+        [
+            "gh",
+            "pr",
+            "list",
+            "--repo",
+            repo,
+            "--base",
+            base,
+            "--state",
+            "open",
+            "--limit",
+            "100",
+            "--json",
+            "number,headRefName",
+        ]
+    )
+    if isinstance(fallback, list):
+        for item in fallback:
+            if isinstance(item, Mapping) and str(item.get("headRefName") or "") == branch:
+                return int(item["number"])
+
     url = _stdout(
         [
             "gh",
