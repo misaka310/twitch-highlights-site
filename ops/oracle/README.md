@@ -52,6 +52,9 @@ Create `/etc/youtube-highlight/youtube.env` with mode `600`. Use real values
 only on the VM; never commit this file:
 
 ```text
+# Resolve the newest archive from this channel tab on every timer run.
+YOUTUBE_ORACLE_STREAMS_URL=https://www.youtube.com/@dotitube/streams
+# Optional one-video fallback when streams discovery is intentionally disabled.
 YOUTUBE_ORACLE_VIDEO_URL=https://www.youtube.com/watch?v=...
 YOUTUBE_ORACLE_BUNDLE_UPLOAD_URL=https://objectstorage.../par/...
 YOUTUBE_ORACLE_GITHUB_TOKEN=...
@@ -67,6 +70,12 @@ fixed, narrowly scoped object; rotate both PARs before they expire. OCI
 pre-authenticated requests cannot delete objects, so configure an OCI
 lifecycle rule that deletes the temporary object within one day. The GitHub token must be limited to this repository's
 `repository_dispatch` operation.
+
+When `YOUTUBE_ORACLE_STREAMS_URL` is set, the timer resolves the first archive
+from that channel's `/streams` tab and processes it. The last successfully
+handed-off video ID is kept in the state file, so a day without a new stream
+exits cleanly without re-running Whisper preparation. A fixed
+`YOUTUBE_ORACLE_VIDEO_URL` remains supported as a fallback.
 
 Install and enable the timer:
 

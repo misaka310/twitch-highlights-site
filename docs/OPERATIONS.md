@@ -53,7 +53,7 @@ $env:YOUTUBE_ORACLE_SCRIPT_PATH = '<ORACLE_SCRIPT_PATH>'
 python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGTrmrSvZH0'
 ```
 
-- Oracleの`ops/oracle/youtube-highlight.timer`は毎日**06:07 JST**に起動し、Actionsの`process-youtube-material.yml`へ`repository_dispatch`を送る。GitHub ActionsのcronはYouTube取得経路に使わない。
+- Oracleの`ops/oracle/youtube-highlight.timer`は毎日**06:07 JST**に起動し、`YOUTUBE_ORACLE_STREAMS_URL`で指定したYouTubeチャンネルの`/streams`先頭から最新アーカイブを解決して処理し、Actionsの`process-youtube-material.yml`へ`repository_dispatch`を送る。新しい配信がない日は前回処理済みIDを見て正常終了する。GitHub ActionsのcronはYouTube取得経路に使わない。
 - yt-dlpがライブチャットJSONを生成した後に付随形式のHTTP 403で終了する場合は、生成済みJSONが非空であることを検証して処理を継続する。JSONがない、または空の場合は失敗として扱う。
 - 既存`.github/workflows/update-vods.yml`のschedule宣言は互換検査のため残すが、現在の`if: github.event_name == 'workflow_dispatch'`による停止を無条件に解除しない。
 - GitHub側の混雑により実際の開始・完了が遅れることはある。画面の「次回更新予定」は処理開始時刻ではなく、公開反映目標の09:00 JSTを表示する。
@@ -63,6 +63,7 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 - YouTube更新PRの検証はActions botが作成したPRでも停止しないよう、`Frontend CI`、`Repository hygiene`、`Repo Launch Doctor`を`workflow_dispatch`で対象ブランチへ実行してから自動マージする。PRの`pull_request`イベント待ちは使わない（GitHub側の承認待ち`action_required`になり得るため）。
 - YouTubeでWhisperの内容を確定できない区間は `headline` 欠損のまま扱い、反応タグや既存の `reason` を公開UIの表示見出しへフォールバックしない。既存Twitchデータは互換維持のため従来の `reason` 表示を許容する。
 - YouTube更新では、タグを見出しへ変換しない。公開用の `headline` は、Oracleから取得した見どころ区間の音声・映像を後段のWhisper/見出し生成へ渡して作る。素材や文字起こしを取得できない項目は `headline` を欠損のまま扱い、反応タグを見出しに見せかけない。
+- Oracleの定期実行は`YOUTUBE_ORACLE_STREAMS_URL=https://www.youtube.com/@dotitube/streams`を優先し、固定の`YOUTUBE_ORACLE_VIDEO_URL`へ戻さない。Cookieは従来どおりOracle上の`$HOME/youtube-cookies.txt`だけを使う。
 - YouTubeの内部音声解析は、スクリーンショット不要時はHTTPS音声のみ、必要時はHTTPSの軽量映像・音声を選ぶ。Twitchの区間取得フォーマットは変更しない。
 - 公開準備チェックは、生成済み `headline` の品質と見どころサムネイルの存在を検証する。見出しが欠損する場合や、生成済み見出しが品質基準を満たさない場合は従来どおり失敗させる。
 

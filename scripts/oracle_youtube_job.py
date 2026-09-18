@@ -100,6 +100,62 @@ def _yt_dlp_base(ytdlp: str, deno: str, cookies: str) -> list[str]:
     ]
 
 
+def _resolve_latest_stream_url(streams_url: str, ytdlp: str, deno: str, cookies: str) -> str:
+    completed = _run_ytdlp(
+        [
+            ytdlp,
+            "--js-runtimes",
+            f"deno:{deno}",
+            "--remote-components",
+            "ejs:github",
+            "--cookies",
+            cookies,
+            "--flat-playlist",
+            "--playlist-end",
+            "1",
+            "--print",
+            "%(id)s",
+            "--quiet",
+            "--no-warnings",
+            streams_url,
+        ],
+        timeout=120,
+    )
+    for line in completed.stdout.splitlines():
+        candidate = line.strip()
+        try:
+            video_id = parse_youtube_video_id(candidate)
+        except ValueError:
+            continue
+        return f"https://www.youtube.com/watch?v={video_id}"
+    raise OracleJobFailure("yt_dlp_failure", "YouTube streams page returned no archive")
+
+
+def _state_path() -> Path:
+    return Path(_env("YOUTUBE_ORACLE_STATE_PATH", "/var/lib/youtube-highlight/state.json"))
+
+
+def _read_state() -> dict[str, Any]:
+    path = _state_path()
+    try:
+        value = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return value if isinstance(value, dict) else {}
+
+
+def _write_state(state: dict[str, Any]) -> None:
+    path = _state_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(state, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _mark_processed(video_id: str) -> None:
+    state = _read_state()
+    state["last_processed_video_id"] = video_id
+    _write_state(state)
+
+
 def _find_offset(value: Any) -> int | None:
     if isinstance(value, dict):
         if "videoOffsetTimeMsec" in value:
@@ -342,23 +398,20 @@ def _dispatch_github(video_id: str) -> None:
 
 def _notify(category: str | None) -> None:
     webhook = _env("DISCORD_WEBHOOK_URL")
-    state_path = Path(_env("YOUTUBE_ORACLE_STATE_PATH", "/var/lib/youtube-highlight/state.json"))
-    try:
-        state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
-    except (OSError, json.JSONDecodeError):
-        state = {}
+    state = _read_state()
     previous = str(state.get("failure_category") or "")
     if category:
         should_send = bool(webhook) and (previous != category or not bool(state.get("failure_notified")))
         if should_send:
             _send_discord(webhook, f"YouTube取得に失敗しました\ncategory: {category}\nprovider: youtube")
-        state = {"failure_category": category, "failure_notified": bool(webhook)}
+        state["failure_category"] = category
+        state["failure_notified"] = bool(webhook)
     elif previous:
         if webhook:
             _send_discord(webhook, "YouTube取得が復旧しました\nprovider: youtube")
-        state = {"failure_category": "", "failure_notified": False}
-    state_path.parent.mkdir(parents=True, exist_ok=True)
-    state_path.write_text(json.dumps(state, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+        state["failure_category"] = ""
+        state["failure_notified"] = False
+    _write_state(state)
 
 
 def _send_discord(webhook: str, content: str) -> None:
@@ -423,12 +476,28 @@ def run(video_url: str) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Acquire one YouTube archive on Oracle and hand off selected material.")
+    parser.add_argument("--streams-url", default=_env("YOUTUBE_ORACLE_STREAMS_URL"))
     parser.add_argument("--video-url", default=_env("YOUTUBE_ORACLE_VIDEO_URL"))
     args = parser.parse_args()
-    if not args.video_url:
-        raise SystemExit("YOUTUBE_ORACLE_VIDEO_URL or --video-url is required")
     try:
-        result = run(args.video_url)
+        ytdlp = _env("YOUTUBE_ORACLE_YTDLP_PATH", DEFAULT_YTDLP)
+        deno = _env("YOUTUBE_ORACLE_DENO_PATH", DEFAULT_DENO)
+        cookies = _env("YOUTUBE_ORACLE_COOKIES_PATH", DEFAULT_COOKIES)
+        if args.streams_url:
+            if not Path(cookies).is_file():
+                raise OracleJobFailure("cookie_authentication_failure", "YouTube cookies file is missing")
+            video_url = _resolve_latest_stream_url(args.streams_url, ytdlp, deno, cookies)
+        else:
+            video_url = args.video_url
+        if not video_url:
+            raise OracleJobFailure("handoff_configuration", "YOUTUBE_ORACLE_STREAMS_URL or video URL is required")
+        video_id = parse_youtube_video_id(video_url)
+        if _read_state().get("last_processed_video_id") == video_id:
+            _notify(None)
+            print(f"oracle YouTube job skipped: video_id={video_id} reason=already_processed")
+            return 0
+        result = run(video_url)
+        _mark_processed(result["video_id"])
         _notify(None)
         print(
             "oracle YouTube job complete:"
