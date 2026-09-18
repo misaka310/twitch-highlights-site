@@ -8,6 +8,7 @@ highlight/output pipeline and runs Whisper locally in Actions.
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import sys
 import tempfile
@@ -28,6 +29,7 @@ from vod_sources import ChatFetchResult
 from vod_serialization import filter_youtube_videos
 from youtube_enrichment import enrich_youtube_video
 from youtube_handoff import extract_material_bundle
+from youtube_captions import write_captions_payload
 
 
 def _interval_key(start_sec: Any, end_sec: Any) -> tuple[int, int]:
@@ -98,6 +100,17 @@ def process_bundle(bundle_path: Path, *, now: datetime | None = None) -> dict[st
             if item.get("vod_id")
         }
         cached_by_vod_id[enriched["vod_id"]] = enriched
+        captions_written = False
+        captions_source_path = root / "captions.json"
+        if captions_source_path.is_file():
+            captions_payload = json.loads(captions_source_path.read_text(encoding="utf-8"))
+            captions_destination = DATA_DIR / "captions" / f"{enriched['vod_id']}.json"
+            write_captions_payload(
+                captions_destination,
+                captions_payload,
+                expected_video_id=enriched["vod_id"],
+            )
+            captions_written = True
         write_processed_cache(cached_by_vod_id.values(), active_now)
         write_public_data(filter_youtube_videos(cached_by_vod_id.values()), active_now)
         result = {
@@ -107,6 +120,7 @@ def process_bundle(bundle_path: Path, *, now: datetime | None = None) -> dict[st
             "transcribed": getattr(summary, "transcribed", 0),
             "headlines": getattr(summary, "headlines", 0),
             "screenshots": len(manifest["media"]),
+            "captions": captions_written,
             "output": str(OUT_PATH),
         }
         print(
@@ -117,6 +131,7 @@ def process_bundle(bundle_path: Path, *, now: datetime | None = None) -> dict[st
             f" transcribed={result['transcribed']}"
             f" headlines={result['headlines']}"
             f" screenshots={result['screenshots']}"
+            f" captions={'yes' if result['captions'] else 'no'}"
         )
         return result
 

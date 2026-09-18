@@ -54,6 +54,7 @@ export type RuntimeSiteConfig = {
     description?: string;
     base_url?: string;
     language?: string;
+    feedback_url?: string;
     analytics?: {
       goatcounter_code?: string;
     };

@@ -1,4 +1,4 @@
-# Twitch Highlights Site
+# dotitao moments
 
 ## 公開サイト
 
@@ -26,6 +26,8 @@ VODのコメント量から見どころを抽出し、閲覧用の静的サイ�
 - 見どころを1クリックで音声付き再生
 - 同一VODでのプレイヤー再利用とseek
 - コメント量の盛り上がりマップ
+- YouTube公開字幕の再生同期表示（前 / 今 / 次）
+- 外部の要望・誤り報告フォームへの任意リンク
 - デスクトップ・スマートフォン対応
 - 静的公開用`public/`の再現可能な生成
 - GitHub Actionsによる定期データ更新
@@ -68,6 +70,7 @@ public/                      公開ビルドの生成先
 - `SITE_DESCRIPTION`
 - `SITE_BASE_URL`
 - `SITE_LANGUAGE`
+- `SITE_FEEDBACK_URL`（例: 自分のお題箱URL。未設定ならリンク非表示）
 - `GOATCOUNTER_CODE`
 
 ## ローカル表示

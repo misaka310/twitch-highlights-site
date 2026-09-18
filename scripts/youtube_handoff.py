@@ -19,7 +19,7 @@ from urllib import request
 MATERIAL_BUNDLE_VERSION = 1
 _VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 _CLIP_MEMBER_RE = re.compile(r"^clips/clip-(\d+)\.(wav|webp)$")
-_SAFE_MEMBER_RE = re.compile(r"^(manifest\.json|clips/clip-\d+\.(wav|webp))$")
+_SAFE_MEMBER_RE = re.compile(r"^(manifest\.json|captions\.json|clips/clip-\d+\.(wav|webp))$")
 _FORBIDDEN_KEYS = {
     "author",
     "author_name",
@@ -214,8 +214,10 @@ def create_material_bundle(
     bundle_path: Path,
     manifest: Mapping[str, Any],
     media_files: Mapping[str, Path],
+    *,
+    captions_file: Path | None = None,
 ) -> Path:
-    """Create a gzip tar bundle containing only manifest and selected clips."""
+    """Create a gzip tar bundle containing validated material and optional public captions."""
 
     safe_manifest = validate_material_manifest(manifest)
     expected_members = {"manifest.json"}
@@ -228,6 +230,16 @@ def create_material_bundle(
         if not path.is_file() or path.stat().st_size <= 0:
             raise ValueError(f"material bundle media file is missing: {name}")
 
+    safe_captions_path: Path | None = None
+    if captions_file is not None:
+        from youtube_captions import validate_captions_payload
+
+        safe_captions_path = Path(captions_file)
+        if not safe_captions_path.is_file() or safe_captions_path.stat().st_size <= 0:
+            raise ValueError("captions file is missing")
+        captions_payload = json.loads(safe_captions_path.read_text(encoding="utf-8"))
+        validate_captions_payload(captions_payload, expected_video_id=safe_manifest["video"]["vod_id"])
+
     bundle_path = Path(bundle_path)
     bundle_path.parent.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(safe_manifest, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -236,6 +248,13 @@ def create_material_bundle(
         manifest_info.size = len(payload)
         manifest_info.mode = 0o600
         archive.addfile(manifest_info, fileobj=_BytesReader(payload))
+        if safe_captions_path is not None:
+            captions_info = archive.gettarinfo(str(safe_captions_path), arcname="captions.json")
+            captions_info.mode = 0o600
+            captions_info.uid = captions_info.gid = 0
+            captions_info.uname = captions_info.gname = ""
+            with safe_captions_path.open("rb") as source:
+                archive.addfile(captions_info, source)
         for name in sorted(provided):
             path = provided[name]
             info = archive.gettarinfo(str(path), arcname=name)
@@ -282,6 +301,12 @@ def extract_material_bundle(bundle_path: Path, output_dir: Path) -> dict[str, An
 
     manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
     safe_manifest = validate_material_manifest(manifest)
+    captions_path = output_dir / "captions.json"
+    if captions_path.is_file():
+        from youtube_captions import validate_captions_payload
+
+        captions_payload = json.loads(captions_path.read_text(encoding="utf-8"))
+        validate_captions_payload(captions_payload, expected_video_id=safe_manifest["video"]["vod_id"])
     for media in safe_manifest["media"]:
         for key in ("audio_path", "screenshot_path"):
             path = output_dir / media[key]

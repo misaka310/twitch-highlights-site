@@ -16,13 +16,15 @@ npm run setup
 npm run verify
 ```
 
-このゲートはfrontendのtypecheck、lint、単体テスト、Pythonテスト、frontend E2E、`public/`生成・内容検証・同一環境での再生成一致、生成済み`public/`の静的配信E2E、repository hygieneを含む。実YouTubeやデプロイ済みRenderへ依存する検証は含めない。
+このゲートはfrontendのtypecheck、lint、単体テスト、Pythonテスト、`public/`生成・内容検証・同一環境での再生成一致、repository hygieneを含む。ブラウザ操作を伴うPlaywright E2Eは標準ゲートに含めず、ユーザーの明示許可がある場合だけ `npm run verify:browser` で実行する。実YouTubeやデプロイ済みRenderへ依存する検証は含めない。
 
-YouTubeプレイヤーまたは公開経路へ影響する変更は、通常ゲート成功後かつデプロイ完了後に次を独立実行する。
+YouTubeプレイヤーまたは公開経路へ影響する変更は、通常ゲート成功後かつデプロイ完了後に次の非GUIデータ検証を独立実行する。
 
 ```text
 npm run verify:live
 ```
+
+実YouTube/Renderをブラウザ操作で検証する場合は、ユーザーの明示許可があるときだけ `npm run verify:live:browser` を実行する。
 
 本番URLは`config/site.json`の`site.base_url`から解決し、`LIVE_BASE_URL`が指定された場合だけ上書きする。HTMLは配信基盤が除去する空行を無視して照合し、JavaScript・CSS・設定ファイルは内容hashを一致させる。検証対象URLが空の場合はskipせず設定エラーとして失敗させる。
 
@@ -41,7 +43,7 @@ PR作成、対象SHAの検証、head SHA確認、squash mergeは`.github/scripts
 
 ## 定期VOD更新
 
-YouTubeの本番取得経路は確定済みのOracle VM（`<ORACLE_HOST>`、`ubuntu`）だけとする。OracleはYouTube live_chatの取得、コメント時刻抽出、既存の10秒bucket/z-scoreによる見どころ決定、選択区間の音声・軽量映像の切り出しまでを担当する。GitHub ActionsはYouTubeへ直接アクセスせず、OCI Object Storageの一時PARオブジェクトを受け取ってWhisper、見出し、サムネイル、検証、checked PR公開を担当する。Renderは`main`更新後の静的サイト公開を担当する。
+YouTubeの本番取得経路は確定済みのOracle VM（`<ORACLE_HOST>`、`ubuntu`）だけとする。OracleはYouTube live_chatの取得、YouTube公開字幕の任意取得、コメント時刻抽出、既存の10秒bucket/z-scoreによる見どころ決定、選択区間の音声・軽量映像の切り出しまでを担当する。GitHub ActionsはYouTubeへ直接アクセスせず、OCI Object Storageの一時PARオブジェクトを受け取ってWhisper、見出し、サムネイル、字幕JSON、検証、checked PR公開を担当する。Renderは`main`更新後の静的サイト公開を担当する。
 
 Oracleで確認済みの取得スクリプトは`<ORACLE_SCRIPT_PATH>`であり、`<ORACLE_SCRIPT_PATH>`は使用しない。指定SSH鍵は`<SSH_KEY_PATH>`、Oracle上の実行ファイルは`$HOME/yt-dlp`、`$HOME/.local/bin/deno`、Cookieは`$HOME/youtube-cookies.txt`である。鍵とCookieの内容は表示・commitしない。
 
@@ -62,6 +64,7 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 - YouTube更新データは `automation/youtube-material-*` ブランチとPRを経由し、公開準備チェック成功後にmainへマージする。旧Twitch更新workflowは停止中であり、公開出力へTwitchを戻さない。
 - YouTube更新PRの検証はActions botが作成したPRでも停止しないよう、`Frontend CI`、`Repository hygiene`、`Repo Launch Doctor`を`workflow_dispatch`で対象ブランチへ実行してから自動マージする。PRの`pull_request`イベント待ちは使わない（GitHub側の承認待ち`action_required`になり得るため）。
 - YouTubeでWhisperの内容を確定できない区間は `headline` 欠損のまま扱い、反応タグや既存の `reason` を公開UIの表示見出しへフォールバックしない。既存Twitchデータは互換維持のため従来の `reason` 表示を許容する。
+- YouTube公開字幕は任意データとして扱う。手動字幕を優先し、なければ自動生成字幕を取得する。字幕取得失敗・字幕なしはVOD更新を失敗させず、字幕パネルを出さない。
 - YouTube更新では、タグを見出しへ変換しない。公開用の `headline` は、Oracleから取得した見どころ区間の音声・映像を後段のWhisper/見出し生成へ渡して作る。素材や文字起こしを取得できない項目は `headline` を欠損のまま扱い、反応タグを見出しに見せかけない。
 - Oracleの定期実行は`YOUTUBE_ORACLE_STREAMS_URL=https://www.youtube.com/@dotitube/streams`を優先し、固定の`YOUTUBE_ORACLE_VIDEO_URL`へ戻さない。Cookieは従来どおりOracle上の`$HOME/youtube-cookies.txt`だけを使う。
 - YouTubeの内部音声解析は、スクリーンショット不要時はHTTPS音声のみ、必要時はHTTPSの軽量映像・音声を選ぶ。Twitchの区間取得フォーマットは変更しない。
@@ -69,7 +72,7 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 
 ### Oracle → Actions 一時素材
 
-受け渡しはOCI Object Storageの短命オブジェクトとPre-Authenticated Request（PAR）を使う。Oracleは固定した一時オブジェクトに対する`YOUTUBE_ORACLE_BUNDLE_UPLOAD_URL`へ選択区間だけをPUTし、Actionsは`YOUTUBE_ORACLE_BUNDLE_READ_URL`で取得する。PARは期限まで再利用できるため毎日作り直さず、6か月を目安に両方を同時ローテーションする。OCIのPARではオブジェクトを削除できないため、OCIの1日以内のlifecycle ruleで一時オブジェクトを自動削除する。bundleには公開メタデータ、offset-onlyの時刻一覧、選択区間ごとのWAV/WEBPだけを入れ、raw chat、ユーザー名、メッセージ、文字起こしは入れない。
+受け渡しはOCI Object Storageの短命オブジェクトとPre-Authenticated Request（PAR）を使う。Oracleは固定した一時オブジェクトに対する`YOUTUBE_ORACLE_BUNDLE_UPLOAD_URL`へ選択区間だけをPUTし、Actionsは`YOUTUBE_ORACLE_BUNDLE_READ_URL`で取得する。PARは期限まで再利用できるため毎日作り直さず、6か月を目安に両方を同時ローテーションする。OCIのPARではオブジェクトを削除できないため、OCIの1日以内のlifecycle ruleで一時オブジェクトを自動削除する。bundleには公開メタデータ、offset-onlyの時刻一覧、選択区間ごとのWAV/WEBP、および取得できた場合だけYouTube公開字幕cueを入れる。raw chat、ユーザー名、メッセージ、内部Whisper文字起こしは入れない。
 
 2026-09-17に適用したOCI設定は次のとおり。`shareclip`は別用途のため使用しない。
 

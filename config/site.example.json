@@ -4,6 +4,7 @@
     "description": "YouTubeライブアーカイブのコメント量から見どころを表示する非公式サイトです。",
     "base_url": "https://example.com",
     "language": "ja",
+    "feedback_url": "",
     "analytics": {
       "goatcounter_code": ""
     }

@@ -4,6 +4,7 @@
     "description": "dotitao のYouTubeライブアーカイブから、コメント量が大きく動いた時間帯を見どころとして表示する非公式ファンサイトです。",
     "base_url": "https://dotitao-moments.onrender.com",
     "language": "ja",
+    "feedback_url": "",
     "analytics": {
       "goatcounter_code": "dotitao-moments"
     }

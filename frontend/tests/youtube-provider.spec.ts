@@ -50,10 +50,28 @@ test.beforeEach(async ({ page }) => {
   await page.route(`**/data/vods/${secondVod.vod_id}.json`, async (route) => {
     await route.fulfill({ contentType: "application/json", body: JSON.stringify(secondVod) });
   });
+  await page.route(`**/data/captions/${firstVod.vod_id}.json`, async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        video_id: firstVod.vod_id,
+        source: "youtube_automatic_captions",
+        language: "ja",
+        cues: [
+          { start_sec: 15, end_sec: 25, text: "前の字幕" },
+          { start_sec: 26, end_sec: 55, text: "中間の字幕" },
+          { start_sec: 56, end_sec: 75, text: "後半の字幕" },
+        ],
+      }),
+    });
+  });
+  await page.route(`**/data/captions/${secondVod.vod_id}.json`, async (route) => {
+    await route.fulfill({ status: 404, body: "not found" });
+  });
 });
 
 
-test("runs real user playback controls through the YouTube adapter", async ({ page }) => {
+test("runs real user playback controls through the YouTube adapter", async ({ page }, testInfo) => {
   await page.goto("/");
   const frame = page.locator(".player-frame");
   await expect(frame).toHaveAttribute("data-player-provider", "youtube");
@@ -68,6 +86,14 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   expect(initial.plays).toBe(0);
   expect(initial.muted.at(-1)).toBe(true);
   await expect(frame).toHaveAttribute("data-player-status", "ready");
+  await expect(page.getByRole("region", { name: "文字起こし" })).toBeVisible();
+  await expect(page.locator(".caption-line--current .caption-text")).toHaveText("前の字幕");
+  if (testInfo.project.name === "desktop") {
+    const verticalOverflow = await page.evaluate(
+      () => document.documentElement.scrollHeight - document.documentElement.clientHeight,
+    );
+    expect(verticalOverflow).toBeLessThanOrEqual(1);
+  }
 
   await page.locator(".highlight-item").first().click();
   await expect(frame).toHaveAttribute("data-current-start-sec", "20");
@@ -78,6 +104,7 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   await expect(frame).toHaveAttribute("data-expected-muted", "false");
   await expect(frame).toHaveAttribute("data-player-status", "playing");
   await expect(frame).toHaveAttribute("data-current-start-sec", "60");
+  await expect(page.locator(".caption-line--current .caption-text")).toHaveText("後半の字幕");
   const afterHighlight = await getFakeYoutubeLog(page);
   expect(afterHighlight.mounts).toHaveLength(1);
   expect(afterHighlight.seeks).toContain(60);
@@ -101,6 +128,7 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   await page.getByRole("tab").nth(1).click();
   await expect(frame).toHaveAttribute("data-current-vod-id", secondVod.vod_id);
   await expect.poll(async () => (await getFakeYoutubeLog(page)).mounts.length).toBe(2);
+  await expect(page.getByRole("region", { name: "文字起こし" })).toHaveCount(0);
   expect((await getFakeYoutubeLog(page)).mounts.at(-1)).toMatchObject({ videoId: secondVod.vod_id, autoplay: 1 });
   expect((await getFakeYoutubeLog(page)).destroys).toBeGreaterThan(0);
 

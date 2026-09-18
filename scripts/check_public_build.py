@@ -74,6 +74,16 @@ def check_public_json_matches_sources() -> None:
         if published != source:
             fail(f"public/data/{relative_path} differs structurally from data/{relative_path}")
 
+    source_captions = DATA / "captions"
+    public_captions = PUBLIC / "data" / "captions"
+    if source_captions.is_dir():
+        for source_path in sorted(source_captions.glob("*.json")):
+            public_path = public_captions / source_path.name
+            if not public_path.is_file():
+                fail(f"missing captions JSON: {public_path.relative_to(ROOT)}")
+            if read_json(public_path) != read_json(source_path):
+                fail(f"published captions differ from source: {source_path.name}")
+
     source_details = DATA / "vods"
     public_details = PUBLIC / "data" / "vods"
     if source_details.is_dir():

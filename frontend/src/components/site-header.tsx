@@ -5,9 +5,10 @@ type SiteHeaderProps = {
   siteName: string;
   updatedAt: string;
   nextUpdateAt: string;
+  feedbackUrl?: string;
 };
 
-export function SiteHeader({ siteName, updatedAt }: SiteHeaderProps) {
+export function SiteHeader({ siteName, updatedAt, feedbackUrl = "" }: SiteHeaderProps) {
   return (
     <header className="site-header">
       <div>
@@ -20,6 +21,11 @@ export function SiteHeader({ siteName, updatedAt }: SiteHeaderProps) {
       <div className="update-stack" aria-label="更新情報">
         <span>データ更新: {formatUpdate(updatedAt)}</span>
         <span>自動更新: 一時停止中</span>
+        {feedbackUrl ? (
+          <a className="feedback-link" href={feedbackUrl} target="_blank" rel="noreferrer">
+            要望・誤り報告はこちら
+          </a>
+        ) : null}
       </div>
     </header>
   );
