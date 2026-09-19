@@ -1,7 +1,20 @@
 {
-  "updated_at": "2026-09-18T10:03:17+09:00",
-  "next_update_at": "2026-09-19T00:00:00+00:00",
+  "updated_at": "2026-09-20T06:21:01+09:00",
+  "next_update_at": "2026-09-20T00:00:00+00:00",
   "videos": [
+    {
+      "vod_id": "aTCWAb8wRd8",
+      "vod_url": "https://www.youtube.com/watch?v=aTCWAb8wRd8",
+      "title": "ダスブラなりきりエルデン大会やるのでビルド育てる【エルデンリング/ELDEN RING Tarnished Edition】",
+      "published_at": "2026-09-19T00:00:00+00:00",
+      "thumbnail_url": "https://i.ytimg.com/vi/aTCWAb8wRd8/maxresdefault.jpg",
+      "duration_sec": 23299,
+      "count": 3,
+      "chat_total": 2202,
+      "comments_per_hour": 340.238,
+      "detail_path": "/data/vods/aTCWAb8wRd8.json",
+      "provider": "youtube"
+    },
     {
       "vod_id": "2a_ATYeOiAQ",
       "vod_url": "https://www.youtube.com/watch?v=2a_ATYeOiAQ",
