@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-20T06:21:01+09:00",
+  "updated_at": "2026-09-20T08:38:40+09:00",
   "channel": "dotitao",
   "channel_url": "https://www.twitch.tv/dotitao",
   "analysis_version": "chat-zscore-v8",
@@ -25,7 +25,7 @@
           "start_time": "01:24:10",
           "end_time": "01:27:00",
           "reason": "Chat activity spike around 1h24m10s (z-score=3.861).",
-          "headline": "したら先に一緒と石が混ざっちゃった",
+          "headline": "制御できない川の流れと一致",
           "tags": [],
           "watch_url": "https://www.youtube.com/watch?v=aTCWAb8wRd8&t=5050s",
           "screenshot_url": "/data/segment-thumbnails/aTCWAb8wRd8/aTCWAb8wRd8_5050_5220.webp"
@@ -39,7 +39,7 @@
           "start_time": "05:44:50",
           "end_time": "05:46:30",
           "reason": "Chat activity spike around 5h44m50s (z-score=4.813).",
-          "headline": "んなけネギトロにこだわれてるってことはう",
+          "headline": "適合者かどうかの料理検証",
           "tags": [],
           "watch_url": "https://www.youtube.com/watch?v=aTCWAb8wRd8&t=20690s",
           "screenshot_url": "/data/segment-thumbnails/aTCWAb8wRd8/aTCWAb8wRd8_20690_20790.webp"
@@ -53,7 +53,7 @@
           "start_time": "05:34:40",
           "end_time": "05:36:20",
           "reason": "Chat activity spike around 5h34m40s (z-score=3.861).",
-          "headline": "お分かりいただけました明日からあなたも",
+          "headline": "時間も大切、混ぜすぎ注意",
           "tags": [],
           "watch_url": "https://www.youtube.com/watch?v=aTCWAb8wRd8&t=20080s",
           "screenshot_url": "/data/segment-thumbnails/aTCWAb8wRd8/aTCWAb8wRd8_20080_20180.webp"
@@ -127,7 +127,7 @@
         ]
       },
       "analysis_version": "chat-zscore-v8",
-      "analyzed_at": "2026-09-20T06:21:01+09:00"
+      "analyzed_at": "2026-09-20T08:38:40+09:00"
     },
     {
       "vod_id": "2a_ATYeOiAQ",
