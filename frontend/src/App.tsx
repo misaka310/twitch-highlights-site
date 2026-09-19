@@ -186,21 +186,21 @@ export default function App() {
           <LayerCard>
             <LayerCard.Primary>
               <div className="playback-surface">
-                <div className="player-caption-stack">
-                  <TwitchPlayer
-                    ref={playerRef}
-                    onPositionChange={setPositionSec}
-                    onStatusChange={(label) => setPlayerState(label)}
+                <TwitchPlayer
+                  ref={playerRef}
+                  onPositionChange={setPositionSec}
+                  onStatusChange={(label) => setPlayerState(label)}
+                />
+                <div className={captions ? "playback-assist-panel" : "playback-assist-panel playback-assist-panel--map-only"}>
+                  <ActivityMap
+                    geometry={activityGeometry}
+                    overlay={activityOverlay}
+                    positionSec={positionSec}
+                    onSeek={seekByMap}
+                    onRewind={rewindTenSeconds}
                   />
                   {captions ? <CaptionPanel window={captionWindow} /> : null}
                 </div>
-                <ActivityMap
-                  geometry={activityGeometry}
-                  overlay={activityOverlay}
-                  positionSec={positionSec}
-                  onSeek={seekByMap}
-                  onRewind={rewindTenSeconds}
-                />
               </div>
             </LayerCard.Primary>
           </LayerCard>
