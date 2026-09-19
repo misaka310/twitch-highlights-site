@@ -137,15 +137,80 @@ class YoutubeMediaTests(unittest.TestCase):
                     segments=None,
                 )
 
+        class FakeHeadlineGenerator:
+            def generate(self, **kwargs):
+                self.kwargs = kwargs
+                return SimpleNamespace(
+                    text="迷路を突破してバナナに到達",
+                    source="groq",
+                    model="openai/gpt-oss-120b",
+                    generation_mode="llm_ranked",
+                    confidence="high",
+                    notes="",
+                )
+
+        headline_generator = FakeHeadlineGenerator()
         enriched, summary = enrich_youtube_video(
             video,
             media_fetcher=media_fetcher,
             transcriber=FakeTranscriber(),
+            headline_generator=headline_generator,
         )
         self.assertEqual(summary.headlines, 1)
         self.assertIn("迷路", enriched["items"][0]["headline"])
         self.assertNotIn("ww", enriched["items"][0]["headline"])
-        self.assertEqual(enriched["items"][0]["headline_source"], "whisper")
+        self.assertEqual(enriched["items"][0]["headline_source"], "groq")
+        self.assertEqual(enriched["items"][0]["headline_model"], "openai/gpt-oss-120b")
+        self.assertEqual(enriched["items"][0]["headline_generation_mode"], "llm_ranked")
+        self.assertIn("迷路", headline_generator.kwargs["prepared_transcript"])
+
+    def test_enrichment_rejects_extractive_headline_fallback(self):
+        video = {
+            "provider": "youtube",
+            "vod_id": "WGTrmrSvZH0",
+            "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+            "title": "archive",
+            "items": [{"id": "WGTrmrSvZH0_120_240", "start_sec": 120, "end_sec": 240}],
+        }
+
+        def media_fetcher(_url, _start, _end, output_dir):
+            path = output_dir / "clip.webm"
+            path.write_bytes(b"clip")
+            return path
+
+        class FakeTranscriber:
+            def transcribe(self, *_args, **_kwargs):
+                return SimpleNamespace(
+                    text="この気まずくなる流れ好きすぎるからやめて。",
+                    source_text="この気まずくなる流れ好きすぎるからやめて。",
+                    language="ja",
+                    language_probability=0.9,
+                    segments=None,
+                )
+
+        class ExtractiveFallbackGenerator:
+            def generate(self, **_kwargs):
+                return SimpleNamespace(
+                    text="気まずくなる流れ好き",
+                    source="extractive",
+                    model="local-extractive",
+                    generation_mode="fallback_extractive",
+                    confidence="low",
+                    notes="extractive_fallback",
+                )
+
+        with self.assertRaisesRegex(RuntimeError, "no remote LLM headline"):
+            enrich_youtube_video(
+                video,
+                media_fetcher=media_fetcher,
+                transcriber=FakeTranscriber(),
+                headline_generator=ExtractiveFallbackGenerator(),
+            )
+
+    def test_oracle_workflow_uses_gpt_oss_120b_for_headlines(self):
+        workflow = (ROOT / ".github" / "workflows" / "process-youtube-material.yml").read_text(encoding="utf-8")
+        self.assertIn("GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}", workflow)
+        self.assertIn("GROQ_MODEL: openai/gpt-oss-120b", workflow)
 
 
 if __name__ == "__main__":
