@@ -1,10 +1,12 @@
 import io
+import os
 import sys
 import tarfile
 import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -206,6 +208,71 @@ class YoutubeMediaTests(unittest.TestCase):
                 transcriber=FakeTranscriber(),
                 headline_generator=ExtractiveFallbackGenerator(),
             )
+
+    def test_enrichment_refreshes_headline_runtime_from_environment(self):
+        video = {
+            "provider": "youtube",
+            "vod_id": "WGTrmrSvZH0",
+            "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+            "title": "archive",
+            "items": [{"id": "WGTrmrSvZH0_120_240", "start_sec": 120, "end_sec": 240}],
+        }
+
+        def media_fetcher(_url, _start, _end, output_dir):
+            path = output_dir / "clip.webm"
+            path.write_bytes(b"clip")
+            return path
+
+        class FakeTranscriber:
+            def transcribe(self, *_args, **_kwargs):
+                return SimpleNamespace(
+                    text="迷路を突破してバナナにたどり着く。",
+                    source_text="迷路を突破してバナナにたどり着く。",
+                    language="ja",
+                    language_probability=0.9,
+                    segments=None,
+                )
+
+        class FakeHeadlineGenerator:
+            def generate(self, **_kwargs):
+                return SimpleNamespace(
+                    text="迷路を突破してバナナに到達",
+                    source="groq",
+                    model="openai/gpt-oss-120b",
+                    generation_mode="llm_ranked",
+                    confidence="high",
+                    notes="",
+                )
+
+        captured = {}
+
+        def fake_builder():
+            import transcribe_segments as ts
+
+            captured["api_key"] = ts.GROQ_API_KEY
+            captured["model"] = ts.GROQ_MODEL
+            return FakeHeadlineGenerator()
+
+        with patch.dict(
+            os.environ,
+            {
+                "GROQ_API_KEY": "x",
+                "GROQ_MODEL": "openai/gpt-oss-120b",
+                "GEMINI_API_KEY": "",
+                "NVIDIA_API_KEY": "",
+            },
+            clear=False,
+        ):
+            with patch("transcribe_segments.build_headline_generator", side_effect=fake_builder):
+                enriched, _summary = enrich_youtube_video(
+                    video,
+                    media_fetcher=media_fetcher,
+                    transcriber=FakeTranscriber(),
+                )
+
+        self.assertEqual(captured["api_key"], "x")
+        self.assertEqual(captured["model"], "openai/gpt-oss-120b")
+        self.assertEqual(enriched["items"][0]["headline_source"], "groq")
 
     def test_oracle_workflow_uses_gpt_oss_120b_for_headlines(self):
         workflow = (ROOT / ".github" / "workflows" / "process-youtube-material.yml").read_text(encoding="utf-8")

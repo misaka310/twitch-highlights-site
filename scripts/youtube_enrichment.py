@@ -9,11 +9,11 @@ from pathlib import Path
 from typing import Any, Callable
 
 from headline_candidate_selection import (
-    HEADLINE_SOURCE_CONFIG,
     build_headline_source_text,
     is_publishable_headline,
     is_valid_headline_source_text,
 )
+from transcription.config import PipelineSettings
 from youtube_media import (
     YOUTUBE_MEDIA_INCLUDE_VIDEO_ENV,
     fetch_youtube_highlight_media_files,
@@ -50,13 +50,21 @@ def enrich_youtube_video(
         SEGMENT_SCREENSHOT_GENERATION_ENABLED,
         SegmentTarget,
         WhisperTranscriber,
+        apply_pipeline_settings,
         apply_transcript_result,
         build_first_pass_config,
         build_headline_generator,
+        build_headline_source_config,
         build_segment_screenshot_file_path,
         build_segment_screenshot_public_path,
         maybe_generate_segment_screenshot,
+        refresh_runtime_configuration,
     )
+
+    settings = PipelineSettings.from_env(os.environ)
+    apply_pipeline_settings(settings)
+    refresh_runtime_configuration()
+    headline_source_config = build_headline_source_config()
 
     active_transcriber = transcriber or WhisperTranscriber()
     active_headline_generator = headline_generator or build_headline_generator()
@@ -169,8 +177,8 @@ def enrich_youtube_video(
                 raise RuntimeError(f"youtube enrichment produced no transcript for {item.get('id')}")
             transcribed += 1
             apply_transcript_result(item, target, result)
-            source_text = build_headline_source_text(transcript, HEADLINE_SOURCE_CONFIG)
-            source_validation = is_valid_headline_source_text(source_text or transcript, HEADLINE_SOURCE_CONFIG)
+            source_text = build_headline_source_text(transcript, headline_source_config)
+            source_validation = is_valid_headline_source_text(source_text or transcript, headline_source_config)
             headline_result = active_headline_generator.generate(
                 video_title=str(video.get("title") or "").strip(),
                 start_time=str(item.get("start_time") or start_sec),
