@@ -8,7 +8,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
-from headline_candidate_selection import build_content_headline
+from headline_candidate_selection import (
+    HEADLINE_SOURCE_CONFIG,
+    build_headline_source_text,
+    is_publishable_headline,
+    is_valid_headline_source_text,
+)
 from youtube_media import (
     YOUTUBE_MEDIA_INCLUDE_VIDEO_ENV,
     fetch_youtube_highlight_media_files,
@@ -32,6 +37,7 @@ def enrich_youtube_video(
     *,
     media_fetcher: MediaFetcher | None = None,
     transcriber: Any | None = None,
+    headline_generator: Any | None = None,
 ) -> tuple[dict[str, Any], YoutubeEnrichmentSummary]:
     """Enrich each selected item from a transient Oracle media section.
 
@@ -46,12 +52,14 @@ def enrich_youtube_video(
         WhisperTranscriber,
         apply_transcript_result,
         build_first_pass_config,
+        build_headline_generator,
         build_segment_screenshot_file_path,
         build_segment_screenshot_public_path,
         maybe_generate_segment_screenshot,
     )
 
     active_transcriber = transcriber or WhisperTranscriber()
+    active_headline_generator = headline_generator or build_headline_generator()
     pass_config = build_first_pass_config()
     attempted = 0
     transcribed = 0
@@ -161,18 +169,37 @@ def enrich_youtube_video(
                 raise RuntimeError(f"youtube enrichment produced no transcript for {item.get('id')}")
             transcribed += 1
             apply_transcript_result(item, target, result)
-            headline = build_content_headline(
-                transcript=transcript,
+            source_text = build_headline_source_text(transcript, HEADLINE_SOURCE_CONFIG)
+            source_validation = is_valid_headline_source_text(source_text or transcript, HEADLINE_SOURCE_CONFIG)
+            headline_result = active_headline_generator.generate(
                 video_title=str(video.get("title") or "").strip(),
+                start_time=str(item.get("start_time") or start_sec),
+                end_time=str(item.get("end_time") or end_sec),
+                transcript=transcript,
+                prepared_transcript=source_text or transcript,
+                source_validation=source_validation,
             )
-            if not headline:
-                raise RuntimeError(f"youtube enrichment produced no content headline for {item.get('id')}")
+            headline = str(getattr(headline_result, "text", "") or "").strip()
+            generation_mode = str(getattr(headline_result, "generation_mode", "") or "").strip()
+            source = str(getattr(headline_result, "source", "") or "").strip().lower()
+            notes = str(getattr(headline_result, "notes", "") or "").strip()
+            if (
+                not headline
+                or source not in {"gemini", "groq", "nvidia"}
+                or generation_mode == "fallback_extractive"
+                or notes == "local_candidate"
+            ):
+                raise RuntimeError(
+                    f"youtube enrichment produced no remote LLM headline for {item.get('id')}"
+                )
+            if not is_publishable_headline(headline, source_text=source_text or transcript):
+                raise RuntimeError(f"youtube enrichment rejected low-quality headline for {item.get('id')}")
             item["headline"] = headline
-            item["headline_source"] = "whisper"
-            item["headline_model"] = pass_config.model
+            item["headline_source"] = source
+            item["headline_model"] = str(getattr(headline_result, "model", "") or "").strip()
             item["headline_status"] = "ok"
-            item["headline_generation_mode"] = "content_extractive"
-            item["headline_confidence"] = "medium"
+            item["headline_generation_mode"] = generation_mode or "llm_ranked"
+            item["headline_confidence"] = str(getattr(headline_result, "confidence", "") or "medium").strip()
             headlines += 1
 
     if attempted == 0 or transcribed != attempted or headlines != attempted:
