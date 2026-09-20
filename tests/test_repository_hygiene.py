@@ -7,10 +7,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from check_repository_hygiene import find_local_output_violations  # noqa: E402
+from check_repository_hygiene import find_local_output_violations, find_public_disclosure_violations  # noqa: E402
 
 
 class RepositoryHygieneTests(unittest.TestCase):
+    def test_tracked_text_does_not_expose_machine_specific_paths_or_public_ips(self):
+        self.assertEqual(find_public_disclosure_violations(ROOT), [])
+
     def test_detects_accidental_npm_cache_argument_directories(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

@@ -52,7 +52,7 @@ def build_youtube_media_script(
     start = max(0, int(start_sec))
     end = max(start + 1, int(end_sec))
     for path in (remote_ytdlp, remote_deno, remote_cookies):
-        if not str(path).startswith("/") or any(char in str(path) for char in "'\n\r"):
+        if not (str(path).startswith("/") or str(path).startswith("$HOME/")) or any(char in str(path) for char in "'\"\n\r`;&|"):
             raise ValueError("remote media paths must be absolute and shell-safe")
     url = f"https://www.youtube.com/watch?v={normalized_id}"
     format_selector = (
@@ -134,7 +134,7 @@ def build_youtube_media_batch_script(
         end = max(start + 1, int(end_sec))
         normalized_intervals.append((start, end))
     for path in (remote_ytdlp, remote_deno, remote_cookies):
-        if not str(path).startswith("/") or any(char in str(path) for char in "'\n\r"):
+        if not (str(path).startswith("/") or str(path).startswith("$HOME/")) or any(char in str(path) for char in "'\"\n\r`;&|"):
             raise ValueError("remote media paths must be absolute and shell-safe")
     url = f"https://www.youtube.com/watch?v={normalized_id}"
     cuts = "\n".join(
@@ -201,7 +201,7 @@ def build_youtube_screenshot_batch_script(
         end = max(start + 1, int(end_sec))
         normalized_intervals.append((start, end))
     for path in (remote_ytdlp, remote_deno, remote_cookies):
-        if not str(path).startswith("/") or any(char in str(path) for char in "'\n\r"):
+        if not (str(path).startswith("/") or str(path).startswith("$HOME/")) or any(char in str(path) for char in "'\"\n\r`;&|"):
             raise ValueError("remote media paths must be absolute and shell-safe")
     if min(width, height, quality) <= 0:
         raise ValueError("screenshot dimensions and quality must be positive")

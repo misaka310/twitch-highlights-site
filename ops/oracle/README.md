@@ -1,9 +1,10 @@
 # Oracle YouTube handoff
 
 The Oracle VM is the only component that connects to YouTube. It fetches
-live-chat offsets with the already verified `$HOME/yt-dlp`, Deno, and
-`$HOME/youtube-cookies.txt` route, applies the repository's existing
-chat z-score detector, and cuts only the selected highlight intervals.
+live-chat offsets with the configured `YOUTUBE_ORACLE_YTDLP_PATH`,
+`YOUTUBE_ORACLE_DENO_PATH`, and `YOUTUBE_ORACLE_COOKIES_PATH` route, applies
+the repository's existing chat z-score detector, and cuts only the selected
+highlight intervals.
 
 The selected WAV and WEBP files are sent to one short-lived OCI Object Storage
 object through a Pre-Authenticated Request (PAR). GitHub Actions reads that
@@ -39,13 +40,13 @@ together before 2027-03-17 07:00 UTC.
 
 ## Install on Oracle
 
-Install this repository at `/opt/youtube-highlight/repository`, or copy the
+Install this repository at the operator-selected repository root, or copy the
 `scripts/`, `config/`, and `ops/` files there. Keep the existing verified
 Oracle acquisition prerequisites in place:
 
-- `$HOME/yt-dlp`
-- `$HOME/.local/bin/deno`
-- `$HOME/youtube-cookies.txt` with mode `600`
+- `YOUTUBE_ORACLE_YTDLP_PATH`
+- `YOUTUBE_ORACLE_DENO_PATH`
+- `YOUTUBE_ORACLE_COOKIES_PATH` with mode `600`
 - `ffmpeg`
 
 Create `/etc/youtube-highlight/youtube.env` with mode `600`. Use real values
@@ -56,6 +57,10 @@ only on the VM; never commit this file:
 YOUTUBE_ORACLE_STREAMS_URL=https://www.youtube.com/@dotitube/streams
 # Optional one-video fallback when streams discovery is intentionally disabled.
 YOUTUBE_ORACLE_VIDEO_URL=https://www.youtube.com/watch?v=...
+YOUTUBE_ORACLE_YTDLP_PATH=$HOME/yt-dlp
+YOUTUBE_ORACLE_DENO_PATH=$HOME/.local/bin/deno
+YOUTUBE_ORACLE_COOKIES_PATH=$HOME/youtube-cookies.txt
+YOUTUBE_ORACLE_WORK_ROOT=$HOME/ytprobe
 YOUTUBE_ORACLE_BUNDLE_UPLOAD_URL=https://objectstorage.../par/...
 YOUTUBE_ORACLE_GITHUB_TOKEN=...
 YOUTUBE_ORACLE_GITHUB_REPOSITORY=owner/repository
@@ -95,7 +100,7 @@ the job keeps that artifact and validates it before continuing; an absent or
 empty artifact remains a hard failure.
 ## Refreshing YouTube authentication
 
-The production cookie file is `$HOME/youtube-cookies.txt` on Oracle and
+The production cookie file configured by `YOUTUBE_ORACLE_COOKIES_PATH` on Oracle
 must remain mode `600`. If YouTube authentication expires, sign in to YouTube
 in the Oracle VM's Chrome profile, export the authenticated cookies from that
 Oracle browser, replace the file, and rerun the one-shot test before starting

@@ -49,7 +49,7 @@ class RepositoryArchitectureTests(unittest.TestCase):
         self.assertIn("YouTube IFrame Player API", playback)
         self.assertIn("videoOffsetTimeMsec", data_contract)
         self.assertIn("YOUTUBE_ORACLE_HOST", operations)
-        self.assertIn("<ORACLE_HOST>", operations)
+        self.assertIn("YOUTUBE_ORACLE_KEY_PATH", operations)
 
     def test_disallowed_backend_integrations_are_absent_from_public_infrastructure(self):
         disallowed_markers = (

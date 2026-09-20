@@ -15,7 +15,7 @@ Extend the public Twitch highlights site so a YouTube live-stream archive can us
 
 ## Source architecture
 
-vod_sources.py remains the source boundary for Twitch and provider dispatch. A focused youtube_sources.py module owns YouTube URL parsing, the confirmed SSH transport to <ORACLE_HOST>, and the transient live-chat parser. The transport executes the existing local Oracle script over SSH as ubuntu with the configured key; no direct local YouTube chat fallback is allowed. The remote script emits operational logs and a temporary TSV containing video offsets. The parser returns only normalized in-memory offsets and safe metadata.
+vod_sources.py remains the source boundary for Twitch and provider dispatch. A focused youtube_sources.py module owns YouTube URL parsing, the configured Oracle SSH transport, and the transient live-chat parser. The transport executes the existing Oracle script over SSH with the configured host, user, and key; no direct local YouTube chat fallback is allowed. The remote script emits operational logs and a temporary TSV containing video offsets. The parser returns only normalized in-memory offsets and safe metadata.
 
 update_vods.py gains an explicit --youtube-url mode. Normal mode remains Twitch-only and therefore the paused scheduled update cannot silently start ingesting YouTube. The explicit mode analyzes the selected archive with the existing vod_highlights.py functions, merges the result into the existing cache, and regenerates the public JSON through vod_serialization.py.
 

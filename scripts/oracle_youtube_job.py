@@ -49,6 +49,10 @@ def _env(name: str, default: str = "") -> str:
     return str(os.environ.get(name) or default).strip()
 
 
+def _path_env(name: str, default: str) -> str:
+    return os.path.expandvars(os.path.expanduser(_env(name, default)))
+
+
 def _run(command: list[str], *, category: str, timeout: int = 900) -> subprocess.CompletedProcess[str]:
     try:
         completed = subprocess.run(
@@ -488,16 +492,16 @@ def _send_discord(webhook: str, content: str) -> None:
 
 
 def run(video_url: str) -> dict[str, Any]:
-    ytdlp = _env("YOUTUBE_ORACLE_YTDLP_PATH", DEFAULT_YTDLP)
-    deno = _env("YOUTUBE_ORACLE_DENO_PATH", DEFAULT_DENO)
-    cookies = _env("YOUTUBE_ORACLE_COOKIES_PATH", DEFAULT_COOKIES)
+    ytdlp = _path_env("YOUTUBE_ORACLE_YTDLP_PATH", DEFAULT_YTDLP)
+    deno = _path_env("YOUTUBE_ORACLE_DENO_PATH", DEFAULT_DENO)
+    cookies = _path_env("YOUTUBE_ORACLE_COOKIES_PATH", DEFAULT_COOKIES)
     upload_url = _env("YOUTUBE_ORACLE_BUNDLE_UPLOAD_URL")
     if not upload_url:
         raise OracleJobFailure("handoff_configuration", "bundle upload PAR is not configured")
     if not Path(cookies).is_file():
         raise OracleJobFailure("cookie_authentication_failure", "YouTube cookies file is missing")
 
-    work_root = Path(_env("YOUTUBE_ORACLE_WORK_ROOT", DEFAULT_WORK_ROOT))
+    work_root = Path(_path_env("YOUTUBE_ORACLE_WORK_ROOT", DEFAULT_WORK_ROOT))
     work_root.mkdir(parents=True, exist_ok=True)
     video_id = parse_youtube_video_id(video_url)
     with tempfile.TemporaryDirectory(prefix=f"job-{video_id}-", dir=work_root) as temp_dir:
@@ -541,9 +545,9 @@ def main() -> int:
     parser.add_argument("--video-url", default=_env("YOUTUBE_ORACLE_VIDEO_URL"))
     args = parser.parse_args()
     try:
-        ytdlp = _env("YOUTUBE_ORACLE_YTDLP_PATH", DEFAULT_YTDLP)
-        deno = _env("YOUTUBE_ORACLE_DENO_PATH", DEFAULT_DENO)
-        cookies = _env("YOUTUBE_ORACLE_COOKIES_PATH", DEFAULT_COOKIES)
+        ytdlp = _path_env("YOUTUBE_ORACLE_YTDLP_PATH", DEFAULT_YTDLP)
+        deno = _path_env("YOUTUBE_ORACLE_DENO_PATH", DEFAULT_DENO)
+        cookies = _path_env("YOUTUBE_ORACLE_COOKIES_PATH", DEFAULT_COOKIES)
         if args.streams_url:
             if not Path(cookies).is_file():
                 raise OracleJobFailure("cookie_authentication_failure", "YouTube cookies file is missing")

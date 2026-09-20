@@ -21,23 +21,26 @@ YOUTUBE_ORACLE_USER_ENV = "YOUTUBE_ORACLE_USER"
 YOUTUBE_ORACLE_KEY_ENV = "YOUTUBE_ORACLE_KEY_PATH"
 YOUTUBE_ORACLE_SCRIPT_ENV = "YOUTUBE_ORACLE_SCRIPT_PATH"
 YOUTUBE_ORACLE_TIMEOUT_ENV = "YOUTUBE_ORACLE_TIMEOUT_SEC"
+YOUTUBE_ORACLE_REMOTE_TSV_ENV = "YOUTUBE_ORACLE_REMOTE_TSV_TEMPLATE"
+YOUTUBE_ORACLE_REMOTE_YTDLP_ENV = "YOUTUBE_ORACLE_REMOTE_YTDLP_PATH"
+YOUTUBE_ORACLE_REMOTE_DENO_ENV = "YOUTUBE_ORACLE_REMOTE_DENO_PATH"
+YOUTUBE_ORACLE_REMOTE_COOKIES_ENV = "YOUTUBE_ORACLE_REMOTE_COOKIES_PATH"
 YOUTUBE_ORACLE_TSV_BEGIN = "__YOUTUBE_ORACLE_TSV_BEGIN__"
 YOUTUBE_ORACLE_TSV_END = "__YOUTUBE_ORACLE_TSV_END__"
 YOUTUBE_ORACLE_METADATA_BEGIN = "__YOUTUBE_ORACLE_METADATA_BEGIN__"
 YOUTUBE_ORACLE_METADATA_END = "__YOUTUBE_ORACLE_METADATA_END__"
-YOUTUBE_ORACLE_TSV_TEMPLATE = "$HOME/ytprobe/{video_id}-comment-times.tsv"
-DEFAULT_YOUTUBE_ORACLE_HOST = "<ORACLE_HOST>"
-DEFAULT_YOUTUBE_ORACLE_USER = "ubuntu"
-DEFAULT_YOUTUBE_ORACLE_KEY_PATH = Path(r"<SSH_KEY_PATH>")
-DEFAULT_YOUTUBE_ORACLE_SCRIPT_PATH = Path(r"<ORACLE_SCRIPT_PATH>")
+DEFAULT_YOUTUBE_ORACLE_TSV_TEMPLATE = "$HOME/ytprobe/{video_id}-comment-times.tsv"
+DEFAULT_YOUTUBE_ORACLE_REMOTE_YTDLP = "$HOME/yt-dlp"
+DEFAULT_YOUTUBE_ORACLE_REMOTE_DENO = "$HOME/.local/bin/deno"
+DEFAULT_YOUTUBE_ORACLE_REMOTE_COOKIES = "$HOME/youtube-cookies.txt"
 
 
 @dataclass(frozen=True)
 class YoutubeOracleConfig:
     host: str
     user: str
-    key_path: Path
-    script_path: Path
+    key_path: Path | None
+    script_path: Path | None
     timeout_sec: int = 300
 
 
@@ -73,9 +76,9 @@ def parse_youtube_video_id(value: str) -> str:
 def build_oracle_command(config: YoutubeOracleConfig, video_id: str) -> list[str]:
     if not config.host or not config.user:
         raise ValueError("YouTube Oracle host and user are required")
-    if not config.key_path:
+    if config.key_path is None:
         raise ValueError("YouTube Oracle SSH key path is required")
-    if not config.script_path:
+    if config.script_path is None:
         raise ValueError("YouTube Oracle script path is required")
     return [
         "ssh.exe",
@@ -99,11 +102,12 @@ def youtube_oracle_config_from_env(env: Mapping[str, str] | None = None) -> Yout
         timeout_sec = 300
     if timeout_sec <= 0:
         timeout_sec = 300
-    host = str(source.get(YOUTUBE_ORACLE_HOST_ENV) or DEFAULT_YOUTUBE_ORACLE_HOST).strip()
-    user = str(source.get(YOUTUBE_ORACLE_USER_ENV) or DEFAULT_YOUTUBE_ORACLE_USER).strip()
-    key_path = Path(str(source.get(YOUTUBE_ORACLE_KEY_ENV) or DEFAULT_YOUTUBE_ORACLE_KEY_PATH).strip())
+    host = str(source.get(YOUTUBE_ORACLE_HOST_ENV) or "").strip()
+    user = str(source.get(YOUTUBE_ORACLE_USER_ENV) or "").strip()
+    configured_key_path = str(source.get(YOUTUBE_ORACLE_KEY_ENV) or "").strip()
     configured_script_path = str(source.get(YOUTUBE_ORACLE_SCRIPT_ENV) or "").strip()
-    script_path = Path(configured_script_path) if configured_script_path else DEFAULT_YOUTUBE_ORACLE_SCRIPT_PATH
+    key_path = Path(configured_key_path) if configured_key_path else None
+    script_path = Path(configured_script_path) if configured_script_path else None
     return YoutubeOracleConfig(
         host=host,
         user=user,
@@ -111,6 +115,15 @@ def youtube_oracle_config_from_env(env: Mapping[str, str] | None = None) -> Yout
         script_path=script_path,
         timeout_sec=timeout_sec,
     )
+
+
+def _remote_shell_path(value: str, name: str) -> str:
+    normalized = str(value).strip()
+    if not (normalized.startswith("/") or normalized.startswith("$HOME/")) or any(
+        char in normalized for char in "'\"\n\r`;&|"
+    ):
+        raise ValueError(f"{name} must be an absolute or $HOME-relative shell-safe path")
+    return normalized
 
 
 def fetch_youtube_video(
@@ -121,6 +134,10 @@ def fetch_youtube_video(
 ) -> YoutubeFetchResult:
     video_id = parse_youtube_video_id(video_url)
     oracle_config = config or youtube_oracle_config_from_env()
+    if oracle_config.key_path is None:
+        raise RuntimeError("YouTube Oracle SSH key path is not configured")
+    if oracle_config.script_path is None:
+        raise RuntimeError("YouTube Oracle script path is not configured")
     if not oracle_config.key_path.is_file():
         raise RuntimeError(f"YouTube Oracle SSH key was not found: {oracle_config.key_path}")
     if not oracle_config.script_path.is_file():
@@ -128,17 +145,32 @@ def fetch_youtube_video(
     command = build_oracle_command(oracle_config, video_id)
     script = oracle_config.script_path.read_text(encoding="utf-8").replace("\r\n", "\n")
     script = script.replace("WGTrmrSvZH0", video_id).rstrip() + "\n"
-    remote_tsv = YOUTUBE_ORACLE_TSV_TEMPLATE.format(video_id=video_id)
+    remote_tsv = _remote_shell_path(
+        str(os.environ.get(YOUTUBE_ORACLE_REMOTE_TSV_ENV) or DEFAULT_YOUTUBE_ORACLE_TSV_TEMPLATE).format(video_id=video_id),
+        YOUTUBE_ORACLE_REMOTE_TSV_ENV,
+    )
+    remote_ytdlp = _remote_shell_path(
+        str(os.environ.get(YOUTUBE_ORACLE_REMOTE_YTDLP_ENV) or DEFAULT_YOUTUBE_ORACLE_REMOTE_YTDLP),
+        YOUTUBE_ORACLE_REMOTE_YTDLP_ENV,
+    )
+    remote_deno = _remote_shell_path(
+        str(os.environ.get(YOUTUBE_ORACLE_REMOTE_DENO_ENV) or DEFAULT_YOUTUBE_ORACLE_REMOTE_DENO),
+        YOUTUBE_ORACLE_REMOTE_DENO_ENV,
+    )
+    remote_cookies = _remote_shell_path(
+        str(os.environ.get(YOUTUBE_ORACLE_REMOTE_COOKIES_ENV) or DEFAULT_YOUTUBE_ORACLE_REMOTE_COOKIES),
+        YOUTUBE_ORACLE_REMOTE_COOKIES_ENV,
+    )
     script += (
         f"printf '%s\\n' '{YOUTUBE_ORACLE_TSV_BEGIN}'\n"
-        f"cat '{remote_tsv}'\n"
+        f"cat \"{remote_tsv}\"\n"
         f"printf '%s\\n' '{YOUTUBE_ORACLE_TSV_END}'\n"
-        f"rm -f '{remote_tsv}'\n"
+        f"rm -f \"{remote_tsv}\"\n"
         f"printf '%s\\n' '{YOUTUBE_ORACLE_METADATA_BEGIN}'\n"
-        "\"$HOME/yt-dlp\" "
-        "--js-runtimes \"deno:$HOME/.local/bin/deno\" "
+        f"\"{remote_ytdlp}\" "
+        f"--js-runtimes \"deno:{remote_deno}\" "
         "--remote-components ejs:github "
-        "--cookies \"$HOME/youtube-cookies.txt\" "
+        f"--cookies \"{remote_cookies}\" "
         "--skip-download --no-playlist "
         "--print \"%(.{id,title,upload_date,duration,thumbnail})j\" "
         f"\"https://www.youtube.com/watch?v={video_id}\" 2>/dev/null\n"

@@ -43,15 +43,19 @@ PR作成、対象SHAの検証、head SHA確認、squash mergeは`.github/scripts
 
 ## 定期VOD更新
 
-YouTubeの本番取得経路は確定済みのOracle VM（`<ORACLE_HOST>`、`ubuntu`）だけとする。OracleはYouTube live_chatの取得、YouTube公開字幕の任意取得、コメント時刻抽出、既存の10秒bucket/z-scoreによる見どころ決定、選択区間の音声・軽量映像の切り出しまでを担当する。GitHub ActionsはYouTubeへ直接アクセスせず、OCI Object Storageの一時PARオブジェクトを受け取ってWhisper、見出し、サムネイル、字幕JSON、検証、checked PR公開を担当する。Renderは`main`更新後の静的サイト公開を担当する。
+YouTubeの本番取得経路は、`YOUTUBE_ORACLE_HOST`と`YOUTUBE_ORACLE_USER`で設定したOracle VMだけとする。OracleはYouTube live_chatの取得、YouTube公開字幕の任意取得、コメント時刻抽出、既存の10秒bucket/z-scoreによる見どころ決定、選択区間の音声・軽量映像の切り出しまでを担当する。GitHub ActionsはYouTubeへ直接アクセスせず、OCI Object Storageの一時PARオブジェクトを受け取ってWhisper、見出し、サムネイル、字幕JSON、検証、checked PR公開を担当する。Renderは`main`更新後の静的サイト公開を担当する。
 
-Oracleで確認済みの取得スクリプトは`<ORACLE_SCRIPT_PATH>`であり、`<ORACLE_SCRIPT_PATH>`は使用しない。指定SSH鍵は`<SSH_KEY_PATH>`、Oracle上の実行ファイルは`$HOME/yt-dlp`、`$HOME/.local/bin/deno`、Cookieは`$HOME/youtube-cookies.txt`である。鍵とCookieの内容は表示・commitしない。
+取得スクリプトとSSH鍵は、それぞれ`YOUTUBE_ORACLE_SCRIPT_PATH`と`YOUTUBE_ORACLE_KEY_PATH`で実行時に指定する。Oracle上の実行ファイル、Deno、Cookie、作業用TSVの場所も`YOUTUBE_ORACLE_REMOTE_*`環境変数で指定し、実値は表示・commitしない。
 
 ```powershell
 $env:YOUTUBE_ORACLE_HOST = '<ORACLE_HOST>'
 $env:YOUTUBE_ORACLE_USER = '<ORACLE_USER>'
 $env:YOUTUBE_ORACLE_KEY_PATH = '<SSH_KEY_PATH>'
 $env:YOUTUBE_ORACLE_SCRIPT_PATH = '<ORACLE_SCRIPT_PATH>'
+$env:YOUTUBE_ORACLE_REMOTE_YTDLP_PATH = '$HOME/yt-dlp'
+$env:YOUTUBE_ORACLE_REMOTE_DENO_PATH = '$HOME/.local/bin/deno'
+$env:YOUTUBE_ORACLE_REMOTE_COOKIES_PATH = '$HOME/youtube-cookies.txt'
+$env:YOUTUBE_ORACLE_REMOTE_TSV_TEMPLATE = '$HOME/ytprobe/{video_id}-comment-times.tsv'
 python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGTrmrSvZH0'
 ```
 
@@ -68,7 +72,7 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 - YouTube更新では、タグを見出しへ変換しない。公開用の `headline` は、Oracleから取得した見どころ区間の音声・映像を後段のWhisper/見出し生成へ渡して作る。素材や文字起こしを取得できない項目は `headline` を欠損のまま扱い、反応タグを見出しに見せかけない。
 - Oracle素材を処理する `process-youtube-material.yml` の見出し生成は、Whisper文字起こしを入力としてGroqの `openai/gpt-oss-120b` を使う。LLM応答が得られない場合やローカル抽出フォールバックしか得られない場合、その見出しは公開せず更新処理を失敗させる。
 - 既存VODの見出しだけを修復する場合は `workflow_dispatch` の `repair_vod_id` を指定し、保存済みのYouTube公開字幕から同じGPT-OSS 120B見出し生成経路を通して全見どころを再生成する。通常のOracle素材処理ではこの修復経路を使わない。
-- Oracleの定期実行は`YOUTUBE_ORACLE_STREAMS_URL=https://www.youtube.com/@dotitube/streams`を優先し、固定の`YOUTUBE_ORACLE_VIDEO_URL`へ戻さない。Cookieは従来どおりOracle上の`$HOME/youtube-cookies.txt`だけを使う。
+- Oracleの定期実行は`YOUTUBE_ORACLE_STREAMS_URL=https://www.youtube.com/@dotitube/streams`を優先し、固定の`YOUTUBE_ORACLE_VIDEO_URL`へ戻さない。Cookieは`YOUTUBE_ORACLE_REMOTE_COOKIES_PATH`で指定したOracle上のファイルだけを使う。
 - YouTubeの内部音声解析は、スクリーンショット不要時はHTTPS音声のみ、必要時はHTTPSの軽量映像・音声を選ぶ。Twitchの区間取得フォーマットは変更しない。
 - 公開準備チェックは、生成済み `headline` の品質と見どころサムネイルの存在を検証する。見出しが欠損する場合や、生成済み見出しが品質基準を満たさない場合は従来どおり失敗させる。
 
@@ -93,7 +97,7 @@ PAR URLそのものは秘密情報のため、repositoryやドキュメントに
 
 2026-09-17に対象バケットを再作成した際、OCI上では旧PARがアクティブに見えても旧バケットを指して404になったため、Upload/Read PARを同日付の名前で再発行し、Oracle環境とGitHub Actions Secretを更新した。以後もPARは期限まで再利用し、期限前に両方を同時ローテーションする。
 
-YouTubeの認証Cookieが切れた場合は、Oracle VMのChromeへログインして認証済みCookieを更新し、Oracle上の`$HOME/youtube-cookies.txt`（mode `600`）へ配置する。Windows側のCookieを本番経路の代替にせず、更新後はOracle上のyt-dlpメディア取得テストとone-shot serviceで復旧を確認する。Cookie・Chromeプロファイル・SSH秘密鍵はrepositoryへ保存しない。
+YouTubeの認証Cookieが切れた場合は、Oracle VMのChromeへログインして認証済みCookieを更新し、`YOUTUBE_ORACLE_REMOTE_COOKIES_PATH`で指定したOracle上のファイル（mode `600`）へ配置する。Windows側のCookieを本番経路の代替にせず、更新後はOracle上のyt-dlpメディア取得テストとone-shot serviceで復旧を確認する。Cookie・Chromeプロファイル・SSH秘密鍵はrepositoryへ保存しない。
 
 Oracleのsystemd service/timerテンプレートとインストール手順は`ops/oracle/README.md`に置く。Discord通知はOracle側の`DISCORD_WEBHOOK_URL`だけで行い、Cookie認証失敗、bot/challenge、Oracle runtime、yt-dlp/Deno、live_chat 0件、一時ネットワーク障害を分類し、同一連続失敗は一度だけ通知する。復旧時は一度だけ復旧通知を送る。
 
