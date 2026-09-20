@@ -42,8 +42,8 @@ class YoutubeMediaTests(unittest.TestCase):
             archive.addfile(info, io.BytesIO(body))
 
         config = YoutubeOracleConfig(
-            host="64.110.102.170",
-            user="ubuntu",
+            host="oracle.example.test",
+            user="oracle-user",
             key_path=Path(__file__),
             script_path=Path(__file__),
             timeout_sec=30,
@@ -87,8 +87,8 @@ class YoutubeMediaTests(unittest.TestCase):
                 info.size = len(body)
                 archive.addfile(info, io.BytesIO(body))
         config = YoutubeOracleConfig(
-            host="64.110.102.170",
-            user="ubuntu",
+            host="oracle.example.test",
+            user="oracle-user",
             key_path=Path(__file__),
             script_path=Path(__file__),
             timeout_sec=30,

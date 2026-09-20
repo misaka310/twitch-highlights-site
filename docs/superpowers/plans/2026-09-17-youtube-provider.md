@@ -75,7 +75,7 @@ Interfaces:
   Run: python -m unittest tests.test_youtube_sources -v
   Expected: PASS.
 - [ ] Step 5: Add subprocess transport and Twitch-preserving dispatch.
-  Run the confirmed `ssh -i <key> ubuntu@64.110.102.170 bash -s` transport with the existing Oracle script supplied over stdin, normalize its temporary TSV output, surface nonzero/timeout errors, and dispatch only when provider == "youtube".
+  Run the configured `ssh -i <key> <user>@<host> bash -s` transport with the existing Oracle script supplied over stdin, normalize its temporary TSV output, surface nonzero/timeout errors, and dispatch only when provider == "youtube".
 - [ ] Step 6: Add transport tests with an injected runner.
   Assert the command receives the target URL, the output is parsed, and a runner exception is surfaced without falling back to direct local HTTP.
 - [ ] Step 7: Run the focused tests again.
@@ -219,7 +219,7 @@ Files:
 - Test evidence: frontend/artifacts/ or repository-approved verification artifact location; do not commit raw chat.
 
 Interfaces:
-- The configured SSH transport reaches `64.110.102.170` as `ubuntu`, runs the existing Oracle script, and emits the documented temporary TSV.
+- The configured SSH transport reaches the configured Oracle host as the configured user, runs the existing Oracle script, and emits the documented temporary TSV.
 - python scripts/update_vods.py --youtube-url https://www.youtube.com/watch?v=WGTrmrSvZH0 produces normalized public data.
 
 - [ ] Step 1: Preflight Oracle and runtime configuration.

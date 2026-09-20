@@ -215,13 +215,13 @@ class YoutubeSourceTests(unittest.TestCase):
         self.assertEqual(result.video["published_at"], "2026-09-13T00:00:00+00:00")
         self.assertEqual(result.video["duration_sec"], 13679)
 
-    def test_fixed_oracle_config_uses_the_confirmed_vm_route(self):
+    def test_oracle_config_uses_the_configured_route(self):
         config = youtube_oracle_config_from_env(
             {
-                "YOUTUBE_ORACLE_HOST": "64.110.102.170",
-                "YOUTUBE_ORACLE_USER": "ubuntu",
-                "YOUTUBE_ORACLE_KEY_PATH": r"C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key",
-                "YOUTUBE_ORACLE_SCRIPT_PATH": r"C:\00_dev\_system\tmp\oracle_livechat.sh",
+                "YOUTUBE_ORACLE_HOST": "oracle.example.test",
+                "YOUTUBE_ORACLE_USER": "oracle-user",
+                "YOUTUBE_ORACLE_KEY_PATH": "test-ssh-key",
+                "YOUTUBE_ORACLE_SCRIPT_PATH": "test-oracle-script",
             }
         )
         self.assertEqual(
@@ -229,16 +229,24 @@ class YoutubeSourceTests(unittest.TestCase):
             [
                 "ssh.exe",
                 "-i",
-                r"C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key",
+                "test-ssh-key",
                 "-o",
                 "BatchMode=yes",
                 "-o",
                 "ConnectTimeout=20",
-                "ubuntu@64.110.102.170",
+                "oracle-user@oracle.example.test",
                 "bash",
                 "-s",
             ],
         )
+
+    def test_oracle_config_has_no_machine_specific_defaults(self):
+        config = youtube_oracle_config_from_env({})
+
+        self.assertEqual(config.host, "")
+        self.assertEqual(config.user, "")
+        self.assertIsNone(config.key_path)
+        self.assertIsNone(config.script_path)
 
     def test_parse_oracle_output_rejects_video_id_mismatch_and_empty_chat(self):
         mismatch = json.dumps({"type": "metadata", "video_id": "different01"})
@@ -250,17 +258,17 @@ class YoutubeSourceTests(unittest.TestCase):
 
     def test_build_oracle_command_requires_remote_command_and_url_token(self):
         config = YoutubeOracleConfig(
-            host="64.110.102.170",
-            user="ubuntu",
-            key_path=Path(r"C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key"),
-            script_path=Path(r"C:\00_dev\_system\tmp\oracle_livechat.sh"),
+            host="oracle.example.test",
+            user="oracle-user",
+            key_path=Path("test-ssh-key"),
+            script_path=Path("test-oracle-script"),
         )
-        self.assertEqual(build_oracle_command(config, "WGTrmrSvZH0")[-3:], ["ubuntu@64.110.102.170", "bash", "-s"])
+        self.assertEqual(build_oracle_command(config, "WGTrmrSvZH0")[-3:], ["oracle-user@oracle.example.test", "bash", "-s"])
 
     def test_fetch_uses_script_over_ssh_without_text_newline_conversion(self):
         config = YoutubeOracleConfig(
-            host="64.110.102.170",
-            user="ubuntu",
+            host="oracle.example.test",
+            user="oracle-user",
             # The runner is mocked here, so use this tracked test file instead
             # of requiring the developer's private key and external script.
             key_path=Path(__file__),
