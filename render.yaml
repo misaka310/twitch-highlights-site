@@ -1,6 +1,6 @@
 services:
   - type: static_site
-    name: twitch-highlights-site
+    name: video-highlights-site
     buildCommand: npm ci && npm ci --prefix frontend && npm run build:public
     staticPublishPath: public
     headers:

@@ -44,7 +44,7 @@ h1 { margin: 0; font-size: clamp(1.22rem, 2vw, 1.62rem); letter-spacing: -0.035e
 .playback-assist-panel { display: grid; grid-template-columns: minmax(0, 65fr) minmax(220px, 35fr); align-items: stretch; border-top: 1px solid #1b2736; background: #0a1019; }
 .playback-assist-panel--map-only { grid-template-columns: minmax(0, 1fr); }
 .playback-assist-panel .activity-card { border-top: 0; }
-.caption-panel { min-width: 0; padding: 10px 12px 12px; border-left: 1px solid #1b2736; background: #0a1019; }
+.caption-panel { display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: 10px 12px 12px; border-left: 1px solid #1b2736; background: #0a1019; }
 .caption-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 3px; color: #a8adba; font-size: .67rem; }
 .caption-head strong { color: #dce5f1; font-size: .7rem; }
 .caption-line { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 7px; min-width: 0; min-height: 19px; align-items: center; color: #7f8a9d; font-size: .69rem; line-height: 1.25; }

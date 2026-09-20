@@ -1,7 +1,7 @@
 {
-  "name": "twitch-highlights-site",
+  "name": "video-highlights-site",
   "version": "2.0.0",
-  "description": "Static Twitch highlights site",
+  "description": "Static video highlights site",
   "private": true,
   "scripts": {
     "dev": "node frontend/node_modules/vite/bin/vite.js frontend --host localhost --port 4174 --strictPort",

@@ -88,6 +88,10 @@ test("runs real user playback controls through the YouTube adapter", async ({ pa
   await expect(frame).toHaveAttribute("data-player-status", "ready");
   await expect(page.getByRole("region", { name: "文字起こし" })).toBeVisible();
   await expect(page.locator(".caption-line--current .caption-text")).toHaveText("前の字幕");
+  await expect.poll(async () => page.locator(".caption-panel").evaluate((element) => {
+    const style = window.getComputedStyle(element);
+    return `${style.display}|${style.justifyContent}`;
+  })).toBe("flex|center");
   if (testInfo.project.name === "desktop") {
     const verticalOverflow = await page.evaluate(
       () => document.documentElement.scrollHeight - document.documentElement.clientHeight,

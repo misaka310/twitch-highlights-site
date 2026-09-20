@@ -2,7 +2,7 @@
 
 > For agentic workers: REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox syntax for tracking.
 
-Goal: Add a real Oracle-backed YouTube live-chat provider to the public Twitch highlights site while preserving legacy data and Twitch playback UX.
+Goal: Add a real Oracle-backed YouTube live-chat provider to the public video highlights site while preserving legacy data and Twitch playback UX.
 
 Architecture: Keep the existing highlight algorithm and update orchestration. Add a focused YouTube source/Oracle parser, an explicit --youtube-url ingestion mode, optional provider metadata in the public contract, and provider-specific frontend player adapters behind the existing playback lifecycle.
 
