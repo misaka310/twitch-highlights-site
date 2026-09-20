@@ -21,13 +21,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out target repository
-uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           path: target
           fetch-depth: 0
 
       - name: Set up Python
-uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.11"
 
@@ -39,7 +39,7 @@ uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         run: python target/.github/scripts/publish_status.py pending "Repo Launch Doctor is running"
 
       - name: Check out Repo Launch Doctor
-uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           repository: misaka310/repo-launch-doctor
           ref: 976cc69ffdc9b2df446840f5afdfcfe9197151f8
