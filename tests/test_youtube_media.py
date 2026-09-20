@@ -113,7 +113,7 @@ class YoutubeMediaTests(unittest.TestCase):
         )
         self.assertEqual(classify_youtube_media_failure("ffmpeg not found"), "oracle_ffmpeg_failure")
 
-    def test_enrichment_uses_transcript_for_headline_and_strips_nothing_into_public_contract(self):
+    def test_enrichment_uses_llm_headline_provider_and_strips_nothing_into_public_contract(self):
         video = {
             "provider": "youtube",
             "vod_id": "WGTrmrSvZH0",
@@ -137,15 +137,74 @@ class YoutubeMediaTests(unittest.TestCase):
                     segments=None,
                 )
 
+        class FakeHeadlineGenerator:
+            def generate(self, **kwargs):
+                self.kwargs = kwargs
+                return SimpleNamespace(
+                    text="気まずい流れを笑う",
+                    source="groq",
+                    model="openai/gpt-oss-120b",
+                    generation_mode="llm_ranked",
+                    confidence="high",
+                )
+
+        generator = FakeHeadlineGenerator()
         enriched, summary = enrich_youtube_video(
             video,
             media_fetcher=media_fetcher,
             transcriber=FakeTranscriber(),
+            headline_generator=generator,
         )
         self.assertEqual(summary.headlines, 1)
-        self.assertIn("迷路", enriched["items"][0]["headline"])
+        self.assertEqual(enriched["items"][0]["headline"], "気まずい流れを笑う")
         self.assertNotIn("ww", enriched["items"][0]["headline"])
-        self.assertEqual(enriched["items"][0]["headline_source"], "whisper")
+        self.assertEqual(enriched["items"][0]["headline_source"], "groq")
+        self.assertEqual(enriched["items"][0]["headline_model"], "openai/gpt-oss-120b")
+        self.assertEqual(enriched["items"][0]["headline_generation_mode"], "llm_ranked")
+        self.assertTrue(generator.kwargs["prepared_transcript"])
+
+
+    def test_enrichment_rejects_extractive_headline_fallback(self):
+        video = {
+            "provider": "youtube",
+            "vod_id": "WGTrmrSvZH0",
+            "vod_url": "https://www.youtube.com/watch?v=WGTrmrSvZH0",
+            "title": "archive",
+            "items": [{"id": "WGTrmrSvZH0_120_240", "start_sec": 120, "end_sec": 240, "tags": []}],
+        }
+
+        def media_fetcher(_url, _start, _end, output_dir):
+            path = output_dir / "clip.webm"
+            path.write_bytes(b"clip")
+            return path
+
+        class FakeTranscriber:
+            def transcribe(self, *_args, **_kwargs):
+                return SimpleNamespace(
+                    text="この気まずくなる流れ好きすぎるからやめて。",
+                    source_text="この気まずくなる流れ好きすぎるからやめて。",
+                    language="ja",
+                    language_probability=0.9,
+                    segments=None,
+                )
+
+        class FallbackGenerator:
+            def generate(self, **_kwargs):
+                return SimpleNamespace(
+                    text="この気まずくなる流れ好き",
+                    source="extractive",
+                    model="local-extractive-v1",
+                    generation_mode="fallback_extractive",
+                    confidence="low",
+                )
+
+        with self.assertRaisesRegex(RuntimeError, "provider/model mismatch|extractive fallback"):
+            enrich_youtube_video(
+                video,
+                media_fetcher=media_fetcher,
+                transcriber=FakeTranscriber(),
+                headline_generator=FallbackGenerator(),
+            )
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
-from headline_candidate_selection import build_content_headline
+
 from youtube_media import (
     YOUTUBE_MEDIA_INCLUDE_VIDEO_ENV,
     fetch_youtube_highlight_media_files,
@@ -32,6 +32,7 @@ def enrich_youtube_video(
     *,
     media_fetcher: MediaFetcher | None = None,
     transcriber: Any | None = None,
+    headline_generator: Any | None = None,
 ) -> tuple[dict[str, Any], YoutubeEnrichmentSummary]:
     """Enrich each selected item from a transient Oracle media section.
 
@@ -39,6 +40,9 @@ def enrich_youtube_video(
     the public serializer.  A missing transcript never falls back to reaction
     tags or the stream title.
     """
+
+    import transcribe_segments as ts
+    from transcription.config import PipelineSettings
 
     from transcribe_segments import (
         SEGMENT_SCREENSHOT_GENERATION_ENABLED,
@@ -51,7 +55,13 @@ def enrich_youtube_video(
         maybe_generate_segment_screenshot,
     )
 
+    ts.apply_pipeline_settings(PipelineSettings.from_env(os.environ))
+    ts.refresh_runtime_configuration()
+
     active_transcriber = transcriber or WhisperTranscriber()
+    active_headline_generator = headline_generator or ts.build_headline_generator()
+    if headline_generator is None and getattr(active_headline_generator, "groq", None) is None:
+        raise RuntimeError("youtube enrichment requires the Groq headline provider")
     pass_config = build_first_pass_config()
     attempted = 0
     transcribed = 0
@@ -161,18 +171,31 @@ def enrich_youtube_video(
                 raise RuntimeError(f"youtube enrichment produced no transcript for {item.get('id')}")
             transcribed += 1
             apply_transcript_result(item, target, result)
-            headline = build_content_headline(
+            source_text = ts.build_headline_source_text(transcript, ts.HEADLINE_SOURCE_CONFIG)
+            source_validation = ts.is_valid_headline_source_text(source_text, ts.HEADLINE_SOURCE_CONFIG)
+            headline_result = active_headline_generator.generate(
                 transcript=transcript,
                 video_title=str(video.get("title") or "").strip(),
+                start_time=str(item.get("start_time") or ts.format_section_time(start_sec)).strip(),
+                end_time=str(item.get("end_time") or ts.format_section_time(end_sec)).strip(),
+                prepared_transcript=source_text,
+                source_validation=source_validation,
             )
-            if not headline:
-                raise RuntimeError(f"youtube enrichment produced no content headline for {item.get('id')}")
-            item["headline"] = headline
-            item["headline_source"] = "whisper"
-            item["headline_model"] = pass_config.model
+            if headline_result.source != "groq" or (headline_generator is None and headline_result.model != ts.GROQ_MODEL):
+                raise RuntimeError(
+                    "youtube enrichment headline provider/model mismatch "
+                    f"item={item.get('id')} source={headline_result.source} model={headline_result.model}"
+                )
+            if headline_result.generation_mode == "fallback_extractive":
+                raise RuntimeError(f"youtube enrichment refused extractive fallback for {item.get('id')}")
+            if not ts.is_publishable_headline(headline_result.text, source_text=source_text):
+                raise RuntimeError(f"youtube enrichment produced an unpublishable LLM headline for {item.get('id')}")
+            item["headline"] = headline_result.text
+            item["headline_source"] = headline_result.source
+            item["headline_model"] = headline_result.model
             item["headline_status"] = "ok"
-            item["headline_generation_mode"] = "content_extractive"
-            item["headline_confidence"] = "medium"
+            item["headline_generation_mode"] = headline_result.generation_mode
+            item["headline_confidence"] = headline_result.confidence
             headlines += 1
 
     if attempted == 0 or transcribed != attempted or headlines != attempted:
