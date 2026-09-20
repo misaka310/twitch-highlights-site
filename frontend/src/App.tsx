@@ -9,7 +9,7 @@ import { useMediaQuery } from "./hooks/use-media-query.js";
 import { useSiteMetadata } from "./hooks/use-site-metadata.js";
 import { useVodPage } from "./hooks/use-vod-page.js";
 import { createActivityGeometry, createActivityOverlay } from "./lib/activity-geometry.js";
-import { resolveCaptionWindow, type CaptionData } from "./lib/captions.js";
+import { extractAnosaStatements, resolveCaptionWindow, type CaptionData } from "./lib/captions.js";
 import { getVodProvider, pageUrl, parsePageSearch, resolveDurationSec } from "./lib/vod-data.js";
 import { TwitchPlayer, type TwitchPlayerHandle } from "./twitch-player";
 
@@ -103,6 +103,10 @@ export default function App() {
   const captionWindow = useMemo(
     () => resolveCaptionWindow(captions?.cues || [], positionSec),
     [captions?.cues, positionSec],
+  );
+  const anosaStatements = useMemo(
+    () => extractAnosaStatements(captions?.cues || []),
+    [captions?.cues],
   );
 
   function setPage(nextPage: number) {
@@ -199,7 +203,13 @@ export default function App() {
                     onSeek={seekByMap}
                     onRewind={rewindTenSeconds}
                   />
-                  {captions ? <CaptionPanel window={captionWindow} /> : null}
+                  {captions ? (
+                    <CaptionPanel
+                      window={captionWindow}
+                      anosa={anosaStatements}
+                      onSeekAnosa={(startSec) => requestUserPlayback(activeVod.vod_id, startSec)}
+                    />
+                  ) : null}
                 </div>
               </div>
             </LayerCard.Primary>

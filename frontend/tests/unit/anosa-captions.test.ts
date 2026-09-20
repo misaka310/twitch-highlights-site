@@ -1,0 +1,78 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { extractAnosaStatements, type CaptionCue } from "../../src/lib/captions.js";
+
+function cue(start: number, text: string, end = start + 2): CaptionCue {
+  return { start_sec: start, end_sec: end, text };
+}
+
+test("anosa statement starts exactly at あのさ and discards preceding fragment", () => {
+  const result = extractAnosaStatements([
+    cue(10, "前置きは不要。あのさ、これ大事な話なんだけど。"),
+  ]);
+
+  assert.deepEqual(result, [
+    { start_sec: 10, end_sec: 12, text: "あのさ、これ大事な話なんだけど。" },
+  ]);
+});
+
+test("anosa statement joins following cues until a sentence ending", () => {
+  const result = extractAnosaStatements([
+    cue(20, "あのさ、エルデンリング飯って"),
+    cue(22, "こういう感じで作るのが"),
+    cue(24, "一番いいと思うんだよね。"),
+  ]);
+
+  assert.equal(result.length, 1);
+  assert.equal(result[0]?.text, "あのさ、エルデンリング飯ってこういう感じで作るのが一番いいと思うんだよね。");
+  assert.equal(result[0]?.end_sec, 26);
+});
+
+test("incomplete fragmented anosa cue is not emitted", () => {
+  const result = extractAnosaStatements([
+    cue(30, "あのさ、これだけだと"),
+    cue(32, "まだ意味が"),
+  ]);
+
+  assert.deepEqual(result, []);
+});
+
+test("incomplete anosa cue does not jump across a long gap into another utterance", () => {
+  const result = extractAnosaStatements([
+    cue(30, "あのさ、これは途中で"),
+    cue(32, "意味が切れて"),
+    cue(50, "別の話。あのさ、これは完結する。"),
+  ]);
+
+  assert.deepEqual(result, [
+    { start_sec: 50, end_sec: 52, text: "あのさ、これは完結する。" },
+  ]);
+});
+
+test("overlapping automatic caption text is merged without duplicated words", () => {
+  const result = extractAnosaStatements([
+    cue(40, "あのさ、これは絶対"),
+    cue(42, "絶対やった方がいい。"),
+  ]);
+
+  assert.equal(result[0]?.text, "あのさ、これは絶対やった方がいい。");
+});
+
+test("unnatural spaces inside Japanese text are removed", () => {
+  const result = extractAnosaStatements([
+    cue(50, "あのさ、これ は ちゃんと 読める。"),
+  ]);
+
+  assert.equal(result[0]?.text, "あのさ、これはちゃんと読める。");
+});
+
+test("noise-only cues do not break sentence reconstruction", () => {
+  const result = extractAnosaStatements([
+    cue(60, "あのさ、続きが"),
+    cue(62, "[音楽]"),
+    cue(64, "ここまで来れば意味が通る。"),
+  ]);
+
+  assert.equal(result[0]?.text, "あのさ、続きがここまで来れば意味が通る。");
+});
