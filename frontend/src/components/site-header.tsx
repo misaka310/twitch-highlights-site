@@ -8,7 +8,7 @@ type SiteHeaderProps = {
   feedbackUrl?: string;
 };
 
-export function SiteHeader({ siteName, updatedAt, feedbackUrl = "" }: SiteHeaderProps) {
+export function SiteHeader({ siteName, updatedAt, nextUpdateAt, feedbackUrl = "" }: SiteHeaderProps) {
   return (
     <header className="site-header">
       <div>
@@ -16,11 +16,11 @@ export function SiteHeader({ siteName, updatedAt, feedbackUrl = "" }: SiteHeader
           <PlayIcon weight="fill" aria-hidden="true" />
           <h1>{siteName}</h1>
         </div>
-        <p>現在サブスク限定公開のため、新しい見どころは利用できません［非公式ファンサイト］</p>
+        <p>直近2ヶ月の配信の見どころをすぐ再生［非公式ファンサイト］</p>
       </div>
       <div className="update-stack" aria-label="更新情報">
         <span>データ更新: {formatUpdate(updatedAt)}</span>
-        <span>自動更新: 一時停止中</span>
+        <span>次回更新予定: {formatUpdate(nextUpdateAt)}</span>
         {feedbackUrl ? (
           <a className="feedback-link" href={feedbackUrl} target="_blank" rel="noreferrer">
             要望・誤り報告はこちら

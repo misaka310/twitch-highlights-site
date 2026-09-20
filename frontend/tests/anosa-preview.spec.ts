@@ -89,6 +89,10 @@ test("keeps all synchronized captions and shows あのさ as a separate right-ra
 
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "dotitao moments" })).toBeVisible();
+  await expect(page.getByText("直近2ヶ月の配信の見どころをすぐ再生［非公式ファンサイト］", { exact: true })).toBeVisible();
+  await expect(page.getByText(/^次回更新予定:/)).toBeVisible();
+  await expect(page.getByText("現在サブスク限定公開のため、新しい見どころは利用できません［非公式ファンサイト］", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("自動更新: 一時停止中", { exact: true })).toHaveCount(0);
 
   const panel = page.getByRole("region", { name: "文字起こし" });
   await expect(panel).toBeVisible();

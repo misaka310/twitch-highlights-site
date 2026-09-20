@@ -16,7 +16,7 @@ export function AnosaList({ statements, positionSec, captionsAvailable, onSelect
   }
 
   if (statements.length === 0) {
-    return <Empty title="「あのさ」なし" description="この配信の字幕では完結した「あのさ」発話を検出しませんでした。" />;
+    return <Empty title="「あのさ」なし" description="この配信では残念ながら「あのさ」は検出されませんでした。" />;
   }
 
   return (
