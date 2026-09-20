@@ -9,6 +9,11 @@ on:
     types:
       - youtube-material-ready
   workflow_dispatch:
+    inputs:
+      repair_vod_id:
+        description: Optional cached YouTube VOD id whose headlines should be regenerated from committed captions
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -21,6 +26,7 @@ jobs:
     timeout-minutes: 35
     env:
       TZ: Asia/Tokyo
+      REPAIR_VOD_ID: ${{ github.event.inputs.repair_vod_id || '' }}
       YOUTUBE_ORACLE_BUNDLE_READ_URL: ${{ secrets.YOUTUBE_ORACLE_BUNDLE_READ_URL }}
       TRANSCRIPT_MODEL: large-v3-turbo
       TRANSCRIPT_BEAM_SIZE: 3
@@ -71,6 +77,7 @@ jobs:
           python -m pip install -r requirements-transcribe.txt
 
       - name: Download and validate Oracle material
+        if: ${{ env.REPAIR_VOD_ID == '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -94,7 +101,12 @@ jobs:
           PY
 
       - name: Run Whisper and update public data
+        if: ${{ env.REPAIR_VOD_ID == '' }}
         run: python scripts/process_youtube_bundle.py --bundle .tmp/youtube-material/material.tar.gz
+
+      - name: Repair cached YouTube headlines with GPT-OSS 120B
+        if: ${{ env.REPAIR_VOD_ID != '' }}
+        run: python scripts/repair_youtube_headlines.py --vod-id "$REPAIR_VOD_ID"
 
       - name: Build public site
         shell: bash
