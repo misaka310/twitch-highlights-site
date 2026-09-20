@@ -67,6 +67,7 @@ python scripts/update_vods.py --youtube-url 'https://www.youtube.com/watch?v=WGT
 - YouTube公開字幕は任意データとして扱う。手動字幕を優先し、なければ自動生成字幕を取得する。字幕取得失敗・字幕なしはVOD更新を失敗させず、字幕パネルを出さない。
 - YouTube更新では、タグを見出しへ変換しない。公開用の `headline` は、Oracleから取得した見どころ区間の音声・映像を後段のWhisper/見出し生成へ渡して作る。素材や文字起こしを取得できない項目は `headline` を欠損のまま扱い、反応タグを見出しに見せかけない。
 - Oracle素材を処理する `process-youtube-material.yml` の見出し生成は、Whisper文字起こしを入力としてGroqの `openai/gpt-oss-120b` を使う。LLM応答が得られない場合やローカル抽出フォールバックしか得られない場合、その見出しは公開せず更新処理を失敗させる。
+- 既存VODの見出しだけを修復する場合は `workflow_dispatch` の `repair_vod_id` を指定し、保存済みのYouTube公開字幕から同じGPT-OSS 120B見出し生成経路を通して全見どころを再生成する。通常のOracle素材処理ではこの修復経路を使わない。
 - Oracleの定期実行は`YOUTUBE_ORACLE_STREAMS_URL=https://www.youtube.com/@dotitube/streams`を優先し、固定の`YOUTUBE_ORACLE_VIDEO_URL`へ戻さない。Cookieは従来どおりOracle上の`$HOME/youtube-cookies.txt`だけを使う。
 - YouTubeの内部音声解析は、スクリーンショット不要時はHTTPS音声のみ、必要時はHTTPSの軽量映像・音声を選ぶ。Twitchの区間取得フォーマットは変更しない。
 - 公開準備チェックは、生成済み `headline` の品質と見どころサムネイルの存在を検証する。見出しが欠損する場合や、生成済み見出しが品質基準を満たさない場合は従来どおり失敗させる。
