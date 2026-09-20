@@ -19,6 +19,94 @@ export type CaptionWindow = {
   next: CaptionCue | null;
 };
 
+export type AnosaStatement = {
+  start_sec: number;
+  end_sec: number;
+  text: string;
+};
+
+const ANOSA_RE = /あのさ(?:ぁ|あ)?/;
+const SENTENCE_END_RE = /[。！？!?](?:[」』】）》〉〕］】]*)$/;
+const NOISE_ONLY_RE = /^\[[^\]]+\]$/;
+const JAPANESE_SPACE_RE = /(?<=[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}ー])\s+(?=[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}ー])/gu;
+
+function normalizeCaptionText(raw: string): string {
+  return String(raw || "")
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(JAPANESE_SPACE_RE, "")
+    .trim();
+}
+
+function appendCaptionText(base: string, incoming: string): string {
+  const left = normalizeCaptionText(base);
+  const right = normalizeCaptionText(incoming);
+  if (!left) return right;
+  if (!right || NOISE_ONLY_RE.test(right)) return left;
+  if (left.endsWith(right)) return left;
+
+  const maxOverlap = Math.min(left.length, right.length);
+  for (let overlap = maxOverlap; overlap >= 2; overlap -= 1) {
+    if (left.endsWith(right.slice(0, overlap))) {
+      return normalizeCaptionText(left + right.slice(overlap));
+    }
+  }
+  return normalizeCaptionText(`${left}${right}`);
+}
+
+export function extractAnosaStatements(cues: CaptionCue[]): AnosaStatement[] {
+  if (!Array.isArray(cues) || cues.length === 0) return [];
+
+  const results: AnosaStatement[] = [];
+  for (let index = 0; index < cues.length; index += 1) {
+    const source = cues[index];
+    const sourceText = normalizeCaptionText(source?.text || "");
+    const match = ANOSA_RE.exec(sourceText);
+    if (!match || match.index < 0) continue;
+
+    let text = sourceText.slice(match.index);
+    let endSec = Number(source?.end_sec ?? source?.start_sec ?? 0);
+    let cursor = index + 1;
+
+    while (!SENTENCE_END_RE.test(text) && cursor < cues.length && cursor <= index + 8 && text.length < 220) {
+      const next = cues[cursor];
+      const nextStartSec = Number(next?.start_sec ?? endSec);
+      if (nextStartSec - endSec > 5) break;
+      const nextText = normalizeCaptionText(next?.text || "");
+      text = appendCaptionText(text, nextText);
+      endSec = Math.max(endSec, Number(next?.end_sec ?? next?.start_sec ?? endSec));
+      cursor += 1;
+    }
+
+    text = normalizeCaptionText(text);
+    if (!text.startsWith("あのさ") || !SENTENCE_END_RE.test(text)) continue;
+
+    const startSec = Math.max(0, Number(source?.start_sec) || 0);
+    const statement: AnosaStatement = {
+      start_sec: startSec,
+      end_sec: Math.max(startSec, endSec),
+      text,
+    };
+
+    const previous = results[results.length - 1];
+    if (
+      previous &&
+      Math.abs(previous.start_sec - statement.start_sec) <= 3 &&
+      (previous.text === statement.text ||
+        previous.text.startsWith(statement.text) ||
+        statement.text.startsWith(previous.text))
+    ) {
+      if (statement.text.length > previous.text.length) {
+        results[results.length - 1] = statement;
+      }
+      continue;
+    }
+    results.push(statement);
+  }
+
+  return results;
+}
+
 export function resolveCaptionWindow(cues: CaptionCue[], positionSec: number): CaptionWindow {
   if (!Array.isArray(cues) || cues.length === 0) {
     return { previous: null, current: null, next: null };
