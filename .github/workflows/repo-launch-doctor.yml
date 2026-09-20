@@ -17,7 +17,7 @@ jobs:
   doctor:
     name: public-readiness
     if: github.event_name == 'workflow_dispatch' || github.event.repository.private == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Check out target repository

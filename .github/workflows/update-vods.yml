@@ -41,7 +41,7 @@ jobs:
     # Temporary subscriber-only maintenance: automatic push/schedule events remain
     # declared for compatibility checks, but only manual dispatch may run the job.
     if: ${{ github.event_name == 'workflow_dispatch' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
     env:
       TZ: Asia/Tokyo

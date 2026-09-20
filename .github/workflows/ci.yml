@@ -27,7 +27,7 @@ jobs:
     # those PRs verify via explicit workflow_dispatch instead, so skip the
     # automatic pull_request run here to avoid a permanently red check.
     if: github.event_name != 'pull_request' || github.head_ref != 'automation/update-vods'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     steps:
@@ -76,7 +76,7 @@ jobs:
   production-mobile-playback:
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_live == true)
     needs: verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: write
