@@ -1,4 +1,4 @@
-Create an extremely clear technical workflow diagram for a GitHub README, exactly 1536x1024, 3:2 landscape, white background, dark navy text, restrained purple, blue, and teal accents, very large rounded cards, large Japanese labels, no logos, no watermark, no decorative clutter. Title: 「Twitch Highlights Site のしくみ」. Use one main horizontal pipeline and one compact optional-enrichment row. No crossed arrows, no arrows aimed at section borders, no tiny text.
+Create an extremely clear technical workflow diagram for a GitHub README, exactly 1536x1024, 3:2 landscape, white background, dark navy text, restrained purple, blue, and teal accents, very large rounded cards, large Japanese labels, no logos, no watermark, no decorative clutter. Title: 「Video Highlights Site のしくみ」. Use one main horizontal pipeline and one compact optional-enrichment row. No crossed arrows, no arrows aimed at section borders, no tiny text.
 
 MAIN PIPELINE, solid arrows, left to right:
 「Twitch VOD一覧」 → 「コメント数を時系列で集計」 → 「変化が大きい区間を抽出」 → 「見どころデータ」 → 「React 静的サイト」 → 「Render で公開」.
