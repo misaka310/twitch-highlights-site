@@ -52,17 +52,6 @@ h1 { margin: 0; font-size: clamp(1.22rem, 2vw, 1.62rem); letter-spacing: -0.035e
 .caption-label { color: #7d8797; font-weight: 700; text-align: center; }
 .caption-line--current .caption-label { color: #b690ff; }
 .caption-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.caption-panel--anosa { min-height: 0; overflow: hidden; display: grid; grid-template-rows: auto minmax(0, 1fr); }
-.caption-tabs { display: flex; align-items: center; gap: 4px; }
-.caption-tab { padding: 2px 7px; border: 1px solid #344157; border-radius: 999px; background: #111927; color: #8f9bad; font: inherit; cursor: pointer; }
-.caption-tab.is-active { border-color: #8f72d9; background: rgba(143, 114, 217, .18); color: #f1ecff; }
-.anosa-list { display: grid; gap: 4px; max-height: 180px; overflow-y: auto; padding-right: 2px; }
-.caption-panel--anosa .anosa-list { min-height: 0; max-height: 80px; }
-.anosa-row { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 8px; width: 100%; padding: 5px 6px; border: 0; border-radius: 4px; background: transparent; color: #e8edf5; text-align: left; cursor: pointer; }
-.anosa-row:hover, .anosa-row:focus-visible { outline: none; background: rgba(143, 114, 217, .14); }
-.anosa-time { color: #a893dd; font-size: .68rem; font-variant-numeric: tabular-nums; }
-.anosa-text { min-width: 0; font-size: .72rem; line-height: 1.35; }
-.anosa-empty { margin: 4px 0 1px; color: #8994a5; font-size: .7rem; }
 .eyebrow { color: #a8adba; font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 
 .activity-card {
@@ -176,7 +165,6 @@ h1 { margin: 0; font-size: clamp(1.22rem, 2vw, 1.62rem); letter-spacing: -0.035e
   .player-embed--portal { border-radius: 4px; }
   .playback-assist-panel { grid-template-columns: minmax(0, 1fr); }
   .caption-panel { border-left: 0; border-top: 1px solid #1b2736; padding: 7px 9px 9px; }
-  .caption-panel--anosa .anosa-list { max-height: 180px; }
   .activity-card { padding: 9px 9px 10px; }
   .activity-head { gap: 8px; margin-bottom: 7px; }
   .activity-help { display: none; }
