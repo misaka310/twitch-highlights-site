@@ -10,7 +10,7 @@ test.beforeAll(() => {
   mkdirSync(artifactsDirectory, { recursive: true });
 });
 
-test("anosa tab shows only complete statements beginning with あのさ", async ({ page }) => {
+test("keeps the original transcript UI while showing only complete あのさ statements", async ({ page }) => {
   await installFakeYoutube(page);
 
   await page.route("**/site-config.json", async (route) => {
@@ -82,12 +82,6 @@ test("anosa tab shows only complete statements beginning with あのさ", async 
           { start_sec: 32, end_sec: 34, text: "意味が切れて" },
           { start_sec: 50, end_sec: 52, text: "別の話。あのさ、これ は 絶対" },
           { start_sec: 52, end_sec: 54, text: "絶対やった方がいい。" },
-          { start_sec: 60, end_sec: 61, text: "あのさ、三つ目の完結発話です。" },
-          { start_sec: 65, end_sec: 66, text: "あのさ、四つ目の完結発話です。" },
-          { start_sec: 70, end_sec: 71, text: "あのさ、五つ目の完結発話です。" },
-          { start_sec: 75, end_sec: 76, text: "あのさ、六つ目の完結発話です。" },
-          { start_sec: 80, end_sec: 81, text: "あのさ、七つ目の完結発話です。" },
-          { start_sec: 85, end_sec: 86, text: "あのさ、八つ目の完結発話です。" },
         ],
       }),
     });
@@ -95,35 +89,24 @@ test("anosa tab shows only complete statements beginning with あのさ", async 
 
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "dotitao moments" })).toBeVisible();
-  const anosaTab = page.getByRole("tab", { name: "あのさ" });
-  await expect(anosaTab).toBeVisible();
-  await anosaTab.click();
 
-  const rows = page.locator(".anosa-row");
-  await expect(rows).toHaveCount(8);
-  const texts = await rows.locator(".anosa-text").allTextContents();
-  expect(texts.slice(0, 2)).toEqual([
+  const panel = page.getByRole("region", { name: "文字起こし" });
+  await expect(panel).toBeVisible();
+  await expect(panel.getByText("YouTube字幕", { exact: true })).toBeVisible();
+  await expect(panel.locator(".caption-label")).toHaveText(["前", "今", "次"]);
+  await expect(panel.getByRole("tab")).toHaveCount(0);
+  await expect(page.locator(".caption-tabs, .anosa-list, .anosa-row")).toHaveCount(0);
+
+  const texts = await panel.locator(".caption-text").allTextContents();
+  expect(texts).toEqual([
+    "―",
     "あのさ、エルデンリング飯ってこういう感じで作るのが一番いいと思うんだよね。",
     "あのさ、これは絶対やった方がいい。",
   ]);
-  for (const text of texts) {
+  for (const text of texts.filter((value) => value !== "―")) {
     expect(text.startsWith("あのさ")).toBe(true);
   }
   await expect(page.getByText("あのさ、これは途中で", { exact: false })).toHaveCount(0);
-
-  const layout = await page.evaluate(() => ({
-    innerHeight: window.innerHeight,
-    scrollHeight: document.documentElement.scrollHeight,
-  }));
-  expect(layout.scrollHeight).toBeLessThanOrEqual(layout.innerHeight);
-
-  const panelBox = await page.locator(".caption-panel--anosa").boundingBox();
-  const listBox = await page.locator(".anosa-list").boundingBox();
-  expect(panelBox).not.toBeNull();
-  expect(listBox).not.toBeNull();
-  expect((listBox?.y || 0) + (listBox?.height || 0)).toBeLessThanOrEqual(
-    (panelBox?.y || 0) + (panelBox?.height || 0) + 1,
-  );
 
   await page.screenshot({
     path: resolve(artifactsDirectory, "anosa-preview-desktop.png"),
