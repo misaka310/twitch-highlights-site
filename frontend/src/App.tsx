@@ -100,13 +100,13 @@ export default function App() {
     [activeSegment?.end_sec, activeSegment?.start_sec, activeVod?.activity_map?.last_comment_sec, durationSec, positionSec],
   );
 
-  const captionWindow = useMemo(
-    () => resolveCaptionWindow(captions?.cues || [], positionSec),
-    [captions?.cues, positionSec],
-  );
   const anosaStatements = useMemo(
     () => extractAnosaStatements(captions?.cues || []),
     [captions?.cues],
+  );
+  const captionWindow = useMemo(
+    () => resolveCaptionWindow(anosaStatements, positionSec),
+    [anosaStatements, positionSec],
   );
 
   function setPage(nextPage: number) {
@@ -203,13 +203,7 @@ export default function App() {
                     onSeek={seekByMap}
                     onRewind={rewindTenSeconds}
                   />
-                  {captions ? (
-                    <CaptionPanel
-                      window={captionWindow}
-                      anosa={anosaStatements}
-                      onSeekAnosa={(startSec) => requestUserPlayback(activeVod.vod_id, startSec)}
-                    />
-                  ) : null}
+                  {captions ? <CaptionPanel window={captionWindow} /> : null}
                 </div>
               </div>
             </LayerCard.Primary>
