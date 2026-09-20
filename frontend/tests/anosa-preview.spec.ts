@@ -10,7 +10,7 @@ test.beforeAll(() => {
   mkdirSync(artifactsDirectory, { recursive: true });
 });
 
-test("keeps the original transcript UI while showing only complete あのさ statements", async ({ page }) => {
+test("keeps all synchronized captions and shows あのさ as a separate right-rail tab", async ({ page }) => {
   await installFakeYoutube(page);
 
   await page.route("**/site-config.json", async (route) => {
@@ -94,19 +94,40 @@ test("keeps the original transcript UI while showing only complete あのさ sta
   await expect(panel).toBeVisible();
   await expect(panel.getByText("YouTube字幕", { exact: true })).toBeVisible();
   await expect(panel.locator(".caption-label")).toHaveText(["前", "今", "次"]);
-  await expect(panel.getByRole("tab")).toHaveCount(0);
-  await expect(page.locator(".caption-tabs, .anosa-list, .anosa-row")).toHaveCount(0);
 
-  const texts = await panel.locator(".caption-text").allTextContents();
-  expect(texts).toEqual([
+  const captionTexts = await panel.locator(".caption-text").allTextContents();
+  expect(captionTexts).toEqual([
     "―",
+    "前置き。あのさ、エルデンリング飯って",
+    "こういう感じで作るのが",
+  ]);
+
+  const railTabs = page.getByRole("tablist", { name: "見どころ表示" });
+  await expect(railTabs).toBeVisible();
+  await expect(railTabs.getByRole("tab")).toHaveText(["見どころ1", "あのさ2"]);
+  await expect(page.getByText("確認用見どころ", { exact: true })).toBeVisible();
+
+  await railTabs.getByRole("tab", { name: /あのさ/ }).click();
+
+  const anosaItems = page.locator(".anosa-item");
+  await expect(anosaItems).toHaveCount(2);
+  await expect(anosaItems.locator(".anosa-transcript")).toHaveText([
     "あのさ、エルデンリング飯ってこういう感じで作るのが一番いいと思うんだよね。",
     "あのさ、これは絶対やった方がいい。",
   ]);
-  for (const text of texts.filter((value) => value !== "―")) {
-    expect(text.startsWith("あのさ")).toBe(true);
-  }
   await expect(page.getByText("あのさ、これは途中で", { exact: false })).toHaveCount(0);
+
+  await anosaItems.nth(1).click();
+  await expect(anosaItems.nth(1)).toHaveAttribute("aria-pressed", "true");
+
+  const layout = await page.evaluate(() => ({
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    scrollWidth: document.documentElement.scrollWidth,
+    scrollHeight: document.documentElement.scrollHeight,
+  }));
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.innerWidth);
+  expect(layout.scrollHeight).toBeLessThanOrEqual(layout.innerHeight);
 
   await page.screenshot({
     path: resolve(artifactsDirectory, "anosa-preview-desktop.png"),
