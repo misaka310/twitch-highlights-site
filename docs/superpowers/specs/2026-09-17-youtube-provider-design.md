@@ -2,7 +2,7 @@
 
 ## Goal
 
-Extend the public Twitch highlights site so a YouTube live-stream archive can use the same highlight, activity-map, and playback UX without changing the existing Twitch workflow.
+Extend the public video highlights site so a YouTube live-stream archive can use the same highlight, activity-map, and playback UX without changing the existing Twitch workflow.
 
 ## Scope and preserved contracts
 
