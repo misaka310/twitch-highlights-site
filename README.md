@@ -98,14 +98,18 @@ Copy-Item .env.example .env
 YouTubeのライブアーカイブを生成する場合は、確定済みのOracle VMを唯一のYouTube取得経路として使います。ローカルのyt-dlp直接実行はこの経路に使いません。SSH秘密鍵の内容やCookieはリポジトリへ入れません。
 
 ```powershell
-$env:YOUTUBE_ORACLE_HOST = '64.110.102.170'
-$env:YOUTUBE_ORACLE_USER = 'ubuntu'
-$env:YOUTUBE_ORACLE_KEY_PATH = 'C:\00_doc\04_oracle\back\ssh-key-2026-05-20.key'
-$env:YOUTUBE_ORACLE_SCRIPT_PATH = 'C:\00_dev\_system\tmp\oracle_livechat.sh'
+$env:YOUTUBE_ORACLE_HOST = '<ORACLE_HOST>'
+$env:YOUTUBE_ORACLE_USER = '<ORACLE_USER>'
+$env:YOUTUBE_ORACLE_KEY_PATH = '<SSH_KEY_PATH>'
+$env:YOUTUBE_ORACLE_SCRIPT_PATH = '<ORACLE_SCRIPT_PATH>'
+$env:YOUTUBE_ORACLE_REMOTE_YTDLP_PATH = '$HOME/yt-dlp'
+$env:YOUTUBE_ORACLE_REMOTE_DENO_PATH = '$HOME/.local/bin/deno'
+$env:YOUTUBE_ORACLE_REMOTE_COOKIES_PATH = '$HOME/youtube-cookies.txt'
+$env:YOUTUBE_ORACLE_REMOTE_TSV_TEMPLATE = '$HOME/ytprobe/{video_id}-comment-times.tsv'
 python scripts/update_vods.py --youtube-url "https://www.youtube.com/watch?v=WGTrmrSvZH0"
 ```
 
-Oracleスクリプトは`yt-dlp 2026.08.19`、Deno、`/home/ubuntu/youtube-cookies.txt`を使い、`videoOffsetTimeMsec`を含む一時データを解析します。ログ、raw chat、TSVは実行中だけ扱われ、公開データには集計値と見どころだけが保存されます。定期運用は`ops/oracle/youtube-highlight.timer`でOracleから選択区間だけをOCI Object Storageの一時PARへ渡し、`.github/workflows/process-youtube-material.yml`がActions上でWhisper、見出し、サムネイル、検証、checked PR公開を行います。
+Oracleスクリプトは設定したリモート実行ファイル、Deno、Cookieファイルを使い、`videoOffsetTimeMsec`を含む一時データを解析します。ホスト名、ユーザー名、鍵、スクリプト、リモートパスの実値はローカル環境またはOracleの権限制御された環境ファイルだけに置き、リポジトリへ保存しません。ログ、raw chat、TSVは実行中だけ扱われ、公開データには集計値と見どころだけが保存されます。定期運用は`ops/oracle/youtube-highlight.timer`でOracleから選択区間だけをOCI Object Storageの一時PARへ渡し、`.github/workflows/process-youtube-material.yml`がActions上でWhisper、見出し、サムネイル、検証、checked PR公開を行います。
 
 Oracle timerの秘密値とOCI PAR、GitHub Actions Secretの設定は[`ops/oracle/README.md`](ops/oracle/README.md)を参照してください。既存の`.github/workflows/update-vods.yml`の停止中scheduleはこの経路の完成を待って無条件には再開しません。
 

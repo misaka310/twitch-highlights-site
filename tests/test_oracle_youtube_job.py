@@ -22,9 +22,9 @@ class OracleYoutubeJobTests(unittest.TestCase):
         ) as run_ytdlp:
             result = oracle_youtube_job._resolve_latest_stream_url(
                 "https://www.youtube.com/@dotitube/streams",
-                "/home/ubuntu/yt-dlp",
-                "/home/ubuntu/.local/bin/deno",
-                "/home/ubuntu/youtube-cookies.txt",
+                "/remote/yt-dlp",
+                "/remote/deno",
+                "/remote/youtube-cookies.txt",
             )
 
         self.assertEqual(result, "https://www.youtube.com/watch?v=2a_ATYeOiAQ")
@@ -58,9 +58,9 @@ class OracleYoutubeJobTests(unittest.TestCase):
                 _video, comments = oracle_youtube_job._download_chat_and_metadata(
                     "https://www.youtube.com/watch?v=WGTrmrSvZH0",
                     work_dir,
-                    "/home/ubuntu/yt-dlp",
-                    "/home/ubuntu/.local/bin/deno",
-                    "/home/ubuntu/youtube-cookies.txt",
+                    "/remote/yt-dlp",
+                    "/remote/deno",
+                    "/remote/youtube-cookies.txt",
                 )
 
         self.assertEqual(comments, [{"content_offset_seconds": 1.234}])
@@ -92,9 +92,9 @@ class OracleYoutubeJobTests(unittest.TestCase):
                 video, comments = oracle_youtube_job._download_chat_and_metadata(
                     "https://www.youtube.com/watch?v=WGTrmrSvZH0",
                     work_dir,
-                    "/home/ubuntu/yt-dlp",
-                    "/home/ubuntu/.local/bin/deno",
-                    "/home/ubuntu/youtube-cookies.txt",
+                    "/remote/yt-dlp",
+                    "/remote/deno",
+                    "/remote/youtube-cookies.txt",
                 )
 
         self.assertEqual(video["vod_id"], "WGTrmrSvZH0")
@@ -128,9 +128,9 @@ class OracleYoutubeJobTests(unittest.TestCase):
                 captions_path = oracle_youtube_job._download_captions(
                     "https://www.youtube.com/watch?v=WGTrmrSvZH0",
                     work_dir,
-                    "/home/ubuntu/yt-dlp",
-                    "/home/ubuntu/.local/bin/deno",
-                    "/home/ubuntu/youtube-cookies.txt",
+                    "/remote/yt-dlp",
+                    "/remote/deno",
+                    "/remote/youtube-cookies.txt",
                 )
 
             self.assertIsNotNone(captions_path)
@@ -145,9 +145,9 @@ class OracleYoutubeJobTests(unittest.TestCase):
                 captions_path = oracle_youtube_job._download_captions(
                     "https://www.youtube.com/watch?v=WGTrmrSvZH0",
                     work_dir,
-                    "/home/ubuntu/yt-dlp",
-                    "/home/ubuntu/.local/bin/deno",
-                    "/home/ubuntu/youtube-cookies.txt",
+                    "/remote/yt-dlp",
+                    "/remote/deno",
+                    "/remote/youtube-cookies.txt",
                 )
         self.assertIsNone(captions_path)
 
