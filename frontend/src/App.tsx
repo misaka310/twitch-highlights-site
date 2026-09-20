@@ -9,7 +9,7 @@ import { useMediaQuery } from "./hooks/use-media-query.js";
 import { useSiteMetadata } from "./hooks/use-site-metadata.js";
 import { useVodPage } from "./hooks/use-vod-page.js";
 import { createActivityGeometry, createActivityOverlay } from "./lib/activity-geometry.js";
-import { extractAnosaStatements, resolveCaptionWindow, type CaptionData } from "./lib/captions.js";
+import { extractAnosaStatements, resolveCaptionWindow, type AnosaStatement, type CaptionData } from "./lib/captions.js";
 import { getVodProvider, pageUrl, parsePageSearch, resolveDurationSec } from "./lib/vod-data.js";
 import { TwitchPlayer, type TwitchPlayerHandle } from "./twitch-player";
 
@@ -105,8 +105,8 @@ export default function App() {
     [captions?.cues],
   );
   const captionWindow = useMemo(
-    () => resolveCaptionWindow(anosaStatements, positionSec),
-    [anosaStatements, positionSec],
+    () => resolveCaptionWindow(captions?.cues || [], positionSec),
+    [captions?.cues, positionSec],
   );
 
   function setPage(nextPage: number) {
@@ -138,6 +138,11 @@ export default function App() {
   function selectSegment(segment: HighlightSegment) {
     setActiveSegmentId(segment.id);
     requestUserPlayback(activeVod?.vod_id || "", segment.start_sec);
+  }
+
+  function selectAnosa(statement: AnosaStatement) {
+    setActiveSegmentId("");
+    requestUserPlayback(activeVod?.vod_id || "", statement.start_sec);
   }
 
   function seekByMap(event: MouseEvent<HTMLButtonElement>) {
@@ -215,6 +220,8 @@ export default function App() {
           activeVod={activeVod}
           segments={segments}
           activeSegmentId={activeSegment?.id || ""}
+          anosaStatements={anosaStatements}
+          captionsAvailable={Boolean(captions)}
           durationSec={durationSec}
           playerState={playerState}
           positionSec={positionSec}
@@ -222,6 +229,7 @@ export default function App() {
           totalCount={data.totalCount}
           onSelectVod={selectVod}
           onSelectSegment={selectSegment}
+          onSelectAnosa={selectAnosa}
           onSetPage={setPage}
         />
       </main>
