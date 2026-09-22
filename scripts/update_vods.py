@@ -198,6 +198,8 @@ __all__ = (
 )
 
 ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
+LOCAL_ENV_BLOCKED_KEYS = frozenset({"TWITCH_CLIENT_ID", "TWITCH_CLIENT_SECRET"})
+LOCAL_ENV_SECRET_SUFFIXES = ("_API_KEY", "_SECRET", "_TOKEN", "_PASSWORD", "_PRIVATE_KEY")
 PROJECT_CONFIG = load_project_config(env={})
 CHANNEL = PROJECT_CONFIG.twitch_channel_login
 CHANNEL_URL = PROJECT_CONFIG.twitch_channel_url
@@ -221,6 +223,8 @@ def load_local_env(path: Path) -> None:
         key, value = line.split("=", 1)
         key = key.strip()
         if not key:
+            continue
+        if key in LOCAL_ENV_BLOCKED_KEYS or key.endswith(LOCAL_ENV_SECRET_SUFFIXES):
             continue
         value = value.strip().strip('"').strip("'")
         os.environ.setdefault(key, value)
