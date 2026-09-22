@@ -222,12 +222,9 @@ def load_local_env(path: Path) -> None:
             continue
         key, value = line.split("=", 1)
         key = key.strip()
-        if not key:
+        if not key or key in LOCAL_ENV_BLOCKED_KEYS or key.endswith(LOCAL_ENV_SECRET_SUFFIXES):
             continue
-        if key in LOCAL_ENV_BLOCKED_KEYS or key.endswith(LOCAL_ENV_SECRET_SUFFIXES):
-            continue
-        value = value.strip().strip('"').strip("'")
-        os.environ.setdefault(key, value)
+        value = value.strip().strip('"').strip("'"); os.environ.setdefault(key, value)
 
 
 def configure_runtime_environment(mapping: Mapping[str, str] | None = None) -> None:
